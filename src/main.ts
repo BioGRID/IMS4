@@ -1,12 +1,28 @@
 import Vue from 'vue';
 import App from './App.vue';
+
+// Setup Custom Titlebar
+import { Titlebar, Color } from 'custom-electron-titlebar';
+const titleBar = new Titlebar({
+    backgroundColor: Color.fromHex( '#222' ),
+    titleHorizontalAlignment: 'center',
+    icon: './favicon.png',
+});
+
+// Vue Router
 import router from './router';
-import store from './store';
+
+// Vue Store
+import store from './store/store';
+
+// Vuetify
+import vuetify from './plugins/vuetify';
 
 Vue.config.productionTip = false;
 
 new Vue({
   router,
   store,
+  vuetify,
   render: (h) => h(App),
 }).$mount('#app');
