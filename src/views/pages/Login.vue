@@ -24,28 +24,26 @@
                                                 prepend-inner-icon="mdi-clipboard-account"
                                                 outlined
                                                 class='login-field'
-                                            /><v-text-field 
+                                                v-model='username'
+                                            />
+                                            <v-text-field 
                                                 label="password" 
                                                 type="password"
                                                 prepend-inner-icon="mdi-lock-question"
                                                 outlined
                                                 class='login-field'
+                                                v-model='password'
                                             />
                                             <v-btn 
+                                                @click="login"
                                                 size="x-large"
                                                 color="primary"
+                                                :loading="loginAttempt"
+                                                :disabled="loginAttempt"
                                             >
                                                 Login
                                             </v-btn>
                                         </v-form>
-                                        <v-alert
-                                        dense
-                                        type="error"
-                                        class="mt-1"
-                                        v-if="errorMessage"
-                                        >
-                                            {{ errorMessage }}
-                                        </v-alert>
                                     </v-col>
                                 </v-row>
                             </v-card>
@@ -58,12 +56,33 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
+import { Component, Vue, Watch } from 'vue-property-decorator';
 
 @Component
 export default class Login extends Vue {
     private shortTitle: string = process.env.VUE_APP_SHORT_TITLE || 'BioGRID ACE';
-    private errorMessage: string = '';
+    private loginAttempt: boolean = false;
+    private username: string = '';
+    private password: string = '';
+
+
+    private login( ) {
+        console.log( 'BUTTON CLICKED' );
+        this.toggleLoginAttempt();
+        this.$store.dispatch( 'auth/login', {
+            userDetails: {
+                username: this.username,
+                password: this.password,
+            },
+        });
+        setTimeout(() => {
+            this.toggleLoginAttempt();
+        }, 3000 );
+    }
+
+    private toggleLoginAttempt() {
+        this.loginAttempt = !this.loginAttempt;
+    }
 }
 
 </script>
