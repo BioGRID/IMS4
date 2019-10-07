@@ -74,6 +74,11 @@ export default class NavDrawer extends Vue {
             icon: 'mdi-account-question',
             text: 'Error 404',
         },
+        {
+            to: '/pages/login',
+            icon: 'mdi-logout',
+            text: 'Logout',
+        },
     ];
 
 }

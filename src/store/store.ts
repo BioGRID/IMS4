@@ -8,11 +8,17 @@ import actions from './actions';
 
 Vue.use(Vuex);
 
+import moduleAuth from './auth/moduleAuth';
+import moduleNotify from './notify/moduleNotify';
+
 export default new Vuex.Store({
     getters,
     mutations,
     state,
     actions,
-    modules: {},
+    modules: {
+        auth: moduleAuth,
+        notify: moduleNotify,
+    },
     strict: true,
 });

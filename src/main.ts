@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import App from './App.vue';
+import App from '@/App.vue';
 
 // Setup Custom Titlebar
 import { Titlebar, Color } from 'custom-electron-titlebar';
@@ -10,13 +10,16 @@ const titleBar = new Titlebar({
 });
 
 // Vue Router
-import router from './router';
+import router from '@/router';
 
 // Vue Store
-import store from './store/store';
+import store from '@/store/store';
 
 // Vuetify
-import vuetify from './plugins/vuetify';
+import vuetify from '@/plugins/vuetify';
+
+// Vuelidate
+import '@/plugins/vuelidate';
 
 Vue.config.productionTip = false;
 
@@ -24,5 +27,6 @@ new Vue({
   router,
   store,
   vuetify,
+  validations: {},
   render: (h) => h(App),
 }).$mount('#app');

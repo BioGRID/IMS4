@@ -1,8 +1,17 @@
 import Vue from 'vue';
 import Router from 'vue-router';
+import store from '@/store/store';
 import Dashboard from './views/elements/Dashboard.vue';
 
 Vue.use(Router);
+
+const canAccess = (to: any, from: any, next: any) => {
+    if (store.getters['auth/isLoggedIn']) {
+        next();
+        return;
+    }
+    next( '/pages/login' );
+};
 
 const router = new Router({
   mode: 'history',
@@ -18,11 +27,13 @@ const router = new Router({
                 alias: '/elements/dashboard',
                 name: 'Dashboard',
                 component: Dashboard,
+                beforeEnter: canAccess,
             },
             {
                 path: '/elements/test',
                 name: 'Test Page',
                 component: () => import( '@/views/elements/Test.vue' ),
+                beforeEnter: canAccess,
             },
         ],
     },
@@ -51,13 +62,13 @@ const router = new Router({
   ],
 });
 
-router.beforeEach((to, from, next) => {
+/* router.beforeEach((to, from, next) => {
 
     if (
-        to.path === '/pages/login' ||
-        to.path === '/pages/error-404' ||
         to.path === '/elements/dashboard' ||
-        to.path === '/'
+        to.path === '/' ||
+        to.path === '/pages/login' ||
+        to.path === '/pages/error-404'
     ) {
         return next( );
     }
@@ -69,6 +80,6 @@ router.beforeEach((to, from, next) => {
         },
     });
 
-});
+}); */
 
 export default router;
