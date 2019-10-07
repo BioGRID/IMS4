@@ -5,6 +5,7 @@
             :bottom="true"
             :color="notifyColor"
             :timeout="notifyTimeout"
+            @input="closeNotifyBar"
         >
             {{ notifyMessage }}
             <v-btn
@@ -19,7 +20,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
+import { Component, Vue, Watch } from 'vue-property-decorator';
 import { State, namespace } from 'vuex-class';
 
 const notify = namespace( 'notify' );

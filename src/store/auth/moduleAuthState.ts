@@ -1,5 +1,5 @@
 const moduleAuthState = {
-    user: {},
+    user: undefined,
 };
 
 export default moduleAuthState;

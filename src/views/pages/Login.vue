@@ -20,29 +20,34 @@
                                         <p class='subtitle-2'>Welcome Back, please login to your account...</p>
                                         <v-form>
                                             <v-text-field 
-                                                label="username" 
+                                                label="name"
+                                                :error-messages="nameErrors"
                                                 prepend-inner-icon="mdi-clipboard-account"
                                                 outlined
-                                                class='login-field'
-                                                v-model='username'
+                                                class="login-field"
+                                                v-model.trim="name"
+                                                required
+                                                @input="$v.name.$touch()"
+                                                @blur="$v.name.$touch()"
                                             />
                                             <v-text-field 
                                                 label="password" 
+                                                :error-messages="passwordErrors"
                                                 type="password"
                                                 prepend-inner-icon="mdi-lock-question"
                                                 outlined
-                                                class='login-field'
-                                                v-model='password'
+                                                required
+                                                class="login-field"
+                                                v-model.trim="password"
+                                                @input="$v.password.$touch()"
+                                                @blur="$v.password.$touch()"
                                             />
                                             <v-btn 
                                                 @click="login"
                                                 size="x-large"
                                                 color="primary"
-                                                :loading="loginAttempt"
-                                                :disabled="loginAttempt"
-                                            >
-                                                Login
-                                            </v-btn>
+                                                :disabled="isInvalid"
+                                            >Login</v-btn>
                                         </v-form>
                                     </v-col>
                                 </v-row>
@@ -57,38 +62,66 @@
 
 <script lang="ts">
 import { Component, Vue, Watch } from 'vue-property-decorator';
+import { required } from 'vuelidate/lib/validators';
+import { validationMixin } from 'vuelidate';
 
 @Component
 export default class Login extends Vue {
     private shortTitle: string = process.env.VUE_APP_SHORT_TITLE || 'BioGRID ACE';
-    private loginAttempt: boolean = false;
-    private username: string = '';
+    private name: string = '';
     private password: string = '';
 
+    public created() {
+       this.$store.dispatch( 'auth/logout' );
+    }
+
+    get nameErrors() {
+        const errors = [];
+        if (this.$v.name.$dirty) {
+            if (!this.$v.name.required) {
+                errors.push( 'name is required.' );
+            }
+        }
+        return errors;
+    }
+
+    get passwordErrors() {
+        const errors = [];
+        if (this.$v.password.$dirty) {
+            if (!this.$v.password.required) {
+                errors.push( 'Password is required.' );
+            }
+        }
+        return errors;
+    }
+
+    get isInvalid() {
+        return this.$v.$invalid;
+    }
 
     private login( ) {
-        console.log( 'BUTTON CLICKED' );
-        this.toggleLoginAttempt();
-        this.$store.dispatch( 'auth/login', {
-            userDetails: {
-                username: this.username,
-                password: this.password,
-            },
-        });
-        setTimeout(() => {
-            this.toggleLoginAttempt();
-        }, 3000 );
+        this.$v.$touch();
+        if (!this.$v.$invalid) {
+            this.$store.dispatch( 'auth/login', {
+                userDetails: {
+                    name: this.name,
+                    password: this.password,
+                },
+            });
+        }
     }
 
-    private toggleLoginAttempt() {
-        this.loginAttempt = !this.loginAttempt;
+    private validations() {
+        return {
+            name: { required },
+            password: { required },
+        };
     }
+
 }
 
 </script>
 
 <style lang="scss" scoped>
-.login-field {
-    height: 70px;
-}
+
 </style>

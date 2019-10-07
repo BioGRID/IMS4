@@ -1,7 +1,7 @@
 const moduleNotifyState = {
     notifyColor: '',
     notifyBar: false,
-    notifyMessage: 'test-message',
+    notifyMessage: '',
     notifyTimeout: 5000,
 };
 
