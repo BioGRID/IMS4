@@ -27,6 +27,7 @@
                                                 class="login-field"
                                                 v-model.trim="name"
                                                 required
+                                                v-on:keyup.enter="login"
                                                 @input="$v.name.$touch()"
                                                 @blur="$v.name.$touch()"
                                             />
@@ -39,6 +40,7 @@
                                                 required
                                                 class="login-field"
                                                 v-model.trim="password"
+                                                v-on:keyup.enter="login"
                                                 @input="$v.password.$touch()"
                                                 @blur="$v.password.$touch()"
                                             />
@@ -62,17 +64,25 @@
 
 <script lang="ts">
 import { Component, Vue, Watch } from 'vue-property-decorator';
+import { State, namespace } from 'vuex-class';
 import { required } from 'vuelidate/lib/validators';
 import { validationMixin } from 'vuelidate';
+
+const auth = namespace( 'auth' );
 
 @Component
 export default class Login extends Vue {
     private shortTitle: string = process.env.VUE_APP_SHORT_TITLE || 'BioGRID ACE';
     private name: string = '';
     private password: string = '';
+    @auth.State private user!: any;
 
     public created() {
-       this.$store.dispatch( 'auth/logout' );
+        if (this.user !== undefined) {
+            this.$store.dispatch( 'auth/logout', {
+                user: this.user,
+            });
+        }
     }
 
     get nameErrors() {
