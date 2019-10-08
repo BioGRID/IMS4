@@ -1,6 +1,7 @@
 <template>
     <v-app>
         <NotifyBar />
+        <LoadingOverlay />
         <v-content class="grey lighten-4 wavybg">
             <v-fade-transition mode="out-in">
                 <router-view />
@@ -12,10 +13,12 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import NotifyBar from '@/components/core/NotifyBar.vue';
+import LoadingOverlay from '@/components/core/LoadingOverlay.vue';
 
 @Component({
     components: {
         NotifyBar,
+        LoadingOverlay,
     },
 })
 export default class FullPageVue extends Vue {}

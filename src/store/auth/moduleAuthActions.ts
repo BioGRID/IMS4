@@ -3,13 +3,14 @@ import router from '@/router';
 
 const moduleAuthActions = {
     login: (context: any, payload: any) => {
-        payload.notify = true;
+        context.dispatch( 'toggleLoadingOverlay', {}, {root: true} );
         axios
             .post(
                 process.env.VUE_APP_AUTH_URL! + '/login',
                 payload.userDetails,
             )
             .then( (response) => {
+                context.dispatch( 'toggleLoadingOverlay', {}, {root: true} );
                 if ( response.status === 200 ) {
                     // Valid User, Set User Object
                     context.commit( 'AUTH_UPDATE_USER', response.data );
@@ -17,6 +18,7 @@ const moduleAuthActions = {
                 }
             })
             .catch( (error) => {
+                context.dispatch( 'toggleLoadingOverlay', {}, {root: true} );
                 if ( error.response.status === 404 ) {
                     // Unrecognized User Name
                     context.dispatch( 'notify/displayNotification', {
@@ -45,8 +47,25 @@ const moduleAuthActions = {
                 }
             });
     },
-    logout: (context: any) => {
+    logout: (context: any, payload: any) => {
         context.commit( 'AUTH_UPDATE_USER', undefined );
+        axios
+            .post(
+                process.env.VUE_APP_AUTH_URL! + '/logout', {}, {
+                    headers: {
+                        Authorization: 'Bearer ' + payload.user.access_key,
+                    },
+                })
+            .catch( (error) => {
+                if ( error.response.status === 401 ) {
+                    // Unable to logout user
+                    console.log( 'Unauthorized Logout Attempt' );
+                } else if ( error.response.status === 500 ) {
+                    console.log( 'Authentication server is not accessible' );
+                } else {
+                    console.log( error.response.data );
+                }
+            });
     },
 };
 
