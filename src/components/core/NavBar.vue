@@ -14,9 +14,34 @@
             <v-btn text icon>
                 <v-icon color="grey darken-3">mdi-magnify</v-icon>
             </v-btn>
-            <v-btn text icon>
-                <v-icon color="grey darken-3">mdi-account-box</v-icon>
-            </v-btn>
+            <v-menu
+                left
+                bottom
+                dark
+                nudge-bottom="20"
+            >
+                <template v-slot:activator="{ on }">
+                    <v-btn icon v-on="on">
+                        <v-icon color="grey darken-3">mdi-account-box</v-icon>
+                    </v-btn>
+                </template>
+
+                <v-list dense>
+                    <v-list-item
+                        v-for="(link, i) in profileMenuLinks"
+                        :key="i"
+                        :to="link.to"
+                    >
+                        
+                        <v-list-item-content>
+                            <v-list-item-title v-text="link.text" /> 
+                        </v-list-item-content>
+                        <v-list-item-icon>
+                            <v-icon v-text="link.icon"></v-icon>
+                        </v-list-item-icon>
+                    </v-list-item>
+                </v-list>
+            </v-menu>
         </v-app-bar>
     </div>
 </template>
@@ -28,6 +53,13 @@ import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 export default class NavBar extends Vue {
     private pageTitle: string | undefined = '';
     private drawerIcon: string = 'mdi-arrow-expand-left';
+    private profileMenuLinks: object[] = [
+        {
+            to: '/pages/login',
+            icon: 'mdi-logout',
+            text: 'Logout',
+        },
+    ];
 
     @Watch( '$route' )
     private onPropertyChanged( value: object, oldValue: object ) {
