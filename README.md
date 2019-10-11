@@ -1,4 +1,10 @@
-# biogrid-ace
+# BioGRID ACE
+The annotation and curation engine for the BioGRID.
+
+## Requirements (for windows)
+* GIT 2.23+ (https://git-scm.com/download/win)
+* Node.js 10.16.3+ (https://nodejs.org/en/)
+
 
 ## Project setup
 ```
