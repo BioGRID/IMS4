@@ -22,7 +22,7 @@
             >
                 <template v-slot:activator="{ on }">
                     <v-btn icon v-on="on">
-                        <v-icon color="grey darken-3">mdi-account-box</v-icon>
+                        <v-icon color="grey darken-3">mdi-settings</v-icon>
                     </v-btn>
                 </template>
 

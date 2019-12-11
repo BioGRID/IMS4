@@ -2,6 +2,9 @@ import axios from 'axios';
 import router from '@/router';
 
 const moduleAuthActions = {
+    update_user: (context: any, payload: any) => {
+        return context.commit( 'AUTH_UPDATE_USER', payload );
+    },
     login: (context: any, payload: any) => {
         context.dispatch( 'toggleLoadingOverlay', {}, {root: true} );
         axios
@@ -9,12 +12,16 @@ const moduleAuthActions = {
                 process.env.VUE_APP_AUTH_URL! + '/login',
                 payload.userDetails,
             )
-            .then( (response) => {
+            .then( (res) => {
                 context.dispatch( 'toggleLoadingOverlay', {}, {root: true} );
-                if ( response.status === 200 ) {
+                if ( res.status === 200 ) {
                     // Valid User, Set User Object
-                    context.commit( 'AUTH_UPDATE_USER', response.data );
-                    router.push( '/' );
+                    context.dispatch( 'update_user', res.data ).then( () => {
+                        // Fetch list of users from the API for the store
+                        context.dispatch( 'fetch_users', {}, {} );
+                        // Redirect to Dashboard
+                        router.push( '/' );
+                    });
                 }
             })
             .catch( (error) => {
@@ -65,6 +72,31 @@ const moduleAuthActions = {
                 } else {
                     console.log( error.response.data );
                 }
+            });
+    },
+    fetch_users: (context: any, payload: any) => {
+        axios
+            .get(
+                process.env.VUE_APP_AUTH_URL! + '/users', {
+                    headers: {
+                        Authorization: 'Bearer ' + context.state.user.access_key,
+                    },
+                })
+            .then( (res) => {
+                if ( res.status === 200 ) {
+                    // Fetch list of users from the API for the store
+                    interface UserHash {
+                        [key: string]: object;
+                    }
+                    const userHash: UserHash = {};
+                    for (const user of res.data.data) {
+                        userHash[user.id] = user;
+                    }
+                    context.commit( 'AUTH_UPDATE_USERS', userHash );
+                }
+            })
+            .catch( (error) => {
+                console.log( error.response.data );
             });
     },
 };
