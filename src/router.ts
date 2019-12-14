@@ -3,33 +3,26 @@ import Router from 'vue-router';
 import store from '@/store/store';
 import Dashboard from './views/elements/Dashboard.vue';
 import axios from 'axios';
+import { canAccess, isPermitted } from '@/utils/Permission';
 
 Vue.use(Router);
 
-const canAccess = (next: any) => {
-    if (store.getters['auth/isLoggedIn']) {
+const canAccessRoute = (next: any) => {
+    if (canAccess()) {
         next();
         return;
     }
     next( '/pages/login' );
 };
 
-const isPermitted = (permission: string, next: any) => {
-    if (store.getters['auth/isLoggedIn']) {
-        axios
-            .post(
-                process.env.VUE_APP_AUTH_URL! + '/permit', { permission }, {
-                    headers: {
-                        Authorization: 'Bearer ' + store.getters['auth/getUser'].access_key,
-                    },
-                })
-            .then( (response) => {
-                if ( response.status === 200 ) {
+const isPermittedRoute = (permission: string, next: any) => {
+    if (canAccess()) {
+        isPermitted( permission )
+            .then( (res) => {
+                if (res && res.status === 200) {
                     next();
-                    return;
                 }
-            })
-            .catch( (error) => {
+            }).catch( (error) => {
                 if ( error.response.status === 403 || error.response.status === 401 ) {
                     // Forbidden User
                     next( '/pages/error-401' );
@@ -58,7 +51,7 @@ const router = new Router({
                 name: 'Dashboard',
                 component: Dashboard,
                 beforeEnter: (to: any, from: any, next: any) => {
-                    canAccess(next);
+                    canAccessRoute(next);
                 },
             },
             {
@@ -66,7 +59,15 @@ const router = new Router({
                 name: 'Test Page',
                 component: () => import( '@/views/elements/Test.vue' ),
                 beforeEnter: (to: any, from: any, next: any) => {
-                    isPermitted( 'MANAGE USERS', next );
+                    isPermittedRoute( 'MANAGE USERS', next );
+                },
+            },
+            {
+                path: '/elements/admin',
+                name: 'Admin Tools',
+                component: () => import( '@/views/elements/Admin.vue' ),
+                beforeEnter: (to: any, from: any, next: any) => {
+                    isPermittedRoute( 'VIEW ADMIN TOOLS', next );
                 },
             },
         ],

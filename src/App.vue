@@ -11,3 +11,7 @@ import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 export default class App extends Vue {}
 
 </script>
+
+<style lang="scss">
+@import "scss/styles.scss";
+</style>

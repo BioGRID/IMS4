@@ -16,8 +16,8 @@
                             <v-card flat class="text-left mr-3" style="height: 295px">
                                 <v-row>
                                     <v-col sm="12">
-                                        <h1 class='display-1 font-weight-condensed'>404 - Location not Found </h1>
-                                        <p class='mt-3'>Unfortunately, the location you attempted to view does not exist. This is likely the result of an incorrect link sending you to the wrong place. Please head back to the dashboard and try again.</p>
+                                        <h1 class='display-1 font-weight-condensed'>Not Found (404)</h1>
+                                        <p class='mt-3'>This location you attempted to access could not be found. This could be our fault (bad link/redirect/removed tool) or it could be yours (incorrectly entered location). Either way, it sucks to end up here and we apologize. Please try again and contact the administrator if you believe you should not be seeing this page.</p>
                                         <v-btn 
                                                 size="x-large"
                                                 color="primary"

@@ -1,8 +1,8 @@
 <template>
     <div id="test-page">
         <v-container fluid class='pt-0'>
-            <h1>This is a Test Page.</h1>
-            <p>I can only be seen by someone with <strong>MANAGE USERS</strong> permission! Otherwise, I get permission denied!</p>
+            <h1>Admin Tools</h1>
+            <p>I can only be seen by someone with <strong>VIEW ADMIN TOOLS</strong> permission! Otherwise, I get permission denied!</p>
             <a href="http://google.com">TEST</a>
         </v-container>
     </div>
