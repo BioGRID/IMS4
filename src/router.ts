@@ -70,6 +70,14 @@ const router = new Router({
                     isPermittedRoute( 'VIEW ADMIN TOOLS', next );
                 },
             },
+            {
+                path: '/admin/permissions',
+                name: 'Permission Manager',
+                component: () => import( '@/views/admin/PermissionManager.vue' ),
+                beforeEnter: (to: any, from: any, next: any) => {
+                    isPermittedRoute( 'MANAGE PERMISSIONS', next );
+                },
+            },
         ],
     },
     // FULL PAGE LAYOUTS

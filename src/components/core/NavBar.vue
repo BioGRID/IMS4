@@ -85,7 +85,6 @@ export default class NavBar extends Vue {
 
     private appendLinks() {
         if (canAccess()) {
-            console.log( 'CAN ACCESS' );
             isPermitted('VIEW ADMIN TOOLS')
                 .then( (res) => {
                     if (res && res.status === 200) {

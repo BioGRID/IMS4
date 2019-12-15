@@ -23,7 +23,6 @@
                                                 label="name"
                                                 :error-messages="nameErrors"
                                                 prepend-inner-icon="mdi-clipboard-account"
-                                                outlined
                                                 class="login-field"
                                                 v-model.trim="name"
                                                 required
@@ -36,7 +35,6 @@
                                                 :error-messages="passwordErrors"
                                                 type="password"
                                                 prepend-inner-icon="mdi-lock-question"
-                                                outlined
                                                 required
                                                 class="login-field"
                                                 v-model.trim="password"

@@ -90,7 +90,7 @@ const moduleAuthActions = {
                     }
                     const userHash: UserHash = {};
                     for (const user of res.data.data) {
-                        userHash[user.id] = user;
+                        userHash[String(user.id)] = user;
                     }
                     context.commit( 'AUTH_UPDATE_USERS', userHash );
                 }
