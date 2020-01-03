@@ -79,6 +79,7 @@ export default class Login extends Vue {
         if (this.user !== undefined) {
             this.$store.dispatch( 'auth/logout', {
                 user: this.user,
+                vm: this,
             });
         }
     }
@@ -115,6 +116,7 @@ export default class Login extends Vue {
                     name: this.name,
                     password: this.password,
                 },
+                vm: this,
             });
         }
     }

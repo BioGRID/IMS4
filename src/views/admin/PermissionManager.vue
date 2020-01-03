@@ -11,8 +11,6 @@
             <h1>Permission Manager</h1>
             <div class="subtitle-1">Use the add new permission form below to add a new permission to the system. You can also use the table below to make adjustments to the access permissions used by the system. <strong>Note</strong>: Users will need to logout and then log back in again for changes to be reflected in their permissions.</div>
             <v-card
-                outlined
-                color="grey lighten-2"
                 class="mt-2 pa-0"
             >
                 <v-card-title>
@@ -81,6 +79,19 @@
                 </v-form>
                 </v-card-text>
             </v-card>
+            <ACETable 
+                class="mt-4 smallFont"
+                title="Current Permissions"
+                showSearch
+                :headers="permissionTableHeaders"
+                :items="permissionList"
+                :sortBy="['category','name']"
+                :sortDesc="[false,false]"
+                :itemsPerPage="100"
+                :loading="permissionTableLoading"
+            >
+                
+            </ACETable>
         </v-container>
     </div>
 </template>
@@ -90,17 +101,42 @@ import { Component, Vue, Watch } from 'vue-property-decorator';
 import { required } from 'vuelidate/lib/validators';
 import { State, namespace } from 'vuex-class';
 import { printableAsciiOnly, lettersAndSpacesOnly } from '@/utils/Validators';
+import ACETable from '@/components/data/ACETable.vue';
 import axios from 'axios';
 
 const auth = namespace( 'auth' );
 
-@Component
+@Component({
+    components: {
+        ACETable,
+    },
+})
 export default class PermissionManager extends Vue {
     @auth.State private user!: any;
+    @auth.State private permissions!: any;
     private permName: string = '';
     private permDescription: string = '';
     private permCategory: string = '';
     private permLevel: string = 'observer';
+    private permissionTableLoading: boolean = false;
+    private permissionTableSearch: string = '';
+    private permissionTableFooterProps: object = {
+        itemsPerPageOptions: [25, 50, 75, 100],
+    };
+    private permissionTableHeaders: object[] = [
+        { text: 'ID', value: 'id', align: 'left', sortable: true, filterable: true },
+        { text: 'Name', value: 'name', align: 'left', sortable: true, filterable: true },
+        { text: 'Description', value: 'description', align: 'left', sortable: true, filterable: true },
+        { text: 'Category', value: 'category', align: 'left', sortable: true, filterable: true },
+        {
+            text: 'Permission Setting',
+            value: 'level',
+            align: 'left',
+            sortable: true,
+            filterable: true,
+            class: 'nowrap',
+        },
+    ];
     private permLevels: object[] = [
         { text: 'Observer', value: 'observer' },
         { text: 'Standard', value: 'standard' },
@@ -157,6 +193,10 @@ export default class PermissionManager extends Vue {
         return this.$v.$invalid;
     }
 
+    get permissionList() {
+        return Object.values(this.permissions);
+    }
+
     private submitPermission( ) {
         this.$v.$touch();
         if (!this.$v.$invalid) {
@@ -185,6 +225,12 @@ export default class PermissionManager extends Vue {
                         message: 'Successfully Added New Permission',
                         color: 'success',
                     }, {root: true });
+                    this.$socket.sendObj({
+                        target: 0,
+                        namespace: 'auth',
+                        mutation: '',
+                        action: 'fetch_permissions',
+                    });
                 }
             })
             .catch( (error) => {

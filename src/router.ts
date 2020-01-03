@@ -1,8 +1,6 @@
 import Vue from 'vue';
 import Router from 'vue-router';
-import store from '@/store/store';
 import Dashboard from './views/elements/Dashboard.vue';
-import axios from 'axios';
 import { canAccess, isPermitted } from '@/utils/Permission';
 
 Vue.use(Router);
@@ -17,6 +15,15 @@ const canAccessRoute = (next: any) => {
 
 const isPermittedRoute = (permission: string, next: any) => {
     if (canAccess()) {
+        if (isPermitted(permission)) {
+            next();
+            return;
+        }
+        next( '/pages/error-401' );
+    } else {
+        next( 'pages/login' );
+    }
+    /* if (canAccess()) {
         isPermitted( permission )
             .then( (res) => {
                 if (res && res.status === 200) {
@@ -33,7 +40,7 @@ const isPermittedRoute = (permission: string, next: any) => {
             });
     } else {
         next( '/pages/login' );
-    }
+    } */
 };
 
 const router = new Router({
@@ -76,6 +83,14 @@ const router = new Router({
                 component: () => import( '@/views/admin/PermissionManager.vue' ),
                 beforeEnter: (to: any, from: any, next: any) => {
                     isPermittedRoute( 'MANAGE PERMISSIONS', next );
+                },
+            },
+            {
+                path: '/admin/socketstatus',
+                name: 'Socket Status',
+                component: () => import( '@/views/admin/SocketStatus.vue' ),
+                beforeEnter: (to: any, from: any, next: any) => {
+                    isPermittedRoute( 'WEBSOCKET MANAGE', next );
                 },
             },
         ],

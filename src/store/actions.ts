@@ -6,6 +6,9 @@ const actions = {
     toggleLoadingOverlay: (context: any) => {
         context.commit( 'TOGGLE_LOADING_OVERLAY' );
     },
+    addMessage: (context: any, payload: any) => {
+        context.commit( 'ADD_MESSAGE', payload.message );
+    },
 };
 
 export default actions;

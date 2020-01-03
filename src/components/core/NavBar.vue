@@ -85,19 +85,13 @@ export default class NavBar extends Vue {
 
     private appendLinks() {
         if (canAccess()) {
-            isPermitted('VIEW ADMIN TOOLS')
-                .then( (res) => {
-                    if (res && res.status === 200) {
-                        this.settingsMenuLinks.unshift({
-                            to: '/elements/admin',
-                            icon: 'mdi-lock-reset',
-                            text: 'Admin Tools',
-                        });
-                    }
-                }).catch( (error) => {
-                    // Ignore the Error, just means permission is denied
-                    // so we don't do anything
+            if (isPermitted('VIEW ADMIN TOOLS')) {
+                this.settingsMenuLinks.unshift({
+                    to: '/elements/admin',
+                    icon: 'mdi-lock-reset',
+                    text: 'Admin Tools',
                 });
+            }
         }
     }
 }

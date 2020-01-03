@@ -1,5 +1,6 @@
 import axios from 'axios';
 import router from '@/router';
+// import {socketOptions} from '@/plugins/vueNativeWebsocket';
 
 const moduleAuthActions = {
     update_user: (context: any, payload: any) => {
@@ -19,6 +20,9 @@ const moduleAuthActions = {
                     context.dispatch( 'update_user', res.data ).then( () => {
                         // Fetch list of users from the API for the store
                         context.dispatch( 'fetch_users', {}, {} );
+                        context.dispatch( 'fetch_permissions', {}, {} );
+                        // Connect to websocket
+                        payload.vm.$connect( process.env.VUE_APP_ACE_WEBSOCKET + '?access_token=' + res.data.access_key + '&id=' + res.data.id );
                         // Redirect to Dashboard
                         router.push( '/' );
                     });
@@ -55,7 +59,11 @@ const moduleAuthActions = {
             });
     },
     logout: (context: any, payload: any) => {
+        // Reset State Variables
         context.commit( 'AUTH_UPDATE_USER', undefined );
+        context.commit( 'AUTH_UPDATE_USERS', {} );
+        context.commit( 'AUTH_UPDATE_PERMISSIONS', {} );
+        payload.vm.$disconnect( );
         axios
             .post(
                 process.env.VUE_APP_AUTH_URL! + '/logout', {}, {
@@ -93,6 +101,31 @@ const moduleAuthActions = {
                         userHash[String(user.id)] = user;
                     }
                     context.commit( 'AUTH_UPDATE_USERS', userHash );
+                }
+            })
+            .catch( (error) => {
+                console.log( error.response.data );
+            });
+    },
+    fetch_permissions: (context: any, payload: any) => {
+        axios
+            .get(
+                process.env.VUE_APP_AUTH_URL! + '/permissions', {
+                    headers: {
+                        Authorization: 'Bearer ' + context.state.user.access_key,
+                    },
+                })
+            .then( (res) => {
+                if ( res.status === 200 ) {
+                    // Fetch list of permissions from the API for the store
+                    interface PermissionHash {
+                        [key: string]: string;
+                    }
+                    const permissionHash: PermissionHash = {};
+                    for (const permission of res.data.data) {
+                        permissionHash[permission.name] = permission;
+                    }
+                    context.commit( 'AUTH_UPDATE_PERMISSIONS', permissionHash );
                 }
             })
             .catch( (error) => {

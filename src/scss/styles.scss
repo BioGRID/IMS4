@@ -6,3 +6,7 @@ a {
 a:hover {
     color: var(--v-highlight-base) !important;
 }
+
+tbody tr:nth-of-type(odd) {
+    background-color: rgba(70, 68, 68, 0.05);
+}
