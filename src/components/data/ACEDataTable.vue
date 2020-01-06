@@ -45,6 +45,18 @@
                     </tr>
                 </thead>
                 <tbody>
+                    <tr 
+                        v-for="(row, rowIndex) in rows"
+                        :key="rowIndex"
+                    >
+                        <td
+                            v-for="(column, colIndex) in columns"
+                            :class="rowClass(column)"
+                            :key="colIndex"
+                        >
+                            {{ row[column.field] }}
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </v-card>
@@ -80,10 +92,9 @@ export default class ACEDataTable extends Vue {
     @Prop(String) private title!: string;
     @Prop(Boolean) private showSearch!: boolean;
     @Prop(Array) private columns!: ACEDataTableColumn[];
-    // private tableHeaders: ACEDataTableColumn[] = [];
+    @Prop(Array) private rows!: object[];
     private tableSortDetails: ACEDataTableSortDetails[] = [];
     private searchText: string = '';
-    // private sortOptions: { [key: number]: string } = {};
     private sortOrderTracker: number[] = [];
 
     private created() {
@@ -97,13 +108,6 @@ export default class ACEDataTable extends Vue {
                 sortOrder: column.sortOrder,
             });
         });
-    }
-
-    private initializeTableHeaders() {
-        /* this.columns.forEach( (column) => {
-            const columnCopy = Object.assign({}, column);
-            this.tableHeaders.push(columnCopy);
-        }); */
     }
 
     private sortBy(index: number) {
@@ -126,47 +130,6 @@ export default class ACEDataTable extends Vue {
                 });
             }
         }
-        /* if (index in this.tableHeaders) {
-            if (this.tableHeaders[index].sortDirection === 'asc') {
-                this.tableHeaders[index].sortDirection = 'desc';
-            } else if (this.tableHeaders[index].sortDirection === '') {
-                this.tableHeaders[index].sortDirection = 'asc';
-                this.sortOrderTracker.push(index);
-                this.tableHeaders[index].sortOrder = this.sortOrderTracker.indexOf(index) + 1;
-            } else {
-                this.tableHeaders[index].sortDirection = '';
-                this.tableHeaders[index].sortOrder = 0;
-                // Remove this one from the tracker
-                this.sortOrderTracker = this.sortOrderTracker.filter( (colID) => colID !== index );
-                // Update all remaining entries in the tracker, in case order has
-                // changed from what it was previously
-                this.sortOrderTracker.forEach( (trackerIndex) => {
-                    this.tableHeaders[trackerIndex].sortOrder = this.sortOrderTracker.indexOf(trackerIndex) + 1;
-                });
-            }
-        } */
-        /* if (index in this.sortOptions) {
-            if (this.sortOptions[index] === 'asc') {
-                // If already sorting ascending, switch to descending
-                this.sortOptions[index] = 'desc';
-                this.tableHeaders[index].sortDirection = 'desc';
-            } else {
-                // If already on descending, remove the sort option
-                delete this.sortOptions[index];
-                this.tableHeaders[index].sortDirection = '';
-                this.sortOrder = this.sortOrder.filter( (colID) => colID !== index );
-            }
-        } else {
-            this.sortOptions[index] = 'asc';
-            this.tableHeaders[index].sortDirection = 'asc';
-            this.sortOrder.push(index);
-        } */
-
-        // this.tableHeaders[index].title = this.tableHeaders[index].sortDirection;
-
-        /* console.log(this.sortOptions);
-        console.log(this.sortOrder); */
-        // console.log(this.tableHeaders);
     }
 
     private columnClass(column: ACEDataTableColumn) {
@@ -177,6 +140,15 @@ export default class ACEDataTable extends Vue {
         if (column.sortable) {
             classes.push('columnSortable');
         }
+        return classes.join(' ');
+    }
+
+    private rowClass(column: ACEDataTableColumn) {
+        const classes = [];
+        if (column.className !== undefined && column.className !== '' ) {
+            classes.push(column.className);
+        }
+
         return classes.join(' ');
     }
 
@@ -201,6 +173,10 @@ export default class ACEDataTable extends Vue {
                 &.columnSortable {
                     cursor: pointer;
                 }
+            }
+
+            td {
+                padding: 5px;
             }
         }
     }
