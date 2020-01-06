@@ -1,6 +1,5 @@
 import axios from 'axios';
 import router from '@/router';
-// import {socketOptions} from '@/plugins/vueNativeWebsocket';
 
 const moduleAuthActions = {
     update_user: (context: any, payload: any) => {
@@ -20,11 +19,13 @@ const moduleAuthActions = {
                     context.dispatch( 'update_user', res.data ).then( () => {
                         // Fetch list of users from the API for the store
                         context.dispatch( 'fetch_users', {}, {} );
-                        context.dispatch( 'fetch_permissions', {}, {} );
                         // Connect to websocket
                         payload.vm.$connect( process.env.VUE_APP_ACE_WEBSOCKET + '?access_token=' + res.data.access_key + '&id=' + res.data.id );
-                        // Redirect to Dashboard
-                        router.push( '/' );
+                        // Get the list of permissions
+                        context.dispatch( 'fetch_permissions', {}, {} ).then( () => {
+                            // Redirect to Dashboard
+                            router.push( '/' );
+                        });
                     });
                 }
             })
@@ -83,7 +84,7 @@ const moduleAuthActions = {
             });
     },
     fetch_users: (context: any, payload: any) => {
-        axios
+        return axios
             .get(
                 process.env.VUE_APP_AUTH_URL! + '/users', {
                     headers: {
@@ -108,7 +109,7 @@ const moduleAuthActions = {
             });
     },
     fetch_permissions: (context: any, payload: any) => {
-        axios
+        return axios
             .get(
                 process.env.VUE_APP_AUTH_URL! + '/permissions', {
                     headers: {

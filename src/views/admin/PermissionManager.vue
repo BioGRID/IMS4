@@ -225,7 +225,7 @@ export default class PermissionManager extends Vue {
                         message: 'Successfully Added New Permission',
                         color: 'success',
                     }, {root: true });
-                    this.$socket.sendObj({
+                    Vue.prototype.$socket.sendObj({
                         target: 0,
                         namespace: 'auth',
                         mutation: '',

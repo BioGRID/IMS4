@@ -28,6 +28,9 @@ const mutations = {
         console.info( 'SOCKET_MESSAGE_UNHANDLED' );
         console.info( message );
     },
+    UPDATE_ECHO_MESSAGE: (state: any, message: string) => {
+        state.socket.lastEchoMessage = message;
+    },
 };
 
 export default mutations;

@@ -1,5 +1,5 @@
 <template>
-    <div class="ace-data-table">
+    <div class="ace-table">
         <v-card>
             <v-card-title>
                 {{ title }}
@@ -27,7 +27,7 @@
                 :loading="loading"
             >
                 <template v-slot:item.level="{ item }">
-                    <v-select
+                    <v-select 
                         label="Permission Level" 
                         :items="permLevels"
                         light
@@ -35,8 +35,9 @@
                         dense
                         :hide-details="true"
                         solo
+                        :value="item.level"
+                        @change="updatePermission( item.id, $event )"
                         class="pa-0 ma-0 pt-2 pb-2"
-                        v-model="item.level"
                     />
                     
                     <!--<v-chip :color="getColor(item.level)" dark>{{ item.level }}</v-chip>-->
@@ -85,6 +86,10 @@ export default class ACETable extends Vue {
         }
 
         return 'pink';
+    }
+
+    private updatePermission(permID: number, event: any) {
+        
     }
 
 }

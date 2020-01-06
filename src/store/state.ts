@@ -5,6 +5,7 @@ const state = {
     socket: {
         isConnected: false,
         reconnectError: false,
+        lastEchoMessage: '',
     },
 };
 

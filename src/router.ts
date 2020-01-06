@@ -23,24 +23,6 @@ const isPermittedRoute = (permission: string, next: any) => {
     } else {
         next( 'pages/login' );
     }
-    /* if (canAccess()) {
-        isPermitted( permission )
-            .then( (res) => {
-                if (res && res.status === 200) {
-                    next();
-                }
-            }).catch( (error) => {
-                if ( error.response.status === 403 || error.response.status === 401 ) {
-                    // Forbidden User
-                    next( '/pages/error-401' );
-                } else {
-                    console.log( error.response.data );
-                    next( '/pages/error-401' );
-                }
-            });
-    } else {
-        next( '/pages/login' );
-    } */
 };
 
 const router = new Router({
