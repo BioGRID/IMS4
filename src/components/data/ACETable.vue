@@ -88,10 +88,6 @@ export default class ACETable extends Vue {
         return 'pink';
     }
 
-    private updatePermission(permID: number, event: any) {
-        
-    }
-
 }
 
 </script>

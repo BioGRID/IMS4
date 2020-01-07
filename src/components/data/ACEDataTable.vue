@@ -46,7 +46,7 @@
                 </thead>
                 <tbody>
                     <tr 
-                        v-for="(row, rowIndex) in rows"
+                        v-for="(row, rowIndex) in displayRows"
                         :key="rowIndex"
                     >
                         <td
@@ -59,6 +59,11 @@
                     </tr>
                 </tbody>
             </table>
+            <v-pagination
+                v-model="paginationPage"
+                :length="paginationSize"
+                :page="paginationPage"
+            ></v-pagination>
         </v-card>
     </div> 
 </template>
@@ -69,6 +74,7 @@ import ACEDataTableHeader from '@/components/data/ACEDataTableHeader.vue';
 
 interface ACEDataTableColumn {
     title: string;
+    field: string;
     sortable: boolean;
     searchable: boolean;
     searchType: string;
@@ -93,12 +99,17 @@ export default class ACEDataTable extends Vue {
     @Prop(Boolean) private showSearch!: boolean;
     @Prop(Array) private columns!: ACEDataTableColumn[];
     @Prop(Array) private rows!: object[];
+    @Prop(Number) private maxRows!: number;
+    @Prop(Boolean) private pagination!: boolean;
     private tableSortDetails: ACEDataTableSortDetails[] = [];
     private searchText: string = '';
     private sortOrderTracker: number[] = [];
+    private paginationPage: number = 1;
+    private paginationSize: number = 1;
 
     private created() {
         this.initializeSortDetails();
+        this.paginationSize = this.rows.length;
     }
 
     private initializeSortDetails() {
@@ -108,6 +119,10 @@ export default class ACEDataTable extends Vue {
                 sortOrder: column.sortOrder,
             });
         });
+    }
+
+    get displayRows() {
+        return this.rows.sort( this.defaultSort );
     }
 
     private sortBy(index: number) {
@@ -152,6 +167,30 @@ export default class ACEDataTable extends Vue {
         return classes.join(' ');
     }
 
+    private defaultSort( a: any, b: any ) {
+        if (this.sortOrderTracker.length <= 0) {
+            return a[this.columns[0].field] - b[this.columns[0].field];
+        }
+
+        for (const colID of this.sortOrderTracker) {
+            let directionModifier = 1;
+            if (this.tableSortDetails[colID].sortDirection === 'desc') {
+                directionModifier = -1;
+            }
+
+            const aval = a[this.columns[colID].field];
+            const bval = b[this.columns[colID].field];
+
+            if (aval > bval) {
+                return -1 * directionModifier;
+            } else if (aval < bval) {
+                return 1 * directionModifier;
+            }
+        }
+
+        return 0;
+    }
+
 }
 
 </script>
@@ -164,7 +203,7 @@ export default class ACEDataTable extends Vue {
             border: 0;
             th {
                 font-size: 14px;
-                background-color: var(--v-primary-base);
+                background-color: var(--v-info-base);
                 color: #FFF;
                 border: 0;
                 margin: 0;          

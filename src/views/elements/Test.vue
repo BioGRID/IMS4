@@ -8,6 +8,8 @@
                 title="Test Data Table"
                 :columns="columnDefinitions"
                 :rows="tableRows"
+                :maxRows="3"
+                :pagination="true"
             ></ACEDataTable>
         </v-container>
     </div>
