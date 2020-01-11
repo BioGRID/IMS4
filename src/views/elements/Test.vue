@@ -8,9 +8,19 @@
                 title="Test Data Table"
                 :columns="columnDefinitions"
                 :rows="tableRows"
-                :maxRows="3"
+                :maxRows="8"
                 :pagination="true"
-            ></ACEDataTable>
+                :showSearch="true"
+            >
+                <template slot-scope="{ row }">
+                    <td class='text-center'><strong>{{ row.id }}</strong></td>
+                    <td class='text-left'><strong>{{ row.name }}</strong></td>
+                    <td class='text-left'>{{ row.description }}</td>
+                    <td class='text-center'>{{ row.category }}</td>
+                    <td class='nowrap text-left'><v-btn small color="primary" @click="clickedBtn()">Primary</v-btn></td>
+                </template>
+
+            </ACEDataTable>
         </v-container>
     </div>
 </template>
@@ -25,6 +35,10 @@ import ACEDataTable from '@/components/data/ACEDataTable.vue';
     },
 })
 export default class Test extends Vue {
+
+    private clickedBtn() {
+        alert( 'CLICKED' );
+    }
 
     get tableRows() {
         return [
@@ -93,6 +107,76 @@ export default class Test extends Vue {
             },
             {
                 id: 10,
+                name: 'WEBSOCKET MANAGE',
+                description: 'Permission to view the Socket Status Page',
+                category: 'BLAH',
+                permission: 'POWER USER',
+            },
+            {
+                id: 11,
+                name: 'ADD USER',
+                description: 'Permission to add a new user to the system',
+                category: 'ADMIN',
+                permission: 'POWER USER',
+            },
+            {
+                id: 18,
+                name: 'GET PERMISSIONS',
+                description: 'Get a listing of existing permission settings',
+                category: '22',
+                permission: 'POWER USER',
+            },
+            {
+                id: 15,
+                name: 'GET USER',
+                description: 'Permission to get information about a user from the database',
+                category: '2',
+                permission: 'OBSERVER',
+            },
+            {
+                id: 13,
+                name: 'LOGOUT USER',
+                description: 'Permission to logout a user',
+                category: 'ABC123',
+                permission: 'MANAGER',
+            },
+            {
+                id: 12,
+                name: 'MANAGE PERMISSIONS',
+                description: 'Permission to access the manage permissions page and add new permissions',
+                category: '456ABC',
+                permission: 'ADMIN',
+            },
+            {
+                id: 14,
+                name: 'MANAGE USERS',
+                description: 'Permission to manage users such as change information and deactivate accounts',
+                category: '123ABC',
+                permission: 'ADMIN',
+            },
+            {
+                id: 16,
+                name: 'UPDATE ANNOTATION',
+                description: 'Permission to update annotation in the core annotation database.',
+                category: 'ABC789',
+                permission: 'MANAGER',
+            },
+            {
+                id: 17,
+                name: 'VIEW ADMIN TOOLS',
+                description: 'Permission to view the listing of admin tools',
+                category: 'BLAH',
+                permission: 'STANDARD',
+            },
+            {
+                id: 19,
+                name: 'WEBSOCKET CONNECT',
+                description: 'Create an open websocket connection',
+                category: 'BANANA',
+                permission: 'OBSERVER',
+            },
+            {
+                id: 20,
                 name: 'WEBSOCKET MANAGE',
                 description: 'Permission to view the Socket Status Page',
                 category: 'BLAH',

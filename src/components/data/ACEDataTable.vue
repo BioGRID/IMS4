@@ -1,18 +1,43 @@
 <template>
     <div class="ace-data-table">
         <v-card>
-            <v-card-title>
-                {{ title }}
-                <v-spacer v-if="showSearch"></v-spacer>
-                <v-text-field
-                    v-if="showSearch"
-                    v-model="searchText"
-                    append-icon="mdi-magnify"
-                    label="Search"
-                    single-line
-                    hide-details
-                ></v-text-field> 
-            </v-card-title>
+            <v-row no-gutters>
+                <v-col xl="8" lg="8" md="6" sm="12" xs="12">
+                    <v-card-title class="pb-0 mb-3">
+                        {{ title }}
+                    </v-card-title>
+                    <v-card-subtitle>
+                        Showing 1 to 100 of 751 entries (filtered from 968 total entries)
+                    </v-card-subtitle>
+                </v-col>
+                <v-col xl="4" lg="4" md="6" sm="12" xs="12">
+                    <v-text-field
+                        v-if="showSearch"
+                        v-model="searchText"
+                        append-icon="mdi-magnify"
+                        label="Search"
+                        single-line
+                        hide-details
+                        :clearable="true"
+                        @keyup.enter="generateDisplayRows()"
+                        @click:append="generateDisplayRows()"
+                        class='pr-5 pl-5 mt-3 mb-2'
+                    ></v-text-field>
+                </v-col>
+            </v-row>
+             
+            <!--<div v-if="loading">
+                <v-progress-linear 
+                    
+                    indeterminate 
+                    color="blue-grey"
+                />
+                <v-sheet
+                    class='text-center pa-5'
+                >
+                    <span class="blue-grey--text lighten-4">Loading ... Please Wait...</span> 
+                </v-sheet>
+            </div>-->
             <table>
                 <thead>
                     <tr>
@@ -44,8 +69,12 @@
                         </th>
                     </tr>
                 </thead>
+                
                 <tbody>
-                    <tr 
+                    <tr v-for="(row, rowIndex) in displayRows" :key="rowIndex">
+                        <slot :row="row"></slot>
+                    </tr>
+                    <!--<tr 
                         v-for="(row, rowIndex) in displayRows"
                         :key="rowIndex"
                     >
@@ -56,20 +85,23 @@
                         >
                             {{ row[column.field] }}
                         </td>
-                    </tr>
+                    </tr>-->
                 </tbody>
             </table>
             <v-pagination
                 v-model="paginationPage"
                 :length="paginationSize"
                 :page="paginationPage"
+                dark
+                total-visible="8"
+                class="mt-5"
             ></v-pagination>
         </v-card>
     </div> 
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from 'vue-property-decorator';
+import { Component, Vue, Prop, Watch } from 'vue-property-decorator';
 import ACEDataTableHeader from '@/components/data/ACEDataTableHeader.vue';
 
 interface ACEDataTableColumn {
@@ -103,13 +135,17 @@ export default class ACEDataTable extends Vue {
     @Prop(Boolean) private pagination!: boolean;
     private tableSortDetails: ACEDataTableSortDetails[] = [];
     private searchText: string = '';
+    private isFiltered: boolean = false;
     private sortOrderTracker: number[] = [];
     private paginationPage: number = 1;
     private paginationSize: number = 1;
+    private displayRows: object[] = [];
+    private loading: boolean = true;
 
     private created() {
         this.initializeSortDetails();
-        this.paginationSize = this.rows.length;
+        this.setupPagination();
+        this.generateDisplayRows();
     }
 
     private initializeSortDetails() {
@@ -121,8 +157,41 @@ export default class ACEDataTable extends Vue {
         });
     }
 
-    get displayRows() {
-        return this.rows.sort( this.defaultSort );
+    @Watch( 'maxRows' )
+    private onMaxRowsChanged() {
+        this.setupPagination();
+    }
+
+    @Watch( 'paginationPage' )
+    private onPaginationPageChanged() {
+        this.generateDisplayRows();
+    }
+
+    @Watch( 'searchText' )
+    private onSearchTextChanged() {
+        console.log( this.isFiltered );
+        if ((this.searchText === null || this.searchText === '') && this.isFiltered === true ) {
+            this.isFiltered = false;
+        }
+    }
+
+    private setupPagination() {
+        const rowsToShow = this.maxRows;
+        let numPages = Math.floor(this.rows.length / rowsToShow);
+        if ((this.rows.length % this.maxRows) > 0) {
+            numPages += 1;
+        }
+        this.paginationSize = numPages;
+    }
+
+    private generateDisplayRows() {
+        this.$store.dispatch( 'toggleLoadingOverlay', {} );
+        if (!this.pagination) {
+            this.displayRows = this.rows.filter( this.defaultFilter ).sort( this.defaultSort );
+        } else {
+            this.displayRows = this.rows.filter( this.defaultFilter ).sort( this.defaultSort ).slice( (this.paginationPage - 1) * this.maxRows, this.paginationPage * this.maxRows );
+        }
+        this.$store.dispatch( 'toggleLoadingOverlay', {} );
     }
 
     private sortBy(index: number) {
@@ -189,6 +258,31 @@ export default class ACEDataTable extends Vue {
         }
 
         return 0;
+    }
+
+    private defaultFilter( item: any ) {
+        if (this.searchText === null || this.searchText === '' ) {
+            return true;
+        }
+
+        let foundMatch = false;
+        for (const column of this.columns) {
+            if ( column.searchable ) {
+                foundMatch = this.compareByString( item[column.field], this.searchText );
+                if (foundMatch) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private compareByString( value: any, search: string ) {
+        return value != null &&
+        search != null &&
+        typeof value !== 'boolean' &&
+        value.toString().toLocaleLowerCase().indexOf(search.toLocaleLowerCase()) !== -1;
     }
 
 }
