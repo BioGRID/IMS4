@@ -7,7 +7,7 @@
                         {{ title }}
                     </v-card-title>
                     <v-card-subtitle>
-                        Showing 1 to 100 of 751 entries (filtered from 968 total entries)
+                        Showing <strong>{{ this.startRange }}</strong> to <strong>{{ this.endRange }}</strong> of <strong>{{ this.filteredRowCount }}</strong> entries (filtered from <strong>{{ this.totalRows }}</strong> total entries)
                     </v-card-subtitle>
                 </v-col>
                 <v-col xl="4" lg="4" md="6" sm="12" xs="12">
@@ -19,26 +19,13 @@
                         single-line
                         hide-details
                         :clearable="true"
-                        @keyup.enter="generateDisplayRows()"
-                        @click:append="generateDisplayRows()"
+                        @keyup.enter="filterSubmit()"
+                        @click:append="filterSubmit()"
                         class='pr-5 pl-5 mt-3 mb-2'
                     ></v-text-field>
                 </v-col>
             </v-row>
-             
-            <!--<div v-if="loading">
-                <v-progress-linear 
-                    
-                    indeterminate 
-                    color="blue-grey"
-                />
-                <v-sheet
-                    class='text-center pa-5'
-                >
-                    <span class="blue-grey--text lighten-4">Loading ... Please Wait...</span> 
-                </v-sheet>
-            </div>-->
-            <table>
+            <table class='pa-1'>
                 <thead>
                     <tr>
                         <th
@@ -89,6 +76,7 @@
                 </tbody>
             </table>
             <v-pagination
+                v-if="showPagination"
                 v-model="paginationPage"
                 :length="paginationSize"
                 :page="paginationPage"
@@ -121,6 +109,10 @@ interface ACEDataTableSortDetails {
     sortOrder: number;
 }
 
+interface NumericHash {
+    [sortOrder: string]: number;
+}
+
 @Component({
     components: {
         ACEDataTableHeader,
@@ -131,16 +123,20 @@ export default class ACEDataTable extends Vue {
     @Prop(Boolean) private showSearch!: boolean;
     @Prop(Array) private columns!: ACEDataTableColumn[];
     @Prop(Array) private rows!: object[];
-    @Prop(Number) private maxRows!: number;
+    @Prop(Number) private rowsPerPage!: number;
+    @Prop(Number) private totalRows!: number;
     @Prop(Boolean) private pagination!: boolean;
     private tableSortDetails: ACEDataTableSortDetails[] = [];
     private searchText: string = '';
-    private isFiltered: boolean = false;
     private sortOrderTracker: number[] = [];
     private paginationPage: number = 1;
     private paginationSize: number = 1;
     private displayRows: object[] = [];
+    private filteredRowCount: number = this.totalRows;
+    private startRange: number = 1;
+    private endRange: number = this.rowsPerPage;
     private loading: boolean = true;
+    private showPagination: boolean = this.pagination;
 
     private created() {
         this.initializeSortDetails();
@@ -149,16 +145,29 @@ export default class ACEDataTable extends Vue {
     }
 
     private initializeSortDetails() {
-        this.columns.forEach( (column) => {
+        const sortData: NumericHash = {};
+        this.columns.forEach( (column, columnIndex) => {
             this.tableSortDetails.push({
                 sortDirection: column.sortDirection,
                 sortOrder: column.sortOrder,
             });
+
+            if (column.sortOrder >= 0 && column.sortDirection !== '') {
+                sortData[column.sortOrder] = columnIndex;
+            }
         });
+
+        const defaultSortTracker: number[] = [];
+        Object.keys(sortData).sort().forEach( (key) => {
+            defaultSortTracker.push(sortData[key]);
+        });
+
+        this.sortOrderTracker = defaultSortTracker;
+
     }
 
-    @Watch( 'maxRows' )
-    private onMaxRowsChanged() {
+    @Watch( 'rowsPerPage' )
+    private onRowsPerPageChanged() {
         this.setupPagination();
     }
 
@@ -169,28 +178,43 @@ export default class ACEDataTable extends Vue {
 
     @Watch( 'searchText' )
     private onSearchTextChanged() {
-        console.log( this.isFiltered );
-        if ((this.searchText === null || this.searchText === '') && this.isFiltered === true ) {
-            this.isFiltered = false;
+        if ((this.searchText === null || this.searchText === '')) {
+            this.generateDisplayRows();
         }
     }
 
+    private filterSubmit() {
+        this.paginationPage = 1;
+        this.generateDisplayRows();
+    }
+
     private setupPagination() {
-        const rowsToShow = this.maxRows;
-        let numPages = Math.floor(this.rows.length / rowsToShow);
-        if ((this.rows.length % this.maxRows) > 0) {
+        const rowsToShow = this.rowsPerPage;
+        let numPages = Math.floor(this.filteredRowCount / rowsToShow);
+        if ((this.filteredRowCount % this.rowsPerPage) > 0) {
             numPages += 1;
         }
         this.paginationSize = numPages;
+        if (numPages <= 1) {
+            this.showPagination = false;
+        } else {
+            this.showPagination = true;
+        }
     }
 
     private generateDisplayRows() {
         this.$store.dispatch( 'toggleLoadingOverlay', {} );
-        if (!this.pagination) {
-            this.displayRows = this.rows.filter( this.defaultFilter ).sort( this.defaultSort );
+        const displayRows = this.rows.filter( this.defaultFilter ).sort( this.defaultSort );
+        this.filteredRowCount = displayRows.length;
+        this.displayRows = displayRows.slice( (this.paginationPage - 1) * this.rowsPerPage, this.paginationPage * this.rowsPerPage );
+        this.startRange = ((this.paginationPage - 1) * this.rowsPerPage) + 1;
+        const endRange = this.paginationPage * this.rowsPerPage;
+        if (endRange > this.filteredRowCount) {
+            this.endRange = this.filteredRowCount;
         } else {
-            this.displayRows = this.rows.filter( this.defaultFilter ).sort( this.defaultSort ).slice( (this.paginationPage - 1) * this.maxRows, this.paginationPage * this.maxRows );
+            this.endRange = endRange;
         }
+        this.setupPagination();
         this.$store.dispatch( 'toggleLoadingOverlay', {} );
     }
 
@@ -213,6 +237,7 @@ export default class ACEDataTable extends Vue {
                     this.tableSortDetails[trackerIndex].sortOrder = this.sortOrderTracker.indexOf(trackerIndex) + 1;
                 });
             }
+            this.generateDisplayRows();
         }
     }
 
@@ -243,7 +268,7 @@ export default class ACEDataTable extends Vue {
 
         for (const colID of this.sortOrderTracker) {
             let directionModifier = 1;
-            if (this.tableSortDetails[colID].sortDirection === 'desc') {
+            if (this.tableSortDetails[colID].sortDirection === 'asc') {
                 directionModifier = -1;
             }
 

@@ -8,7 +8,8 @@
                 title="Test Data Table"
                 :columns="columnDefinitions"
                 :rows="tableRows"
-                :maxRows="8"
+                :rowsPerPage="7"
+                :totalRows="20"
                 :pagination="true"
                 :showSearch="true"
             >
@@ -205,8 +206,8 @@ export default class Test extends Vue {
                 searchable: true,
                 searchType: 'Text',
                 searchName: 'Name',
-                sortDirection: '',
-                sortOrder: 0,
+                sortDirection: 'asc',
+                sortOrder: 2,
                 className: 'text-left',
             },
             {
@@ -227,8 +228,8 @@ export default class Test extends Vue {
                 searchable: true,
                 searchType: 'Text',
                 searchName: 'Category',
-                sortDirection: '',
-                sortOrder: 0,
+                sortDirection: 'asc',
+                sortOrder: 1,
                 className: 'text-center',
             },
             {
