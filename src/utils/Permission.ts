@@ -20,14 +20,14 @@ function convertPermissionLevelToInteger( permissionLevel: string ) {
     return 5;
 }
 
-export function isPermitted(permissionLevel: string) {
+export function isPermitted(permissionName: string) {
 
     // Get Logged in User Permission Class
     const userClass = store.getters['auth/getUserClass'];
     const userPerm = convertPermissionLevelToInteger(userClass);
 
     // Get User Class for passed in permission name
-    const reqClass = store.getters['auth/getPermissionLevel'](permissionLevel);
+    const reqClass = store.getters['auth/getPermission'](permissionName);
     const reqPerm = convertPermissionLevelToInteger(reqClass.level);
 
     if (reqPerm === 5) {

@@ -105,7 +105,7 @@
                             :hide-details="true"
                             solo
                             :value="row.level"
-                            @change="updatePermission( row.id, $event )"
+                            @change="updatePermission( row.name, $event )"
                             class="pa-1"
                         />
                     </td>
@@ -316,9 +316,47 @@ export default class PermissionManager extends Vue {
         return value.toUpperCase();
     }
 
-    private updatePermission( permissionID: number, permissionSetting: string ) {
-        console.log( permissionID );
-        console.log( permissionSetting );
+    private updatePermission( permissionName: number, permissionSetting: string ) {
+        this.$store.dispatch( 'toggleLoadingOverlay', {}, {root: true} );
+        const currentPerm = this.permissions[permissionName];
+        if (currentPerm.level !== permissionSetting) {
+            console.log( 'CHANGING PERMISSION' );
+            axios
+                .put(
+                    process.env.VUE_APP_AUTH_URL! + '/permission/' + currentPerm.id, {
+                        name: currentPerm.name,
+                        description: currentPerm.description,
+                        category: currentPerm.category,
+                        level: permissionSetting,
+                    }, {
+                        headers: {
+                            Authorization: 'Bearer ' + this.user.access_key,
+                        },
+                    })
+                .then( (res) => {
+                    this.$store.dispatch( 'toggleLoadingOverlay', {}, {root: true} );
+                    if ( res.status === 200 ) {
+                        this.$store.dispatch( 'notify/displayNotification', {
+                            message: 'Successfully Updated Permission Level',
+                            color: 'success',
+                        }, {root: true });
+                        Vue.prototype.$socket.sendObj({
+                            target: 0,
+                            namespace: 'auth',
+                            mutation: '',
+                            action: 'fetch_permissions',
+                        });
+                    }
+                })
+                .catch( (error) => {
+                    this.$store.dispatch( 'toggleLoadingOverlay', {}, {root: true} );
+                    console.log(error);
+                    this.$store.dispatch( 'notify/displayNotification', {
+                        message: 'Unable to Update Permission',
+                        color: 'error',
+                    }, {root: true });
+                });
+        }
     }
 
     private validations() {

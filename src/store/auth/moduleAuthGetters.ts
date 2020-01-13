@@ -6,7 +6,7 @@ const moduleAuthGetters = {
     getUserDetails: (state: any) => (userID: string) => {
         return state.users[userID];
     },
-    getPermissionLevel: (state: any) => (permissionName: string) => {
+    getPermission: (state: any) => (permissionName: string) => {
         return state.permissions[permissionName];
     },
 };

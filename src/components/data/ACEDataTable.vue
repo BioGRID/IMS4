@@ -61,18 +61,6 @@
                     <tr v-for="(row, rowIndex) in displayRows" :key="rowIndex">
                         <slot :row="row"></slot>
                     </tr>
-                    <!--<tr 
-                        v-for="(row, rowIndex) in displayRows"
-                        :key="rowIndex"
-                    >
-                        <td
-                            v-for="(column, colIndex) in columns"
-                            :class="rowClass(column)"
-                            :key="colIndex"
-                        >
-                            {{ row[column.field] }}
-                        </td>
-                    </tr>-->
                 </tbody>
             </table>
             <v-pagination
@@ -113,11 +101,7 @@ interface NumericHash {
     [sortOrder: string]: number;
 }
 
-@Component({
-    components: {
-        ACEDataTableHeader,
-    },
-})
+@Component
 export default class ACEDataTable extends Vue {
     @Prop(String) private title!: string;
     @Prop(Boolean) private showSearch!: boolean;
@@ -182,6 +166,11 @@ export default class ACEDataTable extends Vue {
         if ((this.searchText === null || this.searchText === '')) {
             this.generateDisplayRows();
         }
+    }
+
+    @Watch( 'rows' )
+    private onRowsChanged() {
+        this.generateDisplayRows();
     }
 
     private filterSubmit() {
