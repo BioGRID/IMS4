@@ -7,7 +7,7 @@
                         {{ title }}
                     </v-card-title>
                     <v-card-subtitle>
-                        Showing <strong>{{ this.startRange }}</strong> to <strong>{{ this.endRange }}</strong> of <strong>{{ this.filteredRowCount }}</strong> entries (filtered from <strong>{{ this.totalRows }}</strong> total entries)
+                        Showing <strong>{{ this.startRange }}</strong> to <strong>{{ this.endRange }}</strong> of <strong>{{ this.filteredRowCount }}</strong> entries <span v-if="this.filteredRowCount !== this.totalRows">(filtered from <strong>{{ this.totalRows }}</strong> total entries)</span>
                     </v-card-subtitle>
                 </v-col>
                 <v-col xl="4" lg="4" md="6" sm="12" xs="12">
@@ -25,7 +25,7 @@
                     ></v-text-field>
                 </v-col>
             </v-row>
-            <table class='pa-1'>
+            <table :class='tableClass'>
                 <thead>
                     <tr>
                         <th
@@ -126,6 +126,7 @@ export default class ACEDataTable extends Vue {
     @Prop(Number) private rowsPerPage!: number;
     @Prop(Number) private totalRows!: number;
     @Prop(Boolean) private pagination!: boolean;
+    @Prop(String) private tableClass!: string;
     private tableSortDetails: ACEDataTableSortDetails[] = [];
     private searchText: string = '';
     private sortOrderTracker: number[] = [];
@@ -318,6 +319,9 @@ export default class ACEDataTable extends Vue {
     table {
         width: 100%;
         border-spacing: 1px;
+        &.smallFont {
+            font-size: 12px;
+        }
         tr {
             border: 0;
             th {

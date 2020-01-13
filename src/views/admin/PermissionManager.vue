@@ -79,19 +79,39 @@
                 </v-form>
                 </v-card-text>
             </v-card>
-            <ACETable 
-                class="mt-4 smallFont"
+            <ACEDataTable
+                class='mt-5'
                 title="Current Permissions"
-                showSearch
-                :headers="permissionTableHeaders"
-                :items="permissionList"
-                :sortBy="['category','name']"
-                :sortDesc="[false,false]"
-                :itemsPerPage="100"
-                :loading="permissionTableLoading"
+                tableClass="pa-1 smallFont"
+                :columns="permissionTableHeaders"
+                :rows="permissionList"
+                :rowsPerPage="100"
+                :totalRows="permissionCount"
+                :pagination="true"
+                :showSearch="true"
             >
-                
-            </ACETable>
+                <template slot-scope="{ row }">
+                    <td class='text-center'>{{ row.id }}</td>
+                    <td class='text-left'>{{ row.name }}</td>
+                    <td class='text-left'>{{ row.description }}</td>
+                    <td class='text-center'>{{ row.category }}</td>
+                    <td class='nowrap text-left'>
+                        <v-select 
+                            label="Permission Level" 
+                            :items="permLevels"
+                            light
+                            required
+                            dense
+                            :hide-details="true"
+                            solo
+                            :value="row.level"
+                            @change="updatePermission( row.id, $event )"
+                            class="pa-1"
+                        />
+                    </td>
+                </template>
+
+            </ACEDataTable>
         </v-container>
     </div>
 </template>
@@ -101,14 +121,14 @@ import { Component, Vue, Watch } from 'vue-property-decorator';
 import { required } from 'vuelidate/lib/validators';
 import { State, namespace } from 'vuex-class';
 import { printableAsciiOnly, lettersAndSpacesOnly } from '@/utils/Validators';
-import ACETable from '@/components/data/ACETable.vue';
+import ACEDataTable from '@/components/data/ACEDataTable.vue';
 import axios from 'axios';
 
 const auth = namespace( 'auth' );
 
 @Component({
     components: {
-        ACETable,
+        ACEDataTable,
     },
 })
 export default class PermissionManager extends Vue {
@@ -118,23 +138,61 @@ export default class PermissionManager extends Vue {
     private permDescription: string = '';
     private permCategory: string = '';
     private permLevel: string = 'observer';
-    private permissionTableLoading: boolean = false;
-    private permissionTableSearch: string = '';
-    private permissionTableFooterProps: object = {
-        itemsPerPageOptions: [25, 50, 75, 100],
-    };
     private permissionTableHeaders: object[] = [
-        { text: 'ID', value: 'id', align: 'left', sortable: true, filterable: true },
-        { text: 'Name', value: 'name', align: 'left', sortable: true, filterable: true },
-        { text: 'Description', value: 'description', align: 'left', sortable: true, filterable: true },
-        { text: 'Category', value: 'category', align: 'left', sortable: true, filterable: true },
         {
-            text: 'Permission Setting',
-            value: 'level',
-            align: 'left',
+            title: 'ID',
+            field: 'id',
             sortable: true,
-            filterable: true,
-            class: 'nowrap',
+            searchable: true,
+            searchType: 'NumericRange',
+            searchName: 'ID',
+            sortDirection: '',
+            sortOrder: 0,
+            className: 'text-center',
+        },
+        {
+            title: 'Name',
+            field: 'name',
+            sortable: true,
+            searchable: true,
+            searchType: 'Text',
+            searchName: 'Name',
+            sortDirection: 'asc',
+            sortOrder: 2,
+            className: 'text-left',
+        },
+        {
+            title: 'Description',
+            field: 'description',
+            sortable: true,
+            searchable: true,
+            searchType: 'Text',
+            searchName: 'Description',
+            sortDirection: '',
+            sortOrder: 0,
+            className: 'text-left',
+        },
+        {
+            title: 'Category',
+            field: 'category',
+            sortable: true,
+            searchable: true,
+            searchType: 'Text',
+            searchName: 'Category',
+            sortDirection: 'asc',
+            sortOrder: 1,
+            className: 'text-center',
+        },
+        {
+            title: 'Permission Setting',
+            field: 'permission',
+            sortable: false,
+            searchable: true,
+            searchType: 'Text',
+            searchName: 'Permission Setting',
+            sortDirection: '',
+            sortOrder: 0,
+            className: 'nowrap text-left',
         },
     ];
     private permLevels: object[] = [
@@ -197,6 +255,10 @@ export default class PermissionManager extends Vue {
         return Object.values(this.permissions);
     }
 
+    get permissionCount() {
+        return Object.keys(this.permissions).length;
+    }
+
     private submitPermission( ) {
         this.$v.$touch();
         if (!this.$v.$invalid) {
@@ -254,6 +316,11 @@ export default class PermissionManager extends Vue {
         return value.toUpperCase();
     }
 
+    private updatePermission( permissionID: number, permissionSetting: string ) {
+        console.log( permissionID );
+        console.log( permissionSetting );
+    }
+
     private validations() {
         return {
             permName: { required, lettersAndSpacesOnly },
@@ -264,3 +331,13 @@ export default class PermissionManager extends Vue {
 }
 
 </script>
+
+<style lang="scss" scoped>
+    table {
+        tr {
+            td {
+                padding: 5px;
+            }
+        }
+    }
+</style>
