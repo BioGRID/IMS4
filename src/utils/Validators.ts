@@ -26,3 +26,27 @@ export function lettersAndSpacesOnly(value: string) {
 
     return /^[A-Za-z ]*$/.test(value);
 }
+
+// Check to see if a password is of sufficient complexity
+export function passwordComplexity(value: string) {
+    if (!helpers.req(value)) {
+        return true;
+    }
+
+    // Must include at least one uppercase letter
+    if (false === /[A-Z]/.test(value)) {
+        return false;
+    }
+
+    // Must include at least one number
+    if (false === /\d/.test(value)) {
+        return false;
+    }
+
+    // Must include at least one symbol
+    if (false === /[!@#\$%\^&*()\-=+,<>\?\[\]\{\}|;:]/.test(value)) {
+        return false;
+    }
+
+    return true;
+}

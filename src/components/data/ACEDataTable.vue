@@ -32,6 +32,7 @@
                             v-for="(column,index) in columns" 
                             :class="columnClass(column)"
                             :key="index"
+                            :width="columnWidth(column)"
                             @click="column.sortable ? sortBy(index) : null"
                         >
                             {{ column.title }}
@@ -90,6 +91,7 @@ interface ACEDataTableColumn {
     sortDirection: string;
     sortOrder: number;
     className?: string;
+    width?: string;
 }
 
 interface ACEDataTableSortDetails {
@@ -251,6 +253,12 @@ export default class ACEDataTable extends Vue {
         return classes.join(' ');
     }
 
+    private columnWidth(column: ACEDataTableColumn) {
+        if (column.width !== undefined && column.width !== '') {
+            return column.width;
+        }
+    }
+
     private defaultSort( a: any, b: any ) {
         if (this.sortOrderTracker.length <= 0) {
             return a[this.columns[0].field] - b[this.columns[0].field];
@@ -314,7 +322,7 @@ export default class ACEDataTable extends Vue {
         tr {
             border: 0;
             th {
-                font-size: 14px;
+                font-size: 12px;
                 background-color: var(--v-info-base);
                 color: #FFF;
                 border: 0;

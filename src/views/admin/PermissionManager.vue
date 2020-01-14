@@ -13,6 +13,7 @@
             <v-card
                 class="mt-2 pa-0"
             >
+                <v-icon color="deep-purple lighten-1" x-large class="float-right pa-3">mdi-account-badge</v-icon>
                 <v-card-title>
                     Add New Permission
                 </v-card-title>
@@ -102,6 +103,7 @@
                             light
                             required
                             dense
+                            :attach="false"
                             :hide-details="true"
                             solo
                             :value="row.level"

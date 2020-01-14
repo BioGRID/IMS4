@@ -58,10 +58,17 @@ import { Component, Vue } from 'vue-property-decorator';
 export default class Admin extends Vue {
     private adminToolsList: object[] = [{
         to: '/admin/permissions',
-        icon: 'mdi-alpha-p-circle',
+        icon: 'mdi-account-badge',
         tool_color: 'deep-purple lighten-1',
         title: 'Permission Manager',
-        desc: 'Create/Delete/Modify global permission settings and user classes assigned to those permissions',
+        desc: 'Create/Delete/Modify global permission settings and user classes assigned to those permissions.',
+    },
+    {
+        to: '/admin/usermanager',
+        icon: 'mdi-account-star',
+        tool_color: 'green darken-3',
+        title: 'User Manager',
+        desc: 'Add or edit users and modify their permission levels for access within the application.',
     },
     {
         to: '/admin/socketstatus',

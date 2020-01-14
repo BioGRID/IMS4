@@ -8,7 +8,7 @@ export function canAccess(): boolean {
     return false;
 }
 
-function convertPermissionLevelToInteger( permissionLevel: string ) {
+export function convertPermissionLevelToInteger( permissionLevel: string ) {
     switch (permissionLevel) {
         case 'observer': return 0;
         case 'standard': return 1;

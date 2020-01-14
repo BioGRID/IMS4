@@ -75,6 +75,14 @@ const router = new Router({
                     isPermittedRoute( 'WEBSOCKET MANAGE', next );
                 },
             },
+            {
+                path: '/admin/usermanager',
+                name: 'User Manager',
+                component: () => import( '@/views/admin/UserManager.vue' ),
+                beforeEnter: (to: any, from: any, next: any) => {
+                    isPermittedRoute( 'MANAGE USERS', next );
+                },
+            },
         ],
     },
     // FULL PAGE LAYOUTS
