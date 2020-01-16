@@ -68,6 +68,22 @@ const router = new Router({
                 },
             },
             {
+                path: '/admin/permission/permissionadd',
+                name: 'Permission Add',
+                component: () => import( '@/views/admin/permission/PermissionAdd.vue' ),
+                beforeEnter: (to: any, from: any, next: any) => {
+                    isPermittedRoute( 'MANAGE PERMISSIONS', next );
+                },
+            },
+            {
+                path: '/admin/permission/permissionedit/:id',
+                name: 'Permission Edit',
+                component: () => import( '@/views/admin/permission/PermissionEdit.vue' ),
+                beforeEnter: (to: any, from: any, next: any) => {
+                    isPermittedRoute( 'MANAGE PERMISSIONS', next );
+                },
+            },
+            {
                 path: '/admin/socket/socketstatus',
                 name: 'Socket Status',
                 component: () => import( '@/views/admin/socket/SocketStatus.vue' ),

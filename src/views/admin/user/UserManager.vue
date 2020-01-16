@@ -79,7 +79,7 @@
                             </template>
                             <span>Edit User</span>
                         </v-tooltip>
-                        <v-tooltip left :nudge-top="30" color="black">
+                        <v-tooltip left :nudge-top="30" color="black" >
                             <template v-slot:activator="{ on }">
                                 <v-btn 
                                     x-small 
