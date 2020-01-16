@@ -80,6 +80,7 @@
 <script lang="ts">
 import { Component, Vue, Prop, Watch } from 'vue-property-decorator';
 import ACEDataTableHeader from '@/components/data/ACEDataTableHeader.vue';
+import { NumericHash } from '@/utils/Interfaces.ts';
 
 interface ACEDataTableColumn {
     title: string;
@@ -97,10 +98,6 @@ interface ACEDataTableColumn {
 interface ACEDataTableSortDetails {
     sortDirection: string;
     sortOrder: number;
-}
-
-interface NumericHash {
-    [sortOrder: string]: number;
 }
 
 @Component

@@ -1,5 +1,6 @@
 import axios from 'axios';
 import store from '@/store/store';
+import notification from '@/utils/Notifications.ts';
 
 // Update an existing User
 export function API_USER_UPDATE( payload: object, userID: number, successCallback?: () => void ) {
@@ -11,10 +12,7 @@ export function API_USER_UPDATE( payload: object, userID: number, successCallbac
     .then( (res) => {
         store.dispatch( 'toggleLoadingOverlay', {}, {root: true} );
         if ( res.status === 200 ) {
-            store.dispatch( 'notify/displayNotification', {
-                message: 'Successfully updated user information',
-                color: 'success',
-            }, {root: true }).then( () => {
+            store.dispatch( 'notify/displayNotification', notification( 'success', 'user_update_success' ), {root: true }).then( () => {
                 if (successCallback !== undefined) {
                     successCallback();
                 }
@@ -24,16 +22,10 @@ export function API_USER_UPDATE( payload: object, userID: number, successCallbac
     .catch( (error) => {
         store.dispatch( 'toggleLoadingOverlay', {}, {root: true} );
         if ( error.response.status === 409 ) {
-            store.dispatch( 'notify/displayNotification', {
-                 message: 'User information conflicts with an existing user (same name or email). Unable to update.',
-                 color: 'error',
-             }, {root: true });
+            store.dispatch( 'notify/displayNotification', notification( 'error', 'user_update_conflict' ), {root: true });
         } else {
             console.log(error);
-            store.dispatch( 'notify/displayNotification', {
-                message: 'Unable to update user information',
-                color: 'error',
-            }, {root: true });
+            store.dispatch( 'notify/displayNotification', notification( 'error', 'user_update_unknown' ), {root: true });
         }
     });
 }
@@ -48,10 +40,7 @@ export function API_USER_ADD( payload: object, successCallback?: () => void ) {
     .then( (res) => {
         store.dispatch( 'toggleLoadingOverlay', {}, {root: true} );
         if ( res.status === 200 ) {
-            store.dispatch( 'notify/displayNotification', {
-                message: 'Successfully added new user',
-                color: 'success',
-            }, {root: true }).then( () => {
+            store.dispatch( 'notify/displayNotification', notification( 'success', 'user_add_success' ), {root: true }).then( () => {
                 if (successCallback !== undefined) {
                     successCallback();
                 }
@@ -61,16 +50,10 @@ export function API_USER_ADD( payload: object, successCallback?: () => void ) {
     .catch( (error) => {
         store.dispatch( 'toggleLoadingOverlay', {}, {root: true} );
         if ( error.response.status === 409 ) {
-            store.dispatch( 'notify/displayNotification', {
-                 message: 'User details conflict with an existing user (username or email). Please use alternatives.',
-                 color: 'error',
-             }, {root: true });
+            store.dispatch( 'notify/displayNotification', notification( 'error', 'user_add_conflict' ), {root: true });
         } else {
             console.log(error);
-            store.dispatch( 'notify/displayNotification', {
-                message: 'Unable to add user.',
-                color: 'error',
-            }, {root: true });
+            store.dispatch( 'notify/displayNotification', notification( 'error', 'user_add_unknown' ), {root: true });
         }
     });
 }

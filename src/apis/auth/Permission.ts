@@ -1,5 +1,6 @@
 import axios from 'axios';
 import store from '@/store/store';
+import notification from '@/utils/Notifications';
 
 // Update an existing Permission
 export function API_PERMISSION_UPDATE( payload: object, permID: number, successCallback?: () => void ) {
@@ -11,10 +12,7 @@ export function API_PERMISSION_UPDATE( payload: object, permID: number, successC
     .then( (res) => {
         store.dispatch( 'toggleLoadingOverlay', {}, {root: true} );
         if ( res.status === 200 ) {
-            store.dispatch( 'notify/displayNotification', {
-                message: 'Successfully updated permission details',
-                color: 'success',
-            }, {root: true }).then( () => {
+            store.dispatch( 'notify/displayNotification', notification( 'success', 'permission_update_success' ), {root: true }).then( () => {
                 if (successCallback !== undefined) {
                     successCallback();
                 }
@@ -24,16 +22,10 @@ export function API_PERMISSION_UPDATE( payload: object, permID: number, successC
     .catch( (error) => {
         store.dispatch( 'toggleLoadingOverlay', {}, {root: true} );
         if ( error.response.status === 409 ) {
-            store.dispatch( 'notify/displayNotification', {
-                 message: 'Updated permission details conflict with an existing permission. Unable to update.',
-                 color: 'error',
-             }, {root: true });
+            store.dispatch( 'notify/displayNotification', notification( 'error', 'permission_update_conflict' ), {root: true });
         } else {
             console.log(error);
-            store.dispatch( 'notify/displayNotification', {
-                message: 'Unable to update permission information',
-                color: 'error',
-            }, {root: true });
+            store.dispatch( 'notify/displayNotification', notification( 'error', 'permission_update_unknown' ), {root: true });
         }
     });
 }
@@ -48,10 +40,7 @@ export function API_PERMISSION_ADD( payload: object, successCallback?: () => voi
     .then( (res) => {
         store.dispatch( 'toggleLoadingOverlay', {}, {root: true} );
         if ( res.status === 200 ) {
-            store.dispatch( 'notify/displayNotification', {
-                message: 'Successfully added new permission',
-                color: 'success',
-            }, {root: true }).then( () => {
+            store.dispatch( 'notify/displayNotification', notification( 'success', 'permission_add_success' ), {root: true }).then( () => {
                 if (successCallback !== undefined) {
                     successCallback();
                 }
@@ -61,16 +50,10 @@ export function API_PERMISSION_ADD( payload: object, successCallback?: () => voi
     .catch( (error) => {
         store.dispatch( 'toggleLoadingOverlay', {}, {root: true} );
         if ( error.response.status === 409 ) {
-            store.dispatch( 'notify/displayNotification', {
-                 message: 'Permission with this name already exists.',
-                 color: 'error',
-             }, {root: true });
+            store.dispatch( 'notify/displayNotification', notification( 'error', 'permission_add_conflict' ), {root: true });
         } else {
             console.log(error);
-            store.dispatch( 'notify/displayNotification', {
-                message: 'Unable to Add Permission',
-                color: 'error',
-            }, {root: true });
+            store.dispatch( 'notify/displayNotification', notification( 'error', 'permission_add_unknown' ), {root: true });
         }
     });
 }
