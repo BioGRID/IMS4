@@ -267,45 +267,6 @@ export default class UserAdd extends Vue {
                 action: 'fetch_users',
             });
         });
-        /* this.$store.dispatch( 'toggleLoadingOverlay', {}, {root: true} );
-        axios
-            .post(
-                process.env.VUE_APP_AUTH_URL! + '/user', payload, {
-                    headers: {
-                        Authorization: 'Bearer ' + this.user.access_key,
-                    },
-                })
-            .then( (res) => {
-                this.$store.dispatch( 'toggleLoadingOverlay', {}, {root: true} );
-                if ( res.status === 200 ) {
-                    this.$store.dispatch( 'notify/displayNotification', {
-                        message: 'Successfully Added New User',
-                        color: 'success',
-                    }, {root: true }).then( () => {
-                        Vue.prototype.$socket.sendObj({
-                            target: 0,
-                            namespace: 'auth',
-                            mutation: '',
-                            action: 'fetch_users',
-                        });
-                    });
-                }
-            })
-            .catch( (error) => {
-                this.$store.dispatch( 'toggleLoadingOverlay', {}, {root: true} );
-                if ( error.response.status === 409 ) {
-                   this.$store.dispatch( 'notify/displayNotification', {
-                        message: 'User with this name or email already exists',
-                        color: 'error',
-                    }, {root: true });
-                } else {
-                    console.log(error);
-                    this.$store.dispatch( 'notify/displayNotification', {
-                        message: 'Unable to Add User',
-                        color: 'error',
-                    }, {root: true });
-                }
-            }); */
     }
 
     private validations() {

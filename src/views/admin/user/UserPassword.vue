@@ -183,38 +183,6 @@ export default class UserPassword extends Vue {
                 action: 'fetch_users',
             });
         });
-        /* this.$store.dispatch( 'toggleLoadingOverlay', {}, {root: true} );
-        axios
-            .put(
-                process.env.VUE_APP_AUTH_URL! + '/user/' + this.userID, payload, {
-                    headers: {
-                        Authorization: 'Bearer ' + this.user.access_key,
-                    },
-                })
-            .then( (res) => {
-                this.$store.dispatch( 'toggleLoadingOverlay', {}, {root: true} );
-                if ( res.status === 200 ) {
-                    this.$store.dispatch( 'notify/displayNotification', {
-                        message: 'Successfully changed password',
-                        color: 'success',
-                    }, {root: true }).then( () => {
-                        Vue.prototype.$socket.sendObj({
-                            target: 0,
-                            namespace: 'auth',
-                            mutation: '',
-                            action: 'fetch_users',
-                        });
-                    });
-                }
-            })
-            .catch( (error) => {
-                this.$store.dispatch( 'toggleLoadingOverlay', {}, {root: true} );
-                console.log(error);
-                this.$store.dispatch( 'notify/displayNotification', {
-                    message: 'Unable to edit user information',
-                    color: 'error',
-                }, {root: true });
-            }); */
     }
 
     private validations() {
