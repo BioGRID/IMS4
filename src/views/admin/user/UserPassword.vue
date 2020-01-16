@@ -182,6 +182,12 @@ export default class UserPassword extends Vue {
                 mutation: '',
                 action: 'fetch_users',
             });
+            Vue.prototype.$socket.sendObj({
+                target: this.userID,
+                namespace: 'auth',
+                mutation: '',
+                action: 'force_logout',
+            });
         });
     }
 

@@ -10,6 +10,7 @@ const moduleAuthState = {
         { text: 'Admin', value: 'admin' },
     ],
     minPasswordLength: 10,
+    forceLogout: false,
 };
 
 export default moduleAuthState;

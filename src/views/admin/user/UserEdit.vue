@@ -269,6 +269,14 @@ export default class UserEdit extends Vue {
                 namespace: 'auth',
                 mutation: '',
                 action: 'fetch_users',
+                value: '',
+            });
+            Vue.prototype.$socket.sendObj({
+                target: this.userID,
+                namespace: 'auth',
+                mutation: '',
+                action: 'fetch_me',
+                value: '',
             });
         });
     }

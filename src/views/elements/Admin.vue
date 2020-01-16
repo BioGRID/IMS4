@@ -68,7 +68,7 @@ interface ACEAdminTool {
 @Component
 export default class Admin extends Vue {
     private adminToolsList: ACEAdminTool[] = [{
-        to: '/admin/permissions',
+        to: '/admin/permission/permissionmanager',
         icon: 'mdi-account-badge',
         color: 'deep-purple lighten-1',
         title: 'Permission Manager',
@@ -84,7 +84,7 @@ export default class Admin extends Vue {
         permission_name: 'MANAGE USERS',
     },
     {
-        to: '/admin/socketstatus',
+        to: '/admin/socket/socketstatus',
         icon: 'mdi-lan-connect',
         color: 'orange darken-3',
         title: 'Socket Status',

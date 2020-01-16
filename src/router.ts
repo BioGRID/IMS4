@@ -60,17 +60,17 @@ const router = new Router({
                 },
             },
             {
-                path: '/admin/permissions',
+                path: '/admin/permission/permissionmanager',
                 name: 'Permission Manager',
-                component: () => import( '@/views/admin/PermissionManager.vue' ),
+                component: () => import( '@/views/admin/permission/PermissionManager.vue' ),
                 beforeEnter: (to: any, from: any, next: any) => {
                     isPermittedRoute( 'MANAGE PERMISSIONS', next );
                 },
             },
             {
-                path: '/admin/socketstatus',
+                path: '/admin/socket/socketstatus',
                 name: 'Socket Status',
-                component: () => import( '@/views/admin/SocketStatus.vue' ),
+                component: () => import( '@/views/admin/socket/SocketStatus.vue' ),
                 beforeEnter: (to: any, from: any, next: any) => {
                     isPermittedRoute( 'WEBSOCKET MANAGE', next );
                 },

@@ -83,6 +83,10 @@ const moduleAuthActions = {
                 }
             });
     },
+    force_logout: (context: any, payload: any) => {
+        // Force a person to logout when sent by the websocket server
+        router.push( '/pages/login' );
+    },
     fetch_users: (context: any, payload: any) => {
         return axios
             .get(
@@ -127,6 +131,24 @@ const moduleAuthActions = {
                         permissionHash[permission.name] = permission;
                     }
                     context.commit( 'AUTH_UPDATE_PERMISSIONS', permissionHash );
+                }
+            })
+            .catch( (error) => {
+                console.log( error.response.data );
+            });
+    },
+    fetch_me: (context: any, payload: any) => {
+        console.log(context.state.user.access_key);
+        return axios
+            .post(
+                process.env.VUE_APP_AUTH_URL! + '/me', {}, {
+                    headers: {
+                        Authorization: 'Bearer ' + context.state.user.access_key,
+                    },
+                })
+            .then( (res) => {
+                if ( res.status === 200 ) {
+                    context.commit( 'AUTH_UPDATE_USER', res.data );
                 }
             })
             .catch( (error) => {

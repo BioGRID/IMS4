@@ -8,6 +8,9 @@ const moduleAuthMutations = {
     AUTH_UPDATE_PERMISSIONS: (state: any, permissions: object) => {
         state.permissions = permissions;
     },
+    AUTH_TOGGLE_FORCE_LOGOUT: (state: any) => {
+        state.forceLogout = !state.forceLogout;
+    },
 };
 
 export default moduleAuthMutations;
