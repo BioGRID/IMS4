@@ -95,8 +95,7 @@ import { API_PERMISSION_ADD } from '@/apis/auth/Permission';
 const auth = namespace( 'auth' );
 
 @Component
-export default class PermissionManager extends Vue {
-    @auth.State private user!: any;
+export default class PermissionAdd extends Vue {
     private permName: string = '';
     private permDescription: string = '';
     private permCategory: string = '';
@@ -190,13 +189,3 @@ export default class PermissionManager extends Vue {
 }
 
 </script>
-
-<style lang="scss" scoped>
-    table {
-        tr {
-            td {
-                padding: 5px;
-            }
-        }
-    }
-</style>

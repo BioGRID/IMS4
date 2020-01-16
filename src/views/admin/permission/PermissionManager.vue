@@ -58,7 +58,7 @@
                                     elevation="0" 
                                     v-on="on" 
                                     color="info" 
-                                    :to="'/admin/permission/permissionedit/' + row.id"
+                                    :to="'/admin/permission/permissionedit/' + row.name"
                                 >
                                     <v-icon>mdi-file-document-edit</v-icon>
                                 </v-btn>

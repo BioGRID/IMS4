@@ -76,7 +76,7 @@ const router = new Router({
                 },
             },
             {
-                path: '/admin/permission/permissionedit/:id',
+                path: '/admin/permission/permissionedit/:name',
                 name: 'Permission Edit',
                 component: () => import( '@/views/admin/permission/PermissionEdit.vue' ),
                 beforeEnter: (to: any, from: any, next: any) => {

@@ -5,16 +5,19 @@
                 class='float-right mt-4'
                 small
                 color='primary'
-                to='/elements/admin'
+                to='/admin/permission/permissionmanager'
                 dark
             >< Back</v-btn>
-            <h1>Permission Add <v-icon color="deep-purple lighten-1" large class="">mdi-account-badge</v-icon></h1>
-            <div class="subtitle-1">Use the following form to add a new permission to the application. Fill in the fields, and click the 'Add Permission' button.</div>
+            <h1>Permission Update <v-icon color="deep-purple lighten-1" large class="">mdi-account-badge</v-icon></h1>
+            <div class="subtitle-1">Use the following form to edit an existing permission used by this application. Fill in the fields, and click the 'Update Permission' button.</div>
             <v-card
                 class="mt-2 pa-0"
             >
 
                 <v-card-text>
+                    <v-alert type="warning" dense>
+                        Changing <strong>Permission Name</strong> on an existing permission is not recommended. Many external applications have features built around existing permission names, so changing the name can have unintended consequences. Only modify the name if you are confident these problems do not exist (example to fix a typo shortly after creating a new permission).
+                    </v-alert>
                     <v-sheet
                         color="blue-grey darken-3" 
                         class="pa-3"
@@ -74,7 +77,7 @@
                             color="success"
                             dark
                             :disabled="isInvalid"
-                        >Add Permission</v-btn>
+                        >Update Permission</v-btn>
                         </v-form>
                     </v-sheet>
                 </v-card-text>
@@ -90,13 +93,14 @@ import { required } from 'vuelidate/lib/validators';
 import { State, namespace } from 'vuex-class';
 import { printableAsciiOnly, lettersAndSpacesOnly } from '@/utils/Validators';
 import { generateValidationError } from '@/utils/ValidationErrors';
-import axios from 'axios';
+import { API_PERMISSION_UPDATE } from '@/apis/auth/Permission';
 
 const auth = namespace( 'auth' );
 
 @Component
-export default class PermissionManager extends Vue {
-    @auth.State private user!: any;
+export default class PermissionEdit extends Vue {
+    @auth.State private permissions!: any;
+    private permID: number = 0;
     private permName: string = '';
     private permDescription: string = '';
     private permCategory: string = '';
@@ -109,6 +113,11 @@ export default class PermissionManager extends Vue {
         { text: 'Admin', value: 'admin' },
     ];
 
+    public created() {
+        this.permName = this.$route.params.name;
+        this.initializeFieldValues();
+    }
+
     @Watch( 'permName' )
     private onPermNameChanged() {
         this.permName = this.permName.toUpperCase();
@@ -117,6 +126,15 @@ export default class PermissionManager extends Vue {
     @Watch( 'permCategory' )
     private onPermCategoryChanged() {
         this.permCategory = this.permCategory.toUpperCase();
+    }
+
+    private initializeFieldValues() {
+        const permInfo = this.permissions[this.permName];
+        this.permID = permInfo.id;
+        this.permName = permInfo.name;
+        this.permDescription = permInfo.description;
+        this.permCategory = permInfo.category;
+        this.permLevel = permInfo.level;
     }
 
     get permNameErrors() {
@@ -160,7 +178,7 @@ export default class PermissionManager extends Vue {
     private submitPermission( ) {
         this.$v.$touch();
         if (!this.$v.$invalid) {
-            this.addPermission({
+            this.updatePermission({
                 name: this.permName,
                 description: this.permDescription,
                 category: this.permCategory,
@@ -169,88 +187,15 @@ export default class PermissionManager extends Vue {
         }
     }
 
-    private addPermission( payload: object ) {
-        this.$store.dispatch( 'toggleLoadingOverlay', {}, {root: true} );
-        axios
-            .post(
-                process.env.VUE_APP_AUTH_URL! + '/permission', payload, {
-                    headers: {
-                        Authorization: 'Bearer ' + this.user.access_key,
-                    },
-                })
-            .then( (res) => {
-                this.$store.dispatch( 'toggleLoadingOverlay', {}, {root: true} );
-                if ( res.status === 200 ) {
-                    this.$store.dispatch( 'notify/displayNotification', {
-                        message: 'Successfully Added New Permission',
-                        color: 'success',
-                    }, {root: true });
-                    Vue.prototype.$socket.sendObj({
-                        target: 0,
-                        namespace: 'auth',
-                        mutation: '',
-                        action: 'fetch_permissions',
-                    });
-                }
-            })
-            .catch( (error) => {
-                this.$store.dispatch( 'toggleLoadingOverlay', {}, {root: true} );
-                if ( error.response.status === 409 ) {
-                   this.$store.dispatch( 'notify/displayNotification', {
-                        message: 'Permission with this name already exists',
-                        color: 'error',
-                    }, {root: true });
-                } else {
-                    console.log(error);
-                    this.$store.dispatch( 'notify/displayNotification', {
-                        message: 'Unable to Add Permission',
-                        color: 'error',
-                    }, {root: true });
-                }
+    private updatePermission( payload: object ) {
+        API_PERMISSION_UPDATE( payload, this.permID, () => {
+            Vue.prototype.$socket.sendObj({
+                target: 0,
+                namespace: 'auth',
+                mutation: '',
+                action: 'fetch_permissions',
             });
-    }
-
-    private updatePermission( permissionName: number, permissionSetting: string ) {
-        this.$store.dispatch( 'toggleLoadingOverlay', {}, {root: true} );
-        const currentPerm = this.permissions[permissionName];
-        if (currentPerm.level !== permissionSetting) {
-            console.log( 'CHANGING PERMISSION' );
-            axios
-                .put(
-                    process.env.VUE_APP_AUTH_URL! + '/permission/' + currentPerm.id, {
-                        name: currentPerm.name,
-                        description: currentPerm.description,
-                        category: currentPerm.category,
-                        level: permissionSetting,
-                    }, {
-                        headers: {
-                            Authorization: 'Bearer ' + this.user.access_key,
-                        },
-                    })
-                .then( (res) => {
-                    this.$store.dispatch( 'toggleLoadingOverlay', {}, {root: true} );
-                    if ( res.status === 200 ) {
-                        this.$store.dispatch( 'notify/displayNotification', {
-                            message: 'Successfully Updated Permission Level',
-                            color: 'success',
-                        }, {root: true });
-                        Vue.prototype.$socket.sendObj({
-                            target: 0,
-                            namespace: 'auth',
-                            mutation: '',
-                            action: 'fetch_permissions',
-                        });
-                    }
-                })
-                .catch( (error) => {
-                    this.$store.dispatch( 'toggleLoadingOverlay', {}, {root: true} );
-                    console.log(error);
-                    this.$store.dispatch( 'notify/displayNotification', {
-                        message: 'Unable to Update Permission',
-                        color: 'error',
-                    }, {root: true });
-                });
-        }
+        });
     }
 
     private validations() {
@@ -263,13 +208,3 @@ export default class PermissionManager extends Vue {
 }
 
 </script>
-
-<style lang="scss" scoped>
-    table {
-        tr {
-            td {
-                padding: 5px;
-            }
-        }
-    }
-</style>
