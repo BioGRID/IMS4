@@ -76,11 +76,43 @@ const router = new Router({
                 },
             },
             {
-                path: '/admin/usermanager',
+                path: '/admin/user/usermanager',
                 name: 'User Manager',
-                component: () => import( '@/views/admin/UserManager.vue' ),
+                component: () => import( '@/views/admin/user/UserManager.vue' ),
                 beforeEnter: (to: any, from: any, next: any) => {
                     isPermittedRoute( 'MANAGE USERS', next );
+                },
+            },
+            {
+                path: '/admin/user/useredit/:id',
+                name: 'User Edit',
+                component: () => import( '@/views/admin/user/UserEdit.vue' ),
+                beforeEnter: (to: any, from: any, next: any) => {
+                    isPermittedRoute( 'MANAGE USERS', next );
+                },
+            },
+            {
+                path: '/admin/user/useradd',
+                name: 'User Add',
+                component: () => import( '@/views/admin/user/UserAdd.vue' ),
+                beforeEnter: (to: any, from: any, next: any) => {
+                    isPermittedRoute( 'ADD USER', next );
+                },
+            },
+            {
+                path: '/admin/user/userpassword/:id',
+                name: 'Change Password',
+                component: () => import( '@/views/admin/user/UserPassword.vue' ),
+                beforeEnter: (to: any, from: any, next: any) => {
+                    isPermittedRoute( 'MANAGE USERS', next );
+                },
+            },
+            {
+                path: '/admin/user/changemypassword',
+                name: 'Change My Password',
+                component: () => import( '@/views/admin/user/ChangeMyPassword.vue' ),
+                beforeEnter: (to: any, from: any, next: any) => {
+                    canAccessRoute(next);
                 },
             },
         ],

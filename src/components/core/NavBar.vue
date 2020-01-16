@@ -56,6 +56,10 @@ export default class NavBar extends Vue {
     private pageTitle: string | undefined = '';
     private drawerIcon: string = 'mdi-arrow-expand-left';
     private settingsMenuLinks: object[] = [{
+        to: '/admin/user/changemypassword',
+        icon: 'mdi-lock-reset',
+        text: 'Change Password',
+    }, {
         to: '/pages/login',
         icon: 'mdi-logout',
         text: 'Logout',
@@ -88,7 +92,7 @@ export default class NavBar extends Vue {
             if (isPermitted('VIEW ADMIN TOOLS')) {
                 this.settingsMenuLinks.unshift({
                     to: '/elements/admin',
-                    icon: 'mdi-lock-reset',
+                    icon: 'mdi-lock',
                     text: 'Admin Tools',
                 });
             }

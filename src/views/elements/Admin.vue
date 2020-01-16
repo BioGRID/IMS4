@@ -7,6 +7,7 @@
                 <v-col 
                     v-for="(tool, i) in adminToolsList"
                     :key="i"
+                    v-if="canViewTool(tool.permission_name)"
                     cols="12"
                     xl="6"
                     lg="6"
@@ -23,7 +24,7 @@
                         <v-icon 
                             class="float-right pa-3" 
                             large
-                            :color="tool.tool_color"
+                            :color="tool.color"
                         >
                             {{ tool.icon }}
                         </v-icon>
@@ -36,7 +37,7 @@
                         </v-card-text>
                         <v-card-actions>
                             <v-btn
-                                :color="tool.tool_color"
+                                :color="tool.color"
                                 small
                                 dark
                                 class="ml-2"
@@ -53,30 +54,51 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
+import { isPermitted } from '@/utils/Permission.ts';
+
+interface ACEAdminTool {
+    to: string;
+    icon: string;
+    color: string;
+    title: string;
+    desc: string;
+    permission_name: string;
+}
 
 @Component
 export default class Admin extends Vue {
-    private adminToolsList: object[] = [{
+    private adminToolsList: ACEAdminTool[] = [{
         to: '/admin/permissions',
         icon: 'mdi-account-badge',
-        tool_color: 'deep-purple lighten-1',
+        color: 'deep-purple lighten-1',
         title: 'Permission Manager',
         desc: 'Create/Delete/Modify global permission settings and user classes assigned to those permissions.',
+        permission_name: 'MANAGE PERMISSIONS',
     },
     {
-        to: '/admin/usermanager',
+        to: '/admin/user/usermanager',
         icon: 'mdi-account-star',
-        tool_color: 'green darken-3',
+        color: 'green darken-3',
         title: 'User Manager',
         desc: 'Add or edit users and modify their permission levels for access within the application.',
+        permission_name: 'MANAGE USERS',
     },
     {
         to: '/admin/socketstatus',
         icon: 'mdi-lan-connect',
-        tool_color: 'orange darken-3',
+        color: 'orange darken-3',
         title: 'Socket Status',
         desc: 'Check to see the current status of the Websocket connection to the curation API.',
+        permission_name: 'WEBSOCKET MANAGE',
     }];
+
+    private canViewTool( permissionName: string ) {
+        if (isPermitted( permissionName )) {
+            return true;
+        }
+
+        return false;
+    }
 }
 
 </script>

@@ -9,6 +9,7 @@ const moduleAuthState = {
         { text: 'Power User', value: 'poweruser' },
         { text: 'Admin', value: 'admin' },
     ],
+    minPasswordLength: 10,
 };
 
 export default moduleAuthState;

@@ -3,8 +3,8 @@
         <v-card>
             <v-row no-gutters>
                 <v-col xl="8" lg="8" md="6" sm="12" xs="12">
-                    <v-card-title class="pb-0 mb-3">
-                        {{ title }}
+                    <v-card-title class="pb-0 mb-3 mt-2 headline">
+                        <strong>{{ title }}</strong>
                     </v-card-title>
                     <v-card-subtitle>
                         Showing <strong>{{ this.startRange }}</strong> to <strong>{{ this.endRange }}</strong> of <strong>{{ this.filteredRowCount }}</strong> entries <span v-if="this.filteredRowCount !== this.totalRows">(filtered from <strong>{{ this.totalRows }}</strong> total entries)</span>
@@ -21,7 +21,7 @@
                         :clearable="true"
                         @keyup.enter="filterSubmit()"
                         @click:append="filterSubmit()"
-                        class='pr-5 pl-5 mt-3 mb-2'
+                        class='pr-5 pl-5 mt-4 mb-2'
                     ></v-text-field>
                 </v-col>
             </v-row>

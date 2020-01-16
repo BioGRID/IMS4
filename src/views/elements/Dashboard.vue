@@ -1,6 +1,13 @@
 <template>
     <div id="dashboard">
         <v-container fluid class='pt-0'>
+            <v-alert 
+                type="error" 
+                dense
+                v-if="this.user.password_reset === 1"
+            >
+                You must change your password. <v-btn small color='primary' dark to='/admin/user/changemypassword'>Change Password</v-btn>
+            </v-alert>
             <h1>Welcome Back <span class="highlight--text">{{ firstName }}</span>!</h1>
             <p>You are now using version <strong><span class="highlight--text">{{ appVersion }}</span></strong> of the <strong>{{ fullTitle }}</strong>. This is a private system used in curation and maintainance of the entire suite of <a href="https://thebiogrid.org/" target="_BLANK">BioGRID</a> Projects and Applications. If you are logged in by accident, please immediately <strong><a href="/pages/login" title="Logout">logout</a></strong>.</p>
             <v-btn 

@@ -6,9 +6,12 @@ const moduleNotifyActions = {
         context.commit( 'HIDE_NOTIFY' );
     },
     displayNotification: (context: any, payload: any ) => {
-        context.commit( 'SET_NOTIFY_MESSAGE', payload.message );
-        context.commit( 'SET_NOTIFY_COLOR', payload.color );
-        context.commit( 'SHOW_NOTIFY' );
+        return new Promise((resolve, reject) => {
+            context.commit( 'SET_NOTIFY_MESSAGE', payload.message );
+            context.commit( 'SET_NOTIFY_COLOR', payload.color );
+            context.commit( 'SHOW_NOTIFY' );
+            resolve();
+        });
     },
 };
 
