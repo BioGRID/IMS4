@@ -1,5 +1,6 @@
 import axios from 'axios';
 import router from '@/router';
+import notification from '@/utils/Notifications';
 
 const moduleAuthActions = {
     update_user: (context: any, payload: any) => {
@@ -17,10 +18,14 @@ const moduleAuthActions = {
                 if ( res.status === 200 ) {
                     // Valid User, Set User Object
                     context.dispatch( 'update_user', res.data ).then( () => {
-                        // Fetch list of users from the API for the store
-                        context.dispatch( 'fetch_users', {}, {} );
                         // Connect to websocket
                         payload.vm.$connect( process.env.VUE_APP_ACE_WEBSOCKET + '?access_token=' + res.data.access_key + '&id=' + res.data.id );
+                        // Fetch list of users from the API for the store
+                        context.dispatch( 'fetch_users', {}, {} );
+                        // Fetch list of organisms from the API for the store
+                        context.dispatch( 'annotation/fetch_organisms', {}, {root: true} );
+                        // Fetch list of curation_groups from the API
+                        // context.dispatch( 'ace/fetch_curation_groups', {}, {root: true} );
                         // Get the list of permissions
                         context.dispatch( 'fetch_permissions', {}, {} ).then( () => {
                             // Redirect to Dashboard
@@ -33,16 +38,10 @@ const moduleAuthActions = {
                 context.dispatch( 'toggleLoadingOverlay', {}, {root: true} );
                 if ( error.response.status === 404 ) {
                     // Unrecognized User Name
-                    context.dispatch( 'notify/displayNotification', {
-                        message: 'Unrecognized username',
-                        color: 'error',
-                    }, {root: true });
+                    context.dispatch( 'notify/displayNotification', notification( 'error', 'login_error_notfound' ), {root: true });
                 } else if ( error.response.status === 401 ) {
                     // Unauthorized User, return False
-                    context.dispatch( 'notify/displayNotification', {
-                        message: 'Unrecognized username/password combination',
-                        color: 'error',
-                    }, {root: true });
+                    context.dispatch( 'notify/displayNotification', notification( 'error', 'login_error_unauthorized' ), {root: true });
                 } else if ( error.response.status === 400 ) {
                     // Bad Request, Show message passed
                     context.dispatch( 'notify/displayNotification', {
@@ -51,10 +50,7 @@ const moduleAuthActions = {
                     }, {root: true });
                     console.log( error.response.data );
                 } else if ( error.response.status === 500 ) {
-                    context.dispatch( 'notify/displayNotification', {
-                        message: 'Authentication server is not accessible',
-                        color: 'error',
-                    }, {root: true });
+                    context.dispatch( 'notify/displayNotification', notification( 'error', 'login_error_serverdown' ), {root: true });
                     console.log( error.response.data );
                 }
             });

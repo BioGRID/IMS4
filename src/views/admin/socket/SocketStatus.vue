@@ -46,6 +46,7 @@
 import { Component, Vue } from 'vue-property-decorator';
 import { required } from 'vuelidate/lib/validators';
 import { printableAsciiOnly, lettersAndSpacesOnly } from '@/utils/Validators';
+import { generateValidationError } from '@/utils/ValidationErrors';
 import { State, namespace } from 'vuex-class';
 
 const auth = namespace( 'auth' );
@@ -80,9 +81,9 @@ export default class SocketStatus extends Vue {
         const errors = [];
         if (this.$v.echoMessage.$dirty) {
             if (!this.$v.echoMessage.required) {
-                errors.push( 'Echo Message is required' );
+                errors.push( generateValidationError( 'required', 'Echo message', null ) );
             } else if (!this.$v.echoMessage.lettersAndSpacesOnly) {
-                errors.push( 'Echo Message Name can contain only letters and spaces' );
+                errors.push( generateValidationError( 'lettersAndSpacesOnly', 'Echo message', null ) );
             }
         }
         return errors;

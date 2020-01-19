@@ -63,39 +63,29 @@
                         </v-sheet>
                     </td>
                     <td class='nowrap text-center'>
-                        <v-tooltip left :nudge-top="30" color="black">
-                            <template v-slot:activator="{ on }">
-                                <v-btn 
-                                    x-small 
-                                    dark 
-                                    fab 
-                                    elevation="0" 
-                                    v-on="on" 
-                                    color="info" 
-                                    :to="'/admin/user/useredit/' + row.id"
-                                >
-                                    <v-icon>mdi-account-edit</v-icon>
-                                </v-btn>
-                            </template>
-                            <span>Edit User</span>
-                        </v-tooltip>
-                        <v-tooltip left :nudge-top="30" color="black" >
-                            <template v-slot:activator="{ on }">
-                                <v-btn 
-                                    x-small 
-                                    dark 
-                                    fab 
-                                    elevation="0" 
-                                    v-on="on" 
-                                    color="warning"
-                                    class='ml-1' 
-                                    :to="'/admin/user/userpassword/' + row.id"
-                                >
-                                    <v-icon>mdi-lock-reset</v-icon>
-                                </v-btn>
-                            </template>
-                            <span>Change Password</span>
-                        </v-tooltip>
+                        <v-btn 
+                            x-small 
+                            dark 
+                            fab 
+                            elevation="0" 
+                            color="info" 
+                            :title='"Edit user details for " + row.name' 
+                            :to="'/admin/user/useredit/' + row.id"
+                        >
+                            <v-icon>mdi-account-edit</v-icon>
+                        </v-btn>
+                        <v-btn 
+                            x-small 
+                            dark 
+                            fab 
+                            elevation="0" 
+                            :title='"Change password for " + row.name' 
+                            color="warning"
+                            class='ml-1' 
+                            :to="'/admin/user/userpassword/' + row.id"
+                        >
+                            <v-icon>mdi-lock-reset</v-icon>
+                        </v-btn>
                     </td>
                 </template>
 

@@ -1,6 +1,6 @@
 import axios from 'axios';
 import store from '@/store/store';
-import notification from '@/utils/Notifications.ts';
+import notification from '@/utils/Notifications';
 
 // Update an existing User
 export function API_USER_UPDATE( payload: object, userID: number, successCallback?: () => void ) {

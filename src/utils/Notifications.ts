@@ -18,6 +18,13 @@ export default function notification(type: string, id: string) {
     // Start each with capital letter, and all remaining lower case unless
     // they are proper names
     const messages: AnyHash = {
+        login: {
+            error: {
+                notfound: 'Unrecognized username',
+                unauthorized: 'Unrecognized username/password combination',
+                serverdown: 'Authentication server is not accessible',
+            },
+        },
         permission: {
             add: {
                 success: 'Successfully added new permission',
@@ -47,7 +54,7 @@ export default function notification(type: string, id: string) {
     const getMessage = ( source: string, operation: string, msgtype: string ) => {
         try {
             return messages[source][operation][msgtype];
-        } catch(error) {
+        } catch (error) {
             return undefined;
         }
     };

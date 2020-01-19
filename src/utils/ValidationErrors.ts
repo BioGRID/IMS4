@@ -6,7 +6,7 @@ export function generateValidationError(validationType: string, field: string, p
             return field + ' cannot be empty';
 
         case 'lettersandspacesonly' :
-            return field + ' must contain only lettes and spaces';
+            return field + ' must contain only letters and spaces';
 
         case 'printableasciionly' :
             return field + ' must contain only printable ascii characters';
