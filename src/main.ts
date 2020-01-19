@@ -21,6 +21,9 @@ import vuetify from '@/plugins/vuetify';
 // Vuelidate
 import '@/plugins/vuelidate';
 
+// VueNativeSock
+import '@/plugins/vueNativeWebsocket';
+
 Vue.config.productionTip = false;
 
 new Vue({

@@ -1,0 +1,8 @@
+a {
+    font-weight: bold;
+    text-decoration: none;
+}
+
+tbody tr:nth-of-type(odd) {
+    background-color: rgba(70, 68, 68, 0.05);
+}

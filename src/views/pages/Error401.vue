@@ -16,8 +16,8 @@
                             <v-card flat class="text-left mr-3" style="height: 295px">
                                 <v-row>
                                     <v-col sm="12">
-                                        <h1 class='display-1 font-weight-condensed'>401 - Unauthorized </h1>
-                                        <p class='mt-3'>Unfortunately, your account does not have the necessary permissions to view this area of the application. If you believe this is in error, please contact the application administrator and request an elevation of your permission level.</p>
+                                        <h1 class='display-1 font-weight-condensed'>Unauthorized (401)</h1>
+                                        <p class='mt-3'>Unfortunately, you've attempted to access a location, in which your account has insufficient permissions to view. If you believe this is in error, please contact the application administrator and request an elevation of your permission level. We apologize for any inconvenience this may have caused.</p>
                                         <v-btn 
                                                 size="x-large"
                                                 color="primary"

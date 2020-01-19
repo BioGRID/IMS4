@@ -4,8 +4,8 @@
             <v-app-bar-nav-icon color="grey darken-3" class="mr-n4" @click="toggleNavDrawerMinimization">
                 <v-icon color="grey darken-3">{{ drawerIcon }}</v-icon>
             </v-app-bar-nav-icon>
-            <v-toolbar-title class="tertiary--text font-weight-black align-self-center">
-                {{ pageTitle }}
+            <v-toolbar-title class="align-self-center">
+                <span class='grey--text text--darken-3 font-weight-black'>{{ pageTitle }}</span>
             </v-toolbar-title>
             <v-spacer></v-spacer>
             <v-btn text icon>
@@ -22,13 +22,13 @@
             >
                 <template v-slot:activator="{ on }">
                     <v-btn icon v-on="on">
-                        <v-icon color="grey darken-3">mdi-account-box</v-icon>
+                        <v-icon color="grey darken-3">mdi-settings</v-icon>
                     </v-btn>
                 </template>
 
                 <v-list dense>
                     <v-list-item
-                        v-for="(link, i) in profileMenuLinks"
+                        v-for="(link, i) in settingsMenuLinks"
                         :key="i"
                         :to="link.to"
                     >
@@ -48,22 +48,30 @@
 
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
+// import PermissionMixin from '@/mixins/Permission';
+import { canAccess, isPermitted } from '@/utils/Permission';
 
 @Component
 export default class NavBar extends Vue {
     private pageTitle: string | undefined = '';
     private drawerIcon: string = 'mdi-arrow-expand-left';
-    private profileMenuLinks: object[] = [
-        {
-            to: '/pages/login',
-            icon: 'mdi-logout',
-            text: 'Logout',
-        },
-    ];
+    private settingsMenuLinks: object[] = [{
+        to: '/admin/user/changemypassword',
+        icon: 'mdi-lock-reset',
+        text: 'Change Password',
+    }, {
+        to: '/pages/login',
+        icon: 'mdi-logout',
+        text: 'Logout',
+    }];
 
     @Watch( '$route' )
     private onPropertyChanged( value: object, oldValue: object ) {
         this.pageTitle = this.$route.name;
+    }
+
+    private created() {
+        this.appendLinks();
     }
 
     private mounted() {
@@ -76,6 +84,18 @@ export default class NavBar extends Vue {
             this.drawerIcon = 'mdi-arrow-expand-right';
         } else {
            this.drawerIcon = 'mdi-arrow-expand-left';
+        }
+    }
+
+    private appendLinks() {
+        if (canAccess()) {
+            if (isPermitted('VIEW ADMIN TOOLS')) {
+                this.settingsMenuLinks.unshift({
+                    to: '/elements/admin',
+                    icon: 'mdi-lock',
+                    text: 'Admin Tools',
+                });
+            }
         }
     }
 }

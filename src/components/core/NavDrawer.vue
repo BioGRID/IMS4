@@ -1,11 +1,11 @@
 <template>
     <v-navigation-drawer 
         id="ace-sidebar"
-        dark 
         width="200" 
+        dark
         app 
         floating
-        color="light-blue darken-4"
+        color="primary"
         class="mt-6"
         permanent
         :mini-variant="navDrawerMinimized"
@@ -31,7 +31,7 @@
                 v-for="(link, i) in links"
                 :key="i"
                 :to="link.to"
-                active-class="yellow lighten-2 black--text"
+                active-class="secondary black--text"
             >
                 <v-list-item-action>
                     <v-icon>{{ link.icon }}</v-icon>

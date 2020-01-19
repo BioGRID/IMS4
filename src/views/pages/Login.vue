@@ -23,7 +23,6 @@
                                                 label="name"
                                                 :error-messages="nameErrors"
                                                 prepend-inner-icon="mdi-clipboard-account"
-                                                outlined
                                                 class="login-field"
                                                 v-model.trim="name"
                                                 required
@@ -36,7 +35,6 @@
                                                 :error-messages="passwordErrors"
                                                 type="password"
                                                 prepend-inner-icon="mdi-lock-question"
-                                                outlined
                                                 required
                                                 class="login-field"
                                                 v-model.trim="password"
@@ -73,14 +71,15 @@ const auth = namespace( 'auth' );
 @Component
 export default class Login extends Vue {
     private shortTitle: string = process.env.VUE_APP_SHORT_TITLE || 'BioGRID ACE';
-    private name: string = 'adminuser';
-    private password: string = 'adminuserpassword';
+    private name: string = 'stark';
+    private password: string = 'biogridacefirstloginB1#';
     @auth.State private user!: any;
 
     public created() {
         if (this.user !== undefined) {
             this.$store.dispatch( 'auth/logout', {
                 user: this.user,
+                vm: this,
             });
         }
     }
@@ -89,7 +88,7 @@ export default class Login extends Vue {
         const errors = [];
         if (this.$v.name.$dirty) {
             if (!this.$v.name.required) {
-                errors.push( 'name is required.' );
+                errors.push( 'Name is required.' );
             }
         }
         return errors;
@@ -117,6 +116,7 @@ export default class Login extends Vue {
                     name: this.name,
                     password: this.password,
                 },
+                vm: this,
             });
         }
     }
