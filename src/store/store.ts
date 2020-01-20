@@ -11,7 +11,7 @@ Vue.use(Vuex);
 import moduleAuth from './auth/moduleAuth';
 import moduleNotify from './notify/moduleNotify';
 import moduleAnnotation from './annotation/moduleAnnotation';
-import moduleAce from './ace/moduleAce';
+import moduleCuration from './curation/moduleCuration';
 
 export default new Vuex.Store({
     getters,
@@ -22,7 +22,7 @@ export default new Vuex.Store({
         auth: moduleAuth,
         notify: moduleNotify,
         annotation: moduleAnnotation,
-        ace: moduleAce,
+        curation: moduleCuration,
     },
     strict: true,
 });

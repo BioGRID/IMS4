@@ -4,10 +4,10 @@
  * license that can be found in the LICENSE file.
  */
 
-import state from './moduleAceState';
-import mutations from './moduleAceMutations';
-import actions from './moduleAceActions';
-import getters from './moduleAceGetters';
+import state from './moduleCurationState';
+import mutations from './moduleCurationMutations';
+import actions from './moduleCurationActions';
+import getters from './moduleCurationGetters';
 
 export default {
     namespaced: true,
