@@ -131,6 +131,30 @@ const router = new Router({
                     canAccessRoute(next);
                 },
             },
+            {
+                path: '/admin/curationgroup/curationgroupmanager',
+                name: 'Curation Group Manager',
+                component: () => import( '@/views/admin/curationgroup/CurationGroupManager.vue' ),
+                beforeEnter: (to: any, from: any, next: any) => {
+                    isPermittedRoute( 'MANAGE CURATION GROUPS', next );
+                },
+            },
+            {
+                path: '/admin/curationgroup/curationgroupadd',
+                name: 'Curation Group Add',
+                component: () => import( '@/views/admin/curationgroup/CurationGroupAdd.vue' ),
+                beforeEnter: (to: any, from: any, next: any) => {
+                    isPermittedRoute( 'MANAGE CURATION GROUPS', next );
+                },
+            },
+            {
+                path: '/admin/curationgroup/curationgroupedit/:id',
+                name: 'Curation Group Edit',
+                component: () => import( '@/views/admin/curationgroup/CurationGroupEdit.vue' ),
+                beforeEnter: (to: any, from: any, next: any) => {
+                    isPermittedRoute( 'MANAGE CURATION GROUPS', next );
+                },
+            },
         ],
     },
     // FULL PAGE LAYOUTS

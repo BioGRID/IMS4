@@ -1,4 +1,4 @@
-import { CurationGroupEntry, CurationGroupHash, API_CURATION_GROUP_FETCH } from '@/apis/curation/CurationGroup';
+import { CurationGroupEntry, CurationGroupHash, API_CURATION_GROUP_FETCH } from '@/models/curation/CurationGroup';
 
 const moduleCurationActions = {
     fetch_curation_groups: (context: any) => {

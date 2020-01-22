@@ -25,7 +25,7 @@ const moduleAuthActions = {
                         // Fetch list of organisms from the API for the store
                         context.dispatch( 'annotation/fetch_organisms', {}, {root: true} );
                         // Fetch list of curation_groups from the API
-                        // context.dispatch( 'ace/fetch_curation_groups', {}, {root: true} );
+                        context.dispatch( 'curation/fetch_curation_groups', {}, {root: true} );
                         // Get the list of permissions
                         context.dispatch( 'fetch_permissions', {}, {} ).then( () => {
                             // Redirect to Dashboard

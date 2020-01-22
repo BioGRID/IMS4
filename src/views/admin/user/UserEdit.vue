@@ -124,7 +124,7 @@ import { State, namespace } from 'vuex-class';
 import { printableAsciiOnly, lettersAndSpacesOnly } from '@/utils/Validators';
 import { generateValidationError } from '@/utils/ValidationErrors';
 import { convertPermissionLevelToInteger } from '@/utils/Permission.ts';
-import { API_USER_UPDATE } from '@/apis/auth/User';
+import { API_USER_UPDATE } from '@/models/auth/User';
 
 const auth = namespace( 'auth' );
 
