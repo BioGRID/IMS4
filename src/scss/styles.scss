@@ -3,6 +3,16 @@ a {
     text-decoration: none;
 }
 
+a.plainLink {
+    font-weight: bold;
+    text-decoration: none;
+    
+}
+
+a.plainLink:hover {
+    color: #F00 !important;
+}
+
 tbody tr:nth-of-type(odd) {
     background-color: rgba(70, 68, 68, 0.05);
 }

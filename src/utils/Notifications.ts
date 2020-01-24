@@ -49,6 +49,18 @@ export default function notification(type: string, id: string) {
                 unknown: 'Unable to update user information',
             },
         },
+        curationgroup: {
+            add : {
+                success: 'Successfully added new curation group',
+                conflict: 'Curation group name conflicts with an existing curation group',
+                unknown: 'Unable to add curation group',
+            },
+            update: {
+                success: 'Successfully updated curation group',
+                conflict: 'Curation group name conflicts with an existing curation group',
+                unknown: 'Unable to update curation group',
+            },
+        },
     };
 
     const getMessage = ( source: string, operation: string, msgtype: string ) => {

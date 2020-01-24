@@ -1,4 +1,4 @@
-import { OrganismEntry, OrganismHash, API_ORGANISM_FETCH } from '@/apis/annotation/Organism';
+import { OrganismEntry, OrganismHash, API_ORGANISM_FETCH } from '@/models/annotation/Organism';
 
 const moduleAnnotationActions = {
     fetch_organisms: (context: any) => {

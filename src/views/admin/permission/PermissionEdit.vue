@@ -93,7 +93,7 @@ import { required } from 'vuelidate/lib/validators';
 import { State, namespace } from 'vuex-class';
 import { printableAsciiOnly, lettersAndSpacesOnly } from '@/utils/Validators';
 import { generateValidationError } from '@/utils/ValidationErrors';
-import { API_PERMISSION_UPDATE } from '@/apis/auth/Permission';
+import { API_PERMISSION_UPDATE } from '@/models/auth/Permission';
 
 const auth = namespace( 'auth' );
 

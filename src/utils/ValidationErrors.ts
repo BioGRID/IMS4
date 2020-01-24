@@ -17,10 +17,16 @@ export function generateValidationError(validationType: string, field: string, p
         case 'minlength' :
             return field + ' must be at least ' + param1 + ' in length';
 
+        case 'maxlength' :
+            return field + ' must be no more than ' + param1 + ' in length';
+
         case 'sameas' :
             return field + ' must be identical to ' + param1;
 
         case 'passwordcomplexity' :
             return field + ' must contain at least one capital letter, one number, and one special character';
+
+        case 'numeric' :
+            return field + ' must contain only numbers';
     }
 }

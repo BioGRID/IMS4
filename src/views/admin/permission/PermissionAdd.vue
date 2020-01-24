@@ -90,7 +90,7 @@ import { State, namespace } from 'vuex-class';
 import { required } from 'vuelidate/lib/validators';
 import { printableAsciiOnly, lettersAndSpacesOnly } from '@/utils/Validators';
 import { generateValidationError } from '@/utils/ValidationErrors';
-import { API_PERMISSION_ADD } from '@/apis/auth/Permission';
+import { API_PERMISSION_ADD } from '@/models/auth/Permission';
 
 const auth = namespace( 'auth' );
 

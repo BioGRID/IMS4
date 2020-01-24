@@ -61,7 +61,7 @@ import { required, minLength, sameAs } from 'vuelidate/lib/validators';
 import { State, namespace } from 'vuex-class';
 import { passwordComplexity } from '@/utils/Validators';
 import { generateValidationError } from '@/utils/ValidationErrors';
-import { API_USER_UPDATE } from '@/apis/auth/User';
+import { API_USER_UPDATE } from '@/models/auth/User';
 
 const auth = namespace( 'auth' );
 

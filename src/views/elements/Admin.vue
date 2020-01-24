@@ -72,7 +72,7 @@ export default class Admin extends Vue {
         icon: 'mdi-account-badge',
         color: 'deep-purple lighten-1',
         title: 'Permission Manager',
-        desc: 'Create/Delete/Modify global permission settings and user classes assigned to those permissions.',
+        desc: 'Add or edit global permission settings and user classes assigned to those permissions.',
         permission_name: 'MANAGE PERMISSIONS',
     },
     {
@@ -84,11 +84,19 @@ export default class Admin extends Vue {
         permission_name: 'MANAGE USERS',
     },
     {
+        to: '/admin/curationgroup/curationgroupmanager',
+        icon: 'mdi-account-group',
+        color: 'cyan darken-3',
+        title: 'Curation Group Manager',
+        desc: 'Add or edit curation groups and associated default organisms and users with permission to curate.',
+        permission_name: 'MANAGE CURATION GROUPS',
+    },
+    {
         to: '/admin/socket/socketstatus',
         icon: 'mdi-lan-connect',
         color: 'orange darken-3',
         title: 'Socket Status',
-        desc: 'Check to see the current status of the Websocket connection to the curation API.',
+        desc: 'Check to see the current status of the Websocket connection to the curation API. You can also test it here with an echo.',
         permission_name: 'WEBSOCKET MANAGE',
     }];
 
