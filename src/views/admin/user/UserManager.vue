@@ -38,9 +38,9 @@
                 <template slot-scope="{ row }">
                     <td class='text-center'>{{ row.id }}</td>
                     <td class='text-left'><strong>{{ row.name }}</strong></td>
+                    <td class='text-left'>{{ row.email }}</td>
                     <td class='text-left'>{{ row.first_name }}</td>
                     <td class='text-left'>{{ row.last_name }}</td>
-                    <td class='text-left'>{{ row.email }}</td>
                     <td class='nowrap text-center'>
                         <v-sheet
                             dark

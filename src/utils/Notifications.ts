@@ -48,6 +48,10 @@ export default function notification(type: string, id: string) {
                 conflict: 'User information conflicts with an existing user (same name or email)',
                 unknown: 'Unable to update user information',
             },
+            logout: {
+                unauthorized: 'Account logout is not authorized for this user',
+                inaccessible: 'Logout server is currently inaccessible',
+            },
         },
         curationgroup: {
             add : {
