@@ -12,7 +12,7 @@
             <h1>Welcome Back <span class="highlight--text">{{ firstName }}</span>!</h1>
             <v-divider class='mb-3' />
             <v-row no-gutters>
-                <v-col cols="12" xl="9" lg="8" md="6" sm="6" xs="12">
+                <v-col cols="12" xl="10" lg="10" md="12" sm="12" xs="12">
                     <p>You are now using version <strong><span class="highlight--text">{{ appVersion }}</span></strong> of the <strong>{{ fullTitle }}</strong>. This is a private system used in curation and maintainance of the entire suite of <a class='plainLink' href='https://thebiogrid.org' target='_BLANK'>BioGRID</a> Projects and Applications. If you are logged-in accidentally, please immediately <a class='plainLink' href='/pages/login'>logout</a>.</p>
                     
                     <v-row no-gutters class='mb-3'>
@@ -51,8 +51,8 @@
                         </v-col>
                     </v-row>
                 </v-col>
-                <v-col  cols="12" xl="3" lg="4" md="6" sm="6" xs="12">
-                    <PublicationSearch />
+                <v-col  cols="12" xl="2" lg="2" md="0" sm="0" xs="0" class='d-none d-lg-flex d-xl-flex' >
+                    <v-img src='@/assets/logo_small_gold.png' height="200" contain></v-img>
                 </v-col>
             </v-row>
             <v-divider class='pt-0 mb-0' />
@@ -112,7 +112,6 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import { State, namespace } from 'vuex-class';
-import PublicationSearch from '@/components/operations/PublicationSearch.vue';
 import StatsCard from '@/components/cards/StatsCard.vue';
 
 const auth = namespace( 'auth' );
@@ -120,7 +119,6 @@ const curation = namespace( 'curation' );
 
 @Component({
     components: {
-        PublicationSearch,
         StatsCard,
     },
 })

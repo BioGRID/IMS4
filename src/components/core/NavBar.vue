@@ -9,10 +9,10 @@
             </v-toolbar-title>
             <v-spacer></v-spacer>
             <v-btn text icon>
-                <v-icon color="grey darken-3">mdi-bell</v-icon>
+                <v-icon color="grey darken-3">mdi-magnify</v-icon>
             </v-btn>
             <v-btn text icon>
-                <v-icon color="grey darken-3">mdi-magnify</v-icon>
+                <v-icon color="grey darken-3">mdi-bell</v-icon>
             </v-btn>
             <v-menu
                 left

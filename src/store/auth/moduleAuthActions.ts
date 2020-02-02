@@ -1,6 +1,4 @@
-import axios from 'axios';
 import router from '@/router';
-import notification from '@/utils/Notifications';
 import { PermHash, PermRecord, API_PERMISSION_GETALL } from '@/models/auth/Permission';
 import { UserHash, User, API_USER_GETALL, API_USER_GETME, API_USER_LOGOUT, API_USER_LOGIN } from '@/models/auth/User';
 
@@ -9,7 +7,6 @@ const moduleAuthActions = {
         return context.commit( 'AUTH_UPDATE_USER', payload );
     },
     login: (context: any, payload: any) => {
-        console.log(payload);
         return API_USER_LOGIN( payload.userDetails, (data: User) => {
             // Valid User, Set User Object
             context.dispatch( 'update_user', data ).then( () => {

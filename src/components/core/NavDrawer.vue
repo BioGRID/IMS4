@@ -28,7 +28,7 @@
         
         <v-list dense>
             <v-list-item
-                v-for="(link, i) in links"
+                v-for="(link, i) in primaryLinks"
                 :key="i"
                 :to="link.to"
                 active-class="secondary black--text"
@@ -41,35 +41,118 @@
                 </v-list-item-content>
             </v-list-item>
         </v-list>
+
+        <v-divider />
+
+        <v-list dense v-if="!navDrawerMinimized">
+            <v-list-item
+                class='ml-n2 mr-n2'
+                active-class="secondary black--text"
+            >
+                <v-list-item-content>
+                    <v-text-field 
+                        label="Dataset Search"
+                        :error-messages="publicationIDErrors"
+                        light
+                        required
+                        dense
+                        solo
+                        :hide-details="true"
+                        append-icon="mdi-magnify"
+                        v-model.trim="publicationID"
+                        title="Search for Datasets by Numeric Publication ID (example: pubmed)"
+                        @click:append="submitPublicationSearch"
+                        @input="$v.publicationID.$touch()"
+                        @blur="$v.publicationID.$touch()"
+                    />
+                </v-list-item-content>
+            </v-list-item>
+        </v-list>
+
+        <v-divider />
+
+        <v-list dense v-if="datasetDrawerLinks">
+            <v-subheader v-if="!navDrawerMinimized">Curation Tools</v-subheader>
+            <v-list-item
+                v-for="(link, i) in datasetDrawerLinks"
+                :key="i"
+                :to="link.to"
+                active-class="secondary black--text"
+            >
+                <v-list-item-action>
+                    <v-icon>{{ link.icon }}</v-icon>
+                </v-list-item-action>
+                <v-list-item-content class="ml-n5">
+                    <v-list-item-title v-text="link.text" /> 
+                    <v-list-item-subtitle v-text="link.subtitle" />
+                </v-list-item-content>
+            </v-list-item>
+        </v-list>
+
     </v-navigation-drawer>
 </template>
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import { State } from 'vuex-class';
+import { State, namespace } from 'vuex-class';
+import { required, numeric, maxLength } from 'vuelidate/lib/validators';
+import { printableAsciiOnly, lettersAndSpacesOnly } from '@/utils/Validators';
+import { generateValidationError } from '@/utils/ValidationErrors';
+import Vuelidate from 'vuelidate';
+
+const curation = namespace( 'curation' );
 
 @Component
 export default class NavDrawer extends Vue {
     @State private navDrawerMinimized!: boolean;
+    @curation.State private datasetDrawerLinks!: object[];
     private firstTitle: string = process.env.VUE_APP_FIRST_TITLE || 'BioGRID';
     private secondTitle: string = process.env.VUE_APP_SECOND_TITLE || 'ACE';
-    private links: object[] = [
+    private publicationID: string = '20489023';
+    private publicationType: string = 'pubmed';
+    private maxPublicationIDLength: number = 8;
+    private publicationTypes = [
+        { text: 'Pubmed', value: 'pubmed' },
+        { text: 'Pre-Publication', value: 'prepub' },
+    ];
+    private primaryLinks: object[] = [
         {
             to: '/',
             icon: 'mdi-view-dashboard',
             text: 'Dashboard',
         },
-        {
-            to: '/elements/test',
-            icon: 'mdi-grill',
-            text: 'Test Page',
-        },
-        {
-            to: '/nonexistant',
-            icon: 'mdi-account-question',
-            text: 'Error 404',
-        },
     ];
+
+    get publicationIDErrors() {
+        const errors = [];
+        if (this.$v.publicationID.$dirty) {
+            if (!this.$v.publicationID.required) {
+                errors.push( generateValidationError( 'required', 'Publication ID', null ));
+            } else if (!this.$v.publicationID.numeric) {
+                errors.push( generateValidationError( 'numeric', 'Publication ID', null ));
+            } else if (!this.$v.publicationID.maxLength) {
+                errors.push( generateValidationError( 'maxLength', 'Publication ID', String(this.maxPublicationIDLength) ));
+            }
+        }
+        return errors;
+    }
+
+    get isInvalid() {
+        return this.$v.$invalid;
+    }
+
+    private submitPublicationSearch() {
+        this.$v.$touch();
+        if (!this.$v.$invalid) {
+            this.$router.push({ path: '/curation/DatasetLoad/' + this.publicationType + '/' + this.publicationID });
+        }
+    }
+
+    private validations() {
+        return {
+            publicationID: { required, numeric, maxLength: maxLength(this.maxPublicationIDLength) },
+        };
+    }
 
 }
 </script>
