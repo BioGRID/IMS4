@@ -3,10 +3,10 @@
         <v-container fluid class='pt-0'>
             <v-row dense>
                 <v-col cols="12" xl="10" lg="10" md="9" sm="6" xs="6">
-                    <DatasetDetails />
+                    <DatasetDetails :dark="false" />
                 </v-col>
                 <v-col cols="12" xl="2" lg="2" md="3" sm="6" xs="6">
-                    <DatasetTools />
+                    <DatasetTools :dark="false" />
                 </v-col>
             </v-row>
         </v-container>
@@ -28,6 +28,12 @@ const curation = namespace( 'curation' );
     },
 })
 export default class DatasetView extends Vue {
+    @curation.State private currentDataset!: any;
+    @curation.State private curationDrawerLinks!: object[];
+
+    private created() {
+        this.$store.dispatch( 'curation/build_curation_drawer_links', {} );
+    }
 
 }
 

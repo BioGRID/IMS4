@@ -1,10 +1,15 @@
 <template>
     <div id="dashboard">
         <v-container fluid class='pt-0'>
-            <h1>Loading dataset </h1>
-            <h2>{{ datasetType }}</h2>
-            <h3>{{ datasetSourceID }}</h3>
-            <p>{{ currentDataset }}</p>
+            <div v-if='this.datasetType === "pubmed"'>
+                <h1>Contacting PubMed to retrieve dataset...</h1>
+                <v-progress-linear
+                    indeterminate
+                    color="blue"
+                ></v-progress-linear>
+                <p class='title'>Attempting to retreive dataset from the pubmed remote api. You will be redirected as soon as soon as the dataset is available...</p>
+                <v-img src='@/assets/pubmed_logo.png' width='300'></v-img>
+            </div>
         </v-container>
     </div>
 </template>

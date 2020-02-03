@@ -65,6 +65,14 @@ export default function notification(type: string, id: string) {
                 unknown: 'Unable to update curation group',
             },
         },
+        dataset: {
+            fetch: {
+                nonexistant: 'The publication ID you submitted does not exist. Please try an alternative ID',
+                improper: 'Improperly formatted elastic search query',
+                offline: 'Publication fetching service is currently offline',
+                unrecognized: 'Unrecognized elastic search index',
+            },
+        },
     };
 
     const getMessage = ( source: string, operation: string, msgtype: string ) => {

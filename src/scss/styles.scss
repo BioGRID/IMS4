@@ -13,6 +13,25 @@ a.plainLink:hover {
     color: #F00 !important;
 }
 
+.theme--dark {
+    a.plainLink {
+        font-weight: bold;
+        text-decoration: none;
+        color: rgb(255, 166, 0);
+        
+    }
+    
+    a.plainLink:hover {
+        color: #FF0 !important;
+    }
+
+    &.v-list-item--active {
+        .v-list-item__subtitle {
+            color: #444 !important;
+        }
+    }
+}
+
 tbody tr:nth-of-type(odd) {
     background-color: rgba(70, 68, 68, 0.05);
 }

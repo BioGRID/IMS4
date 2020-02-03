@@ -2,7 +2,7 @@ import axios from 'axios';
 import store from '@/store/store';
 
 // Add a new User
-export function ELASTIC_QUERY( search: object, index: string, displayLoading: boolean, successCallback?: (data: any) => void ) {
+export function ELASTIC_QUERY( search: object, index: string, displayLoading: boolean, successCallback?: (data: any) => void, errorCallback?: (error: any) => void ) {
     const user = store.getters['auth/getUser'];
     if (displayLoading) {
         store.dispatch( 'toggleLoadingOverlay', {}, {root: true} );
@@ -19,19 +19,10 @@ export function ELASTIC_QUERY( search: object, index: string, displayLoading: bo
         }
     })
     .catch( (error) => {
-        if ( error.response.status === 400 ) {
-            // Query was improperly formatted
-            console.log( 'Improperly formatted elastic search query' );
-        } else if ( error.response.status === 500 ) {
-            // Search service is offline
-            console.log( 'Elastic search service is offline' );
-        } else if ( error.response.status === 404 ) {
-            // Unrecognized index/endpoint
-            console.log( 'Unrecognized elastic search index' );
-        }
-
         console.log( error );
-        console.log( error.response );
+        if (errorCallback !== undefined) {
+            errorCallback(error);
+        }
     })
     .finally( () => {
         if (displayLoading) {

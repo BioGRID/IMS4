@@ -6,13 +6,7 @@
             :color="color"
             :dark="dark"
         >
-            <v-alert 
-                type="error" 
-                dense
-                v-if="this.currentDataset.state !== 'active'"
-            >
-                Dataset State: {{ currentDataset.state }}
-            </v-alert>
+            
 
             <div class="overline">BioGRID Dataset ({{ currentDataset.dataset_id }})</div>
             <div
@@ -38,6 +32,15 @@
             <p class='body-2 mt-5 mb-0 font-weight-regular'>
                 {{ citation() }}
             </p>
+
+            <v-alert 
+                type="error" 
+                dense
+                class='mt-5 mr-n5 ml-n5 mb-n5'
+                v-if="this.currentDataset.state !== 'active'"
+            >
+                Dataset State: {{ currentDataset.state }}
+            </v-alert>
 
         </v-card>
     </div>

@@ -26,7 +26,7 @@
 
         <v-divider />
         
-        <v-list dense>
+        <v-list dense :disabled="loadingOverlayVisible">
             <v-list-item
                 v-for="(link, i) in primaryLinks"
                 :key="i"
@@ -38,6 +38,7 @@
                 </v-list-item-action>
                 <v-list-item-content class="ml-n5">
                     <v-list-item-title v-text="link.text" /> 
+                    <v-list-item-subtitle class='' v-text="link.subtitle" />
                 </v-list-item-content>
             </v-list-item>
         </v-list>
@@ -55,6 +56,7 @@
                         :error-messages="publicationIDErrors"
                         light
                         required
+                        :disabled="loadingOverlayVisible"
                         dense
                         solo
                         :hide-details="true"
@@ -71,10 +73,10 @@
 
         <v-divider />
 
-        <v-list dense v-if="datasetDrawerLinks">
+        <v-list :dark="true" dense v-if="curationDrawerLinks.length > 0" :disabled="loadingOverlayVisible">
             <v-subheader v-if="!navDrawerMinimized">Curation Tools</v-subheader>
             <v-list-item
-                v-for="(link, i) in datasetDrawerLinks"
+                v-for="(link, i) in curationDrawerLinks"
                 :key="i"
                 :to="link.to"
                 active-class="secondary black--text"
@@ -84,7 +86,7 @@
                 </v-list-item-action>
                 <v-list-item-content class="ml-n5">
                     <v-list-item-title v-text="link.text" /> 
-                    <v-list-item-subtitle v-text="link.subtitle" />
+                    <v-list-item-subtitle class='' v-text="link.subtitle" />
                 </v-list-item-content>
             </v-list-item>
         </v-list>
@@ -105,7 +107,8 @@ const curation = namespace( 'curation' );
 @Component
 export default class NavDrawer extends Vue {
     @State private navDrawerMinimized!: boolean;
-    @curation.State private datasetDrawerLinks!: object[];
+    @State private loadingOverlayVisible!: boolean;
+    @curation.State private curationDrawerLinks!: object[];
     private firstTitle: string = process.env.VUE_APP_FIRST_TITLE || 'BioGRID';
     private secondTitle: string = process.env.VUE_APP_SECOND_TITLE || 'ACE';
     private publicationID: string = '20489023';
@@ -120,6 +123,7 @@ export default class NavDrawer extends Vue {
             to: '/',
             icon: 'mdi-view-dashboard',
             text: 'Dashboard',
+            subtitle: 'Get Started Here',
         },
     ];
 

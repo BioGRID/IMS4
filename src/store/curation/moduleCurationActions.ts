@@ -2,6 +2,7 @@ import { CurationGroupEntry, CurationGroupHash, API_CURATION_GROUP_FETCH } from 
 import bodybuilder from 'bodybuilder';
 import { ELASTIC_QUERY } from '@/models/elastic/Query';
 import router from '@/router';
+import notification from '@/utils/Notifications';
 
 const moduleCurationActions = {
     fetch_curation_groups: (context: any) => {
@@ -20,12 +21,44 @@ const moduleCurationActions = {
             .build();
         ELASTIC_QUERY( query, 'dataset', true, (data: any) => {
             context.commit( 'CURATION_UPDATE_CURRENT_DATASET', {} );
+            context.commit( 'CURATION_UPDATE_DRAWER_LINKS', [] );
             if (data.hits.total.value === 1) {
                 const dataset = data.hits.hits[0]._source;
                 context.commit( 'CURATION_UPDATE_CURRENT_DATASET', dataset );
                 router.push( '/curation/DatasetView' );
+            } else {
+                context.dispatch( 'notify/displayNotification', notification( 'error', 'dataset_fetch_nonexistant' ), {root: true });
+                router.push( '/elements/dashboard' );
             }
+        }, (error: any) => {
+            if ( !error.response ) {
+                context.dispatch( 'notify/displayNotification', notification( 'error', 'dataset_fetch_offline' ), {root: true });
+            } else {
+                if ( error.response.status === 400 ) {
+                    context.dispatch( 'notify/displayNotification', notification( 'error', 'dataset_fetch_improper' ), {root: true });
+                } else if ( error.response.status === 500 ) {
+                    context.dispatch( 'notify/displayNotification', notification( 'error', 'dataset_fetch_offline' ), {root: true });
+                } else if ( error.response.status === 404 ) {
+                    context.dispatch( 'notify/displayNotification', notification( 'error', 'dataset_fetch_unrecognized' ), {root: true });
+                }
+            }
+            router.push( '/elements/dashboard' );
         });
+    },
+    build_curation_drawer_links: (context: any, payload: any) => {
+        const currentDataset = context.state.currentDataset;
+        let datasetInfo = 'Pubmed: ' + currentDataset.source_id;
+        if (currentDataset.source_type !== 'pubmed') {
+            datasetInfo = currentDataset.source_type + ' ' + currentDataset.source_id;
+        }
+        const curationNavDrawerLinks = [{
+            to: '/curation/DatasetView',
+            icon: 'mdi-book-open-page-variant',
+            text: 'Read Dataset',
+            subtitle: datasetInfo,
+        }];
+
+        context.commit( 'CURATION_UPDATE_DRAWER_LINKS', curationNavDrawerLinks );
     },
 };
 

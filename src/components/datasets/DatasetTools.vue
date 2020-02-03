@@ -5,8 +5,8 @@
             :color="color"
             :dark="dark"
         >
-            <div class="overline pl-5 pt-5">Dataset Tools</div>
-            <v-list dense class='pb-5'>
+            <div class="overline pl-3 pt-5">Dataset Tools</div>
+            <v-list dense class='pb-0 pt-0'>
                 <v-list-item
                     v-for="(link, i) in datasetTools"
                     :key="i"
@@ -23,6 +23,21 @@
                     </v-list-item-content>
                 </v-list-item>
             </v-list>
+            <template v-if="this.currentDataset.source_type === 'pubmed'">
+                <v-divider />
+                <div class="overline pl-3 pt-2">Open @ MOD</div>
+                <div class='pl-5 pr-5 pb-2'>
+                    <span 
+                        v-for="(link,i) in MODLinks"
+                        :key="i"
+                    >
+                        <a :href="link.to" target="_BLANK" class='plainLink body-2 pr-1 font-weight-bold' :title='"View in " + link.text'>{{ link.text }}</a>
+                    </span> 
+                </div> 
+            </template>
+            <v-divider />
+            <div class="overline pl-3 pt-2">Curation Status</div>
+            <div class='pl-5 pr-5 pb-2'></div>
         </v-card>
     </div>
 </template>
@@ -33,16 +48,51 @@ import { State, namespace } from 'vuex-class';
 
 const curation = namespace( 'curation' );
 
+interface ModLinkout {
+    to: string;
+    text: string;
+}
+
+interface ToolLinkout {
+    to: string;
+    icon: string;
+    text: string;
+    color: string;
+}
+
 @Component
 export default class DatasetDetails extends Vue {
     @curation.State private currentDataset!: any;
     @curation.State private datasetCollapsed!: any;
     @Prop({type: String, default: ''}) private color!: string;
     @Prop({type: Boolean, default: false }) private dark!: boolean;
-    private datasetTools: object[] = [];
+    private datasetTools: ToolLinkout[] = [];
+    private baseMODLinkouts: ModLinkout[] = [
+        {
+            to: 'https://www.yeastgenome.org/reference/' ,
+            text: 'SGD',
+        },
+        {
+            to: 'http://www.informatics.jax.org/reference/',
+            text: 'MGI',
+        },
+        {
+            to: 'https://www.pombase.org/reference/PMID:',
+            text: 'POMBASE',
+        },
+    ];
 
     private created() {
         this.generateToolLinks();
+    }
+
+    get MODLinks() {
+        const modLinks = [];
+        for (const link of this.baseMODLinkouts) {
+            link.to = link.to + this.currentDataset.source_id;
+            modLinks.push(link);
+        }
+        return modLinks;
     }
 
     private generateToolLinks() {
