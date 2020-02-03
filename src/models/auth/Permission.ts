@@ -2,8 +2,20 @@ import axios from 'axios';
 import store from '@/store/store';
 import notification from '@/utils/Notifications';
 
+export interface PermHash {
+    [key: string]: PermRecord;
+}
+
+export interface PermRecord {
+    id: number;
+    name: string;
+    description: string;
+    category: string;
+    level: string;
+}
+
 // Update an existing Permission
-export function API_PERMISSION_UPDATE( payload: object, permID: number, successCallback?: () => void ) {
+export function API_PERMISSION_UPDATE( payload: object, permID: number, successCallback?: () => void ): any {
     const user = store.getters['auth/getUser'];
     store.dispatch( 'toggleLoadingOverlay', {}, {root: true} );
     return axios.put( process.env.VUE_APP_AUTH_URL! + '/permission/' + permID, payload, {
@@ -31,7 +43,7 @@ export function API_PERMISSION_UPDATE( payload: object, permID: number, successC
 }
 
 // Add a new Permission
-export function API_PERMISSION_ADD( payload: object, successCallback?: () => void ) {
+export function API_PERMISSION_ADD( payload: object, successCallback?: () => void ): any {
     const user = store.getters['auth/getUser'];
     store.dispatch( 'toggleLoadingOverlay', {}, {root: true} );
     return axios.post( process.env.VUE_APP_AUTH_URL! + '/permission', payload, {
@@ -55,5 +67,23 @@ export function API_PERMISSION_ADD( payload: object, successCallback?: () => voi
             console.log(error);
             store.dispatch( 'notify/displayNotification', notification( 'error', 'permission_add_unknown' ), {root: true });
         }
+    });
+}
+
+// Get Permissions
+export function API_PERMISSION_GETALL( successCallback?: (data: []) => void ): any {
+    const user = store.getters['auth/getUser'];
+    return axios.get( process.env.VUE_APP_AUTH_URL! + '/permissions', {
+        headers: { Authorization: 'Bearer ' + user.access_key },
+    })
+    .then( (res) => {
+        if ( res.status === 200 ) {
+            if (successCallback !== undefined) {
+                successCallback(res.data.data);
+            }
+        }
+    })
+    .catch( (error) => {
+        console.log(error);
     });
 }

@@ -48,6 +48,10 @@ export default function notification(type: string, id: string) {
                 conflict: 'User information conflicts with an existing user (same name or email)',
                 unknown: 'Unable to update user information',
             },
+            logout: {
+                unauthorized: 'Account logout is not authorized for this user',
+                inaccessible: 'Logout server is currently inaccessible',
+            },
         },
         curationgroup: {
             add : {
@@ -59,6 +63,14 @@ export default function notification(type: string, id: string) {
                 success: 'Successfully updated curation group',
                 conflict: 'Curation group name conflicts with an existing curation group',
                 unknown: 'Unable to update curation group',
+            },
+        },
+        dataset: {
+            fetch: {
+                nonexistant: 'The publication ID you submitted does not exist. Please try an alternative ID',
+                improper: 'Improperly formatted elastic search query',
+                offline: 'Publication fetching service is currently offline',
+                unrecognized: 'Unrecognized elastic search index',
             },
         },
     };

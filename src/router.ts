@@ -155,6 +155,22 @@ const router = new Router({
                     isPermittedRoute( 'MANAGE CURATION GROUPS', next );
                 },
             },
+            {
+                path: '/curation/DatasetLoad/:type/:id',
+                name: 'Loading Dataset',
+                component: () => import( '@/views/curation/DatasetLoad.vue' ),
+                beforeEnter: (to: any, from: any, next: any) => {
+                    isPermittedRoute( 'LOAD DATASET', next );
+                },
+            },
+            {
+                path: '/curation/DatasetView',
+                name: 'View Dataset',
+                component: () => import( '@/views/curation/DatasetView.vue' ),
+                beforeEnter: (to: any, from: any, next: any) => {
+                    isPermittedRoute( 'LOAD DATASET', next );
+                },
+            },
         ],
     },
     // FULL PAGE LAYOUTS
