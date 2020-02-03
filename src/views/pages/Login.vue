@@ -71,8 +71,8 @@ const auth = namespace( 'auth' );
 @Component
 export default class Login extends Vue {
     private shortTitle: string = process.env.VUE_APP_SHORT_TITLE || 'BioGRID ACE';
-    private name: string = 'stark';
-    private password: string = 'biogridacefirstloginB1#';
+    private name: string = process.env.VUE_APP_LOGIN_DEFAULT || '';
+    private password: string = process.env.VUE_APP_PASSWORD_DEFAULT || '';
     @auth.State private user!: any;
 
     public created() {
