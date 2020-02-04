@@ -5,6 +5,9 @@ import router from '@/router';
 import notification from '@/utils/Notifications';
 
 const moduleCurationActions = {
+    toggleDatasetCollapsed: (context: any) => {
+        context.commit( 'TOGGLE_DATASET_COLLAPSED' );
+    },
     fetch_curation_groups: (context: any) => {
         return API_CURATION_GROUP_FETCH( (data: CurationGroupEntry[]) => {
             const curationGroupHash: CurationGroupHash = {};

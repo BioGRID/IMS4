@@ -8,6 +8,9 @@ const moduleCurationMutations = {
     CURATION_UPDATE_DRAWER_LINKS: (state: any, links: object[]) => {
         state.curationDrawerLinks = links;
     },
+    TOGGLE_DATASET_COLLAPSED: (state: any) => {
+        state.datasetCollapsed = !state.datasetCollapsed;
+    },
 };
 
 export default moduleCurationMutations;
