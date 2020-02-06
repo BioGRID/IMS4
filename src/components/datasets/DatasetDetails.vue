@@ -1,7 +1,7 @@
 <template>
     <div class='dataset-details-card'>
         <v-card 
-            shaped
+            tile
             class='pa-5'
             :color="color"
             :dark="dark"

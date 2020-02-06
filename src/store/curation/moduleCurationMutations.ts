@@ -11,6 +11,9 @@ const moduleCurationMutations = {
     TOGGLE_DATASET_COLLAPSED: (state: any) => {
         state.datasetCollapsed = !state.datasetCollapsed;
     },
+    CURATION_UPDATE_CURRENT_HISTORY: (state: any, history: object[]) => {
+        state.currentHistory = history;
+    },
 };
 
 export default moduleCurationMutations;

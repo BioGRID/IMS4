@@ -9,6 +9,16 @@
                     <DatasetTools :dark="darkMode" />
                 </v-col>
             </v-row>
+            <v-row dense>
+                <v-col cols="12" xl="12" lg="12" md="12" sm="12" xs="12">
+                    <HistoryList 
+                        :dark="darkMode"
+                        refType="dataset"
+                        :refID="datasetID"
+                        :showNote="false"
+                    ></HistoryList>
+                </v-col>
+            </v-row>
         </v-container>
     </div>
 </template>
@@ -18,6 +28,7 @@ import { Component, Vue } from 'vue-property-decorator';
 import { State, namespace } from 'vuex-class';
 import DatasetDetails from '@/components/datasets/DatasetDetails.vue';
 import DatasetTools from '@/components/datasets/DatasetTools.vue';
+import HistoryList from '@/components/history/HistoryList.vue';
 
 const curation = namespace( 'curation' );
 
@@ -25,6 +36,7 @@ const curation = namespace( 'curation' );
     components: {
         DatasetDetails,
         DatasetTools,
+        HistoryList,
     },
 })
 export default class DatasetView extends Vue {
@@ -34,6 +46,10 @@ export default class DatasetView extends Vue {
 
     private created() {
         this.$store.dispatch( 'curation/build_curation_drawer_links', {} );
+    }
+
+    get datasetID() {
+        return this.currentDataset.dataset_id;
     }
 
 }

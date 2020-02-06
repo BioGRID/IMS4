@@ -1,4 +1,5 @@
 import { CurationGroupEntry, CurationGroupHash, API_CURATION_GROUP_FETCH } from '@/models/curation/CurationGroup';
+import { API_HISTORY_FETCH, HistoryEntry } from '@/models/curation/History';
 import bodybuilder from 'bodybuilder';
 import { ELASTIC_QUERY } from '@/models/elastic/Query';
 import router from '@/router';
@@ -17,6 +18,11 @@ const moduleCurationActions = {
             context.commit( 'CURATION_UPDATE_CURATION_GROUPS', curationGroupHash );
         });
     },
+    fetch_current_history: (context: any, payload: any) => {
+        return API_HISTORY_FETCH( payload.refID, payload.refType, (data: HistoryEntry[]) => {
+            context.commit( 'CURATION_UPDATE_CURRENT_HISTORY', data );
+        });
+    },
     fetch_current_dataset: (context: any, payload: any) => {
         const query = bodybuilder()
             .filter( 'term', 'source_id', payload.sourceID )
@@ -25,9 +31,11 @@ const moduleCurationActions = {
         ELASTIC_QUERY( query, 'dataset', true, (data: any) => {
             context.commit( 'CURATION_UPDATE_CURRENT_DATASET', {} );
             context.commit( 'CURATION_UPDATE_DRAWER_LINKS', [] );
+            context.commit( 'CURATION_UPDATE_CURRENT_HISTORY', [] );
             if (data.hits.total.value === 1) {
                 const dataset = data.hits.hits[0]._source;
                 context.commit( 'CURATION_UPDATE_CURRENT_DATASET', dataset );
+                context.dispatch( 'fetch_current_history', { refID: dataset.dataset_id, refType: 'dataset' }, {} );
                 router.push( '/curation/DatasetView' );
             } else {
                 context.dispatch( 'notify/displayNotification', notification( 'error', 'dataset_fetch_nonexistant' ), {root: true });
