@@ -171,6 +171,14 @@ const router = new Router({
                     isPermittedRoute( 'LOAD DATASET', next );
                 },
             },
+            {
+                path: '/admin/chemical/chemicalmanager',
+                name: 'Manage Chemicals',
+                component: () => import( '@/views/admin/chemical/ChemicalManager.vue' ),
+                beforeEnter: (to: any, from: any, next: any) => {
+                    isPermittedRoute( 'MANAGE CHEMICALS', next );
+                },
+            },
         ],
     },
     // FULL PAGE LAYOUTS

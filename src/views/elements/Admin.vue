@@ -98,6 +98,14 @@ export default class Admin extends Vue {
         title: 'Socket Status',
         desc: 'Check to see the current status of the Websocket connection to the curation API. You can also test it here with an echo.',
         permission_name: 'WEBSOCKET MANAGE',
+    },
+    {
+        to: '/admin/chemical/chemicalmanager',
+        icon: 'mdi-chemical-weapon',
+        color: 'pink darken-3',
+        title: 'Chemical Manager',
+        desc: 'Add, edit or check the current status of chemicals.',
+        permission_name: 'MANAGE CHEMICALS',
     }];
 
     private canViewTool( permissionName: string ) {
