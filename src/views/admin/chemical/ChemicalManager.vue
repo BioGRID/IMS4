@@ -54,11 +54,16 @@ import { State, namespace } from 'vuex-class';
 import { required, numeric } from 'vuelidate/lib/validators';
 import { generateValidationError } from '@/utils/ValidationErrors';
 import Vuelidate from 'vuelidate';
+import { ChemicalEntry, API_CHEMICAL_FETCH } from '@/models/annotation/Chemical';
+import axios from 'axios';
+import store from '@/store/store';
 
 @Component
 export default class ChemicalManager extends Vue {
-     private chemicalSearchQuery: string = '20489023';
-     get chemicalSearchErrors() {
+    private chemicalSearchQuery: string = '301';
+    private chemicalName: string = "";
+
+    get chemicalSearchErrors() {
         const errors = [];
         if (this.$v.chemicalSearchQuery.$dirty) {
             if (!this.$v.chemicalSearchQuery.required) {
@@ -77,7 +82,13 @@ export default class ChemicalManager extends Vue {
     private submitChemicalSearch() {
         this.$v.$touch();
         if (!this.$v.$invalid) {
-            this.$router.push({ path: '/curation/ChemicalLoad/' + this.chemicalSearchQuery });
+            // this.$router.push({ path: '/curation/ChemicalLoad/' + this.chemicalSearchQuery });
+            console.log(this.chemicalSearchQuery);
+            const user = store.getters['auth/getUser'];
+            API_CHEMICAL_FETCH( this.chemicalSearchQuery, (data: ChemicalEntry[]) => {
+                 this.chemicalName = data.name;
+                 console.log("chemical name: " + this.chemicalName);
+            });
         }
     }
 
