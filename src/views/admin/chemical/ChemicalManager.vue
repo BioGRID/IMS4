@@ -27,22 +27,38 @@
                 <v-icon class='ml-2'>mdi-account-plus</v-icon>
             </v-btn>
              
-             <div>
-                <v-text-field 
-                    label="Chemical Search"
-                    :error-messages="chemicalSearchErrors"
-                    light
-                    required
-                    dense
-                    solo
-                    append-icon="mdi-magnify"
-                    v-model.trim="chemicalSearchQuery"
-                    title="Search for Chemicals by name or id (example: pubmed)"
-                    @click:append="submitChemicalSearch"
-                    @input="$v.chemicalSearchQuery.$touch()"
-                    @blur="$v.chemicalSearchQuery.$touch()"
-                />
-            </div>
+            
+            <v-text-field 
+                label="Chemical Search"
+                :error-messages="chemicalSearchErrors"
+                light
+                required
+                dense
+                solo
+                append-icon="mdi-magnify"
+                v-model.trim="chemicalSearchQuery"
+                title="Search for Chemicals by name or id (example: pubmed)"
+                @click:append="submitChemicalSearch"
+                @input="$v.chemicalSearchQuery.$touch()"
+                @blur="$v.chemicalSearchQuery.$touch()"
+            />
+        
+            <ACEDataTable
+                class='mt-5'
+                title="Chemicals"
+                tableClass="pa-1"
+                :columns="chemicalHeaders"
+                :rows="chemicalList"
+                :rowsPerPage="100"
+                :totalRows="chemicalCount"
+                :pagination="true"
+                :showSearch="true"
+            >
+                <template slot-scope="{ row }">
+                    <td class='text-left' nowrap>{{ row.name }}</td>
+                </template>
+
+            </ACEDataTable>
             
         </v-container>
     </div>
@@ -54,14 +70,54 @@ import { State, namespace } from 'vuex-class';
 import { required, numeric } from 'vuelidate/lib/validators';
 import { generateValidationError } from '@/utils/ValidationErrors';
 import Vuelidate from 'vuelidate';
-import { ChemicalEntry, API_CHEMICAL_FETCH } from '@/models/annotation/Chemical';
+import { ChemicalEntry, ChemicalHash, API_CHEMICAL_FETCH } from '@/models/annotation/Chemical';
 import axios from 'axios';
 import store from '@/store/store';
+import ACEDataTable from '@/components/data/ACEDataTable.vue';
 
-@Component
+@Component({
+    components: {
+        ACEDataTable,
+    },
+})
 export default class ChemicalManager extends Vue {
     private chemicalSearchQuery: string = '301';
     private chemicalName: string = "";
+    private chemicalList: object[] = [];
+    private chemicalTableHeaders: object[] = [
+        {
+            title: 'Name',
+            field: 'name',
+            sortable: true,
+            searchable: true,
+            searchType: 'Text',
+            searchName: 'Name',
+            sortDirection: 'asc',
+            sortOrder: 1,
+            className: 'text-left',
+        },
+    ];
+
+    private created() {
+        this.generateChemicalList();
+    }
+
+    private generateChemicalList() {
+        let chemicalGroup: any;
+        console.log("in generate chemical list");
+        const user = store.getters['auth/getUser'];
+        API_CHEMICAL_FETCH( (data: ChemicalEntry[]) => {
+            const chemicalHash: chemicalHash = {};
+            for (const chemical of data) {
+                chemicalHash[Number(chemical.id)] = chemical;
+            }
+            for ( chemical of Object.values(this.chemicalHash)) {
+            this.chemicalList.push({
+                name: chemical.name,
+            });
+        }
+        });
+    }
 
     get chemicalSearchErrors() {
         const errors = [];

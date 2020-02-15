@@ -18,6 +18,10 @@ export interface ChemicalEntry {
     deprecated: number;
 }
 
+export interface ChemicalHash {
+    [key: number]: ChemicalEntry;
+}
+
 // Get Chemical/s from the Annotation API
 export function API_CHEMICAL_FETCH( chemicalQueryID: number, successCallback?: (data: []) => void ): any {
     console.log("In Fetch: " + chemicalQueryID);
@@ -33,6 +37,27 @@ export function API_CHEMICAL_FETCH( chemicalQueryID: number, successCallback?: (
             }
         }
     })
+    .catch( (error) => {
+        console.log(error);
+    });
+}
+
+// Get All Chemical/s from the Annotation API
+export function API_CHEMICAL_FETCH_ALL( successCallback?: (data: []) => void ): any {
+    console.log("In all chemical Fetch: ");
+    const user = store.getters['auth/getUser'];
+    return axios.get( process.env.VUE_APP_ANNOTATION_URL! + '/chemical/', {
+        headers: { Authorization: 'Bearer ' + user.access_key },
+    })
+    .then( (res) => {
+        if ( res.status === 200 ) {
+            if (successCallback !== undefined) {
+                console.log("success with data: " + res.data);
+                successCallback(res.data);
+            }
+        }
+    })
+
     .catch( (error) => {
         console.log(error);
     });
