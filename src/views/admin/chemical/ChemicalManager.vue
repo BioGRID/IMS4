@@ -47,7 +47,7 @@
                 class='mt-5'
                 title="Chemicals"
                 tableClass="pa-1"
-                :columns="chemicalHeaders"
+                :columns="chemicalTableHeaders"
                 :rows="chemicalList"
                 :rowsPerPage="100"
                 :totalRows="chemicalCount"
@@ -60,6 +60,8 @@
 
             </ACEDataTable>
             
+            <div v-if="retrievingChemicalString">Retrieving chemicals.</div>
+
         </v-container>
     </div>
 </template>
@@ -70,7 +72,7 @@ import { State, namespace } from 'vuex-class';
 import { required, numeric } from 'vuelidate/lib/validators';
 import { generateValidationError } from '@/utils/ValidationErrors';
 import Vuelidate from 'vuelidate';
-import { ChemicalEntry, ChemicalHash, API_CHEMICAL_FETCH } from '@/models/annotation/Chemical';
+import { ChemicalEntry, API_CHEMICAL_FETCH, API_CHEMICAL_FETCH_ALL } from '@/models/annotation/Chemical';
 import axios from 'axios';
 import store from '@/store/store';
 import ACEDataTable from '@/components/data/ACEDataTable.vue';
@@ -81,10 +83,22 @@ import ACEDataTable from '@/components/data/ACEDataTable.vue';
     },
 })
 export default class ChemicalManager extends Vue {
-    private chemicalSearchQuery: string = '301';
-    private chemicalName: string = "";
+    private chemicalSearchQuery: number = 301;
+    private retrievingChemicalString: boolean = true;
+    private chemicalName: string = '';
     private chemicalList: object[] = [];
     private chemicalTableHeaders: object[] = [
+         {
+            title: 'ID',
+            field: 'chemical_id',
+            sortable: true,
+            searchable: true,
+            searchType: 'NumericRange',
+            searchName: 'ID',
+            sortDirection: '',
+            sortOrder: 0,
+            className: 'text-center',
+        },
         {
             title: 'Name',
             field: 'name',
@@ -96,6 +110,17 @@ export default class ChemicalManager extends Vue {
             sortOrder: 1,
             className: 'text-left',
         },
+        {
+            title: 'Description',
+            field: 'description',
+            sortable: true,
+            searchable: true,
+            searchType: 'Text',
+            searchName: 'Description',
+            sortDirection: '',
+            sortOrder: 0,
+            className: 'text-left',
+        },
     ];
 
     private created() {
@@ -103,20 +128,23 @@ export default class ChemicalManager extends Vue {
     }
 
     private generateChemicalList() {
-        let chemicalGroup: any;
-        console.log("in generate chemical list");
         const user = store.getters['auth/getUser'];
-        API_CHEMICAL_FETCH( (data: ChemicalEntry[]) => {
-            const chemicalHash: chemicalHash = {};
+        API_CHEMICAL_FETCH_ALL( (data: any) =>  {
             for (const chemical of data) {
-                chemicalHash[Number(chemical.id)] = chemical;
+                this.chemicalList.push({
+                    chemical_id: chemical.chemical_id,
+                    name: chemical.name,
+                    description: chemical.description,
+                });
             }
-            for ( chemical of Object.values(this.chemicalHash)) {
-            this.chemicalList.push({
-                name: chemical.name,
-            });
-        }
+            // Turn the retrievingChemicalString boolean false to hide the message about retreiving chemicals
+            this.retrievingChemicalString = false;
         });
+        console.log(this.chemicalList);
+    }
+
+    get chemicalCount() {
+        return this.chemicalList.length;
     }
 
     get chemicalSearchErrors() {
@@ -141,9 +169,8 @@ export default class ChemicalManager extends Vue {
             // this.$router.push({ path: '/curation/ChemicalLoad/' + this.chemicalSearchQuery });
             console.log(this.chemicalSearchQuery);
             const user = store.getters['auth/getUser'];
-            API_CHEMICAL_FETCH( this.chemicalSearchQuery, (data: ChemicalEntry[]) => {
+            API_CHEMICAL_FETCH( this.chemicalSearchQuery, (data: any) => {
                  this.chemicalName = data.name;
-                 console.log("chemical name: " + this.chemicalName);
             });
         }
     }
@@ -155,4 +182,7 @@ export default class ChemicalManager extends Vue {
     }
 }
 </script>
+
+<style lang="scss" scoped>
+</style>
 
