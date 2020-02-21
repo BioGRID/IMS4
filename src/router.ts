@@ -179,6 +179,14 @@ const router = new Router({
                     isPermittedRoute( 'MANAGE CHEMICALS', next );
                 },
             },
+            {
+                path: '/admin/chemical/chemicaledit/:id',
+                name: 'Chemical Edit',
+                component: () => import( '@/views/admin/chemical/ChemicalEdit.vue' ),
+                beforeEnter: (to: any, from: any, next: any) => {
+                    isPermittedRoute( 'MANAGE CHEMICALS', next );
+                },
+            },
         ],
     },
     // FULL PAGE LAYOUTS

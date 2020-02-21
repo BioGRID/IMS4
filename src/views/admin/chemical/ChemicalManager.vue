@@ -55,7 +55,25 @@
                 :showSearch="true"
             >
                 <template slot-scope="{ row }">
+                    <td class='text-left' nowrap>{{ row.chemical_id }}</td>
                     <td class='text-left' nowrap>{{ row.name }}</td>
+                    <td class='text-left' wrap>{{ row.description }}</td>
+                    <td class='text-left' nowrap>{{ row.chemical_type }}</td>
+                    <td class='text-left' nowrap>{{ row.source }}</td>
+                    <td class='text-left' nowrap>{{ row.source_id }}</td>
+                    <td class='nowrap text-center'>
+                        <v-btn 
+                            x-small 
+                            dark 
+                            fab 
+                            elevation="0" 
+                            color="info" 
+                            :title='"Edit chemical: " + row.name' 
+                            :to="'/admin/chemical/chemicaledit/' + row.chemical_id"
+                        >
+                            <v-icon>mdi-account-edit</v-icon>
+                        </v-btn>
+                    </td>   
                 </template>
 
             </ACEDataTable>
@@ -121,6 +139,50 @@ export default class ChemicalManager extends Vue {
             sortOrder: 0,
             className: 'text-left',
         },
+        {
+            title: 'Chemical Type',
+            field: 'chemical_type',
+            sortable: true,
+            searchable: true,
+            searchType: 'Text',
+            searchName: 'Chemical Type',
+            sortDirection: '',
+            sortOrder: 0,
+            className: 'text-left',
+        },
+        {
+            title: 'Source',
+            field: 'source',
+            sortable: true,
+            searchable: true,
+            searchType: 'Text',
+            searchName: 'Source',
+            sortDirection: '',
+            sortOrder: 0,
+            className: 'text-left',
+        },
+        {
+            title: 'Source ID',
+            field: 'source_id',
+            sortable: true,
+            searchable: true,
+            searchType: 'Text',
+            searchName: 'Source ID',
+            sortDirection: '',
+            sortOrder: 0,
+            className: 'text-left',
+        },
+        {
+            title: 'Tools',
+            field: 'tools',
+            sortable: false,
+            searchable: false,
+            searchType: '',
+            searchName: 'Tools',
+            sortDirection: '',
+            sortOrder: 0,
+            className: 'nowrap text-center',
+        },
     ];
 
     private created() {
@@ -135,6 +197,9 @@ export default class ChemicalManager extends Vue {
                     chemical_id: chemical.chemical_id,
                     name: chemical.name,
                     description: chemical.description,
+                    chemical_type: chemical.chemical_type,
+                    source: chemical.source,
+                    source_id: chemical.source_id,
                 });
             }
             // Turn the retrievingChemicalString boolean false to hide the message about retreiving chemicals
