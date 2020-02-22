@@ -1,0 +1,20 @@
+export interface TableColumn {
+    title: string;
+    field: string;
+    query?: object;
+    sortable: boolean;
+    searchable: boolean;
+    searchType: string;
+    searchTag: string | undefined;
+    searchName: string;
+    sortDirection: string;
+    sortOrder: number;
+    sortNested: object | undefined;
+    className?: string;
+    width?: string;
+}
+
+export interface TableSort {
+    sortDirection: string;
+    sortOrder: number;
+}

@@ -55,12 +55,17 @@ const curation = namespace( 'curation' );
 @Component
 export default class DatasetDetails extends Vue {
     @curation.State private currentDataset!: any;
-    @curation.State private datasetCollapsed!: any;
     @Prop({type: String, default: ''}) private color!: string;
     @Prop({type: Boolean, default: false }) private dark!: boolean;
+    @Prop({type: Boolean, default: false}) private collapsed!: boolean;
     private showAuthors: boolean = true;
     private showKeywords: boolean = true;
     private showMeshTerms: boolean = true;
+    private datasetCollapsed: boolean = false;
+
+    private created() {
+        this.datasetCollapsed = this.collapsed;
+    }
 
     private datasetAuthors() {
         if (this.currentDataset.authors.length > 0) {
@@ -138,7 +143,7 @@ export default class DatasetDetails extends Vue {
     }
 
     private toggleDatasetCollapsed() {
-         this.$store.dispatch( 'curation/toggleDatasetCollapsed' );
+        this.datasetCollapsed = !this.datasetCollapsed;
     }
 
 }

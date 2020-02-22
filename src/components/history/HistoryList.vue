@@ -9,44 +9,57 @@
             <div class='headline font-weight-bold'> 
                 Dataset History ({{ historySize }})
             </div>
-            <p class='body-2 mb-2 font-weight-regular'>List of most history entries...</p>
+            <p class='body-2 mb-2 font-weight-regular'>List of most recent history entries...</p>
             <v-sheet
                 v-for="(history, i) in currentHistory"
                 :key="i"
-                class='mb-2 pa-2'
+                class='mb-2 pa-1'
                 color="grey lighten-4"
                 elevation="1"
             >
                 <v-chip
                     :color="historyColor( history.method )"
-                    label
+                    class='mt-0'
                     dark
+                    small
+                    label
                 >
                     <v-avatar left>
-                        <v-icon medium>{{ historyIcon(history.method) }}</v-icon>
+                        <v-icon>{{ historyIcon(history.method) }}</v-icon>
                     </v-avatar>
                     
-                    <span class='font-weight-bold'>{{ history.method }}</span>
+                    <span class='font-weight-bold'>{{ historyMethod(history.method) }}</span>
                 </v-chip>
                 <v-chip
                     color="grey darken-3"
-                    label
                     dark
-                    class='ml-1'
+                    small
+                    label
+                    class='ml-1 mt-0'
                 >
+                    <v-avatar left>
+                        <v-icon>mdi-account</v-icon>
+                    </v-avatar>
+
                     <span class='font-weight-bold'>{{ userName(history.user_id) }}</span>
                 </v-chip>
                 <v-chip
                     color="deep-orange darken-1"
-                    label
                     dark
-                    class='ml-1'
+                    small
+                    label
+                    class='ml-1 mt-0'
                 >
+
+                    <v-avatar left>
+                        <v-icon>mdi-account-group</v-icon>
+                    </v-avatar>
+
                     <span class='font-weight-bold'>{{ curationGroup(history.curation_group_id) }}</span>
                 </v-chip>
 
                  <span class='pl-2' v-if="showNote">{{ history.comment }};</span> 
-                 <span class='caption'>{{ addedDate( history.added_date ) }}</span>
+                 <span class='pl-2 caption'>{{ addedDate( history.added_date ) }}</span>
             </v-sheet>
         </v-card>
     </div>
@@ -84,6 +97,10 @@ export default class HistoryList extends Vue {
 
     private historyIcon( method: string ) {
         return this.datasetCurationOptions[method].icon;
+    }
+
+    private historyMethod( method: string ) {
+        return this.datasetCurationOptions[method].text;
     }
 
     private userName( userID: number ) {

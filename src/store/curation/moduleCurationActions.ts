@@ -67,6 +67,12 @@ const moduleCurationActions = {
             icon: 'mdi-book-open-page-variant',
             text: 'Read Dataset',
             subtitle: datasetInfo,
+        },
+        {
+            to: '/curation/DatasetEntities',
+            icon: 'mdi-axis-arrow',
+            text: 'Dataset Entities',
+            subtitle: datasetInfo,
         }];
 
         context.commit( 'CURATION_UPDATE_DRAWER_LINKS', curationNavDrawerLinks );
