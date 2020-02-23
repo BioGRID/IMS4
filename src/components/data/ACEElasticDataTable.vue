@@ -1,5 +1,5 @@
 <template>
-    <div class="ace-data-table">
+    <div class="ace-elastic-data-table">
         <v-card>
             <v-row no-gutters>
                 <v-col xl="8" lg="8" md="6" sm="12" xs="12">
@@ -28,6 +28,7 @@
             <table :class='tableClass'>
                 <thead>
                     <tr>
+                        <th v-if="hasRowCheckbox"></th>
                         <th
                             v-for="(column,index) in columns" 
                             :class="columnClass(column)"
@@ -110,7 +111,7 @@ import { NumericHash } from '@/utils/Interfaces.ts';
 import { TableColumn, TableSort } from '@/models/table/Table';
 
 @Component
-export default class ACEExternalDataTable extends Vue {
+export default class ACEElasticDataTable extends Vue {
     @Prop(String) private title!: string;
     @Prop(Boolean) private showSearch!: boolean;
     @Prop(Array) private columns!: TableColumn[];
@@ -121,6 +122,7 @@ export default class ACEExternalDataTable extends Vue {
     @Prop(Boolean) private pagination!: boolean;
     @Prop(String) private tableClass!: string;
     @Prop(Boolean) private hasExpanded!: boolean;
+    @Prop(Boolean) private hasRowCheckbox!: boolean;
     private tableSortDetails: TableSort[] = [];
     private searchText: string = '';
     private sortOrderTracker: number[] = [];

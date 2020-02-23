@@ -12,6 +12,8 @@ export interface TableColumn {
     sortNested: object | undefined;
     className?: string;
     width?: string;
+    formatFunc?: string;
+    formatFuncParams?: object;
 }
 
 export interface TableSort {
