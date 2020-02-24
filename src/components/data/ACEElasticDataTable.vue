@@ -109,6 +109,7 @@ import { Component, Vue, Prop, Watch } from 'vue-property-decorator';
 import ACEDataTableHeader from '@/components/data/ACEDataTableHeader.vue';
 import { NumericHash } from '@/utils/Interfaces.ts';
 import { TableColumn, TableSort } from '@/models/table/Table';
+import { tokenizeSearchString } from '@/utils/HelperUtils.ts';
 
 @Component
 export default class ACEElasticDataTable extends Vue {
@@ -184,14 +185,48 @@ export default class ACEElasticDataTable extends Vue {
 
     @Watch( 'searchText' )
     private onSearchTextChanged() {
-        if ((this.searchText === null || this.searchText === '')) {
+        if (this.searchText === null || this.searchText === '') {
             this.generateDisplayRows();
         }
     }
 
     private filterSubmit() {
-        this.paginationPage = 1;
-        this.generateDisplayRows();
+        this.refreshResults();
+    }
+
+    private refreshResults() {
+        // We do not need to generate display rows
+        // if the pagination page needs to be reset to 1
+        // since changing that, will also call generateDisplayRows
+        if (this.paginationPage !== 1) {
+            this.paginationPage = 1;
+        } else {
+            this.generateDisplayRows();
+        }
+    }
+
+    private tokenizeSearchTerms() {
+        // If Undefined/Null, then no tokens
+        if (this.searchText === null || this.searchText === undefined) {
+            return [];
+        }
+
+        // If nothing but empty space, also no tokens
+        const parseText = this.searchText.trim();
+        if (parseText === '') {
+            return [];
+        }
+
+        const searchTerms: string[] = tokenizeSearchString( this.searchText );
+        const finalTerms: string[] = [];
+        for (const term of searchTerms) {
+            if (term.trim().length !== 0) {
+                finalTerms.push(term);
+            }
+        }
+
+        return finalTerms;
+
     }
 
     private updatePagination() {
@@ -220,7 +255,8 @@ export default class ACEElasticDataTable extends Vue {
 
     private generateDisplayRows() {
         this.$store.dispatch( 'toggleLoadingOverlay', {} );
-        this.$emit( 'query', this.paginationPage, this.tableSortDetails, this.sortOrderTracker );
+        const searchTerms = this.tokenizeSearchTerms();
+        this.$emit( 'query', this.paginationPage, this.tableSortDetails, this.sortOrderTracker, searchTerms );
         this.$store.dispatch( 'toggleLoadingOverlay', {} );
     }
 
@@ -244,14 +280,7 @@ export default class ACEElasticDataTable extends Vue {
                 });
             }
 
-            // We do not need to generate display rows
-            // if the pagination page needs to be reset to 1
-            // since changing that, will also call generateDisplayRows
-            if (this.paginationPage !== 1) {
-                this.paginationPage = 1;
-            } else {
-                this.generateDisplayRows();
-            }
+            this.refreshResults();
         }
     }
 

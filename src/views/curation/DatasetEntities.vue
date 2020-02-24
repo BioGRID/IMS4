@@ -8,7 +8,7 @@
             </v-row>
             <ACEElasticDataTable
                 class='mt-1'
-                title="Curated Entities"
+                title="Curated Data"
                 tableClass="pa-1"
                 :columns="tableHeaders"
                 :rowsPerPage="rowsPerPage"
@@ -229,7 +229,7 @@ export default class DatasetView extends Vue {
         return sortOptions;
     }
 
-    private fetchData( paginationPage: number, tableSortDetails: TableSort[], sortOrderTracker: number[] ) {
+    private fetchData( paginationPage: number, tableSortDetails: TableSort[], sortOrderTracker: number[], searchTerms: string[] ) {
         let query = this.getBaseQuery();
 
         const sortOptions = this.buildSortOptions( tableSortDetails, sortOrderTracker );
