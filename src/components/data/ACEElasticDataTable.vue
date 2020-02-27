@@ -245,14 +245,11 @@ export default class ACEElasticDataTable extends Vue {
     }
 
     private updateRange() {
-        console.log( 'UPDATE RANGE' );
         this.startRange = ((this.paginationPage - 1) * this.rowsPerPage) + 1;
         const endRange = this.paginationPage * this.rowsPerPage;
         if (endRange > this.filteredRowCount) {
-            console.log( 'HERE' );
             this.endRange = this.filteredRowCount;
         } else {
-            console.log( 'HERE2' );
             this.endRange = endRange;
         }
     }

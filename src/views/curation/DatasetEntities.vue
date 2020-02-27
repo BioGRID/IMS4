@@ -73,6 +73,7 @@ const curation = namespace( 'curation' );
 })
 export default class DatasetView extends Vue {
     @curation.State private currentDataset!: any;
+    @curation.State private attributeTypes!: any;
     private displayRows: object[] = [];
     private darkMode: boolean = false;
     private totalRowCount: number = 0;
@@ -244,7 +245,7 @@ export default class DatasetView extends Vue {
 
         const sortOptions = this.buildSortOptions( tableSortDetails, sortOrderTracker );
 
-        query = buildSearchQuery( searchText, query, this.searchTagLookup );
+        query = buildSearchQuery( searchText, query, this.searchTagLookup, this.attributeTypes );
         query = query.size( this.rowsPerPage )
             .from( ((paginationPage - 1) * this.rowsPerPage));
 
