@@ -27,22 +27,6 @@
                 <v-icon class='ml-2'>mdi-account-plus</v-icon>
             </v-btn>
              
-            
-            <v-text-field 
-                label="Chemical Search"
-                :error-messages="chemicalSearchErrors"
-                light
-                required
-                dense
-                solo
-                append-icon="mdi-magnify"
-                v-model.trim="chemicalSearchQuery"
-                title="Search for Chemicals by name or id (example: pubmed)"
-                @click:append="submitChemicalSearch"
-                @input="$v.chemicalSearchQuery.$touch()"
-                @blur="$v.chemicalSearchQuery.$touch()"
-            />
-        
             <ACEDataTable
                 class='mt-5'
                 title="Chemicals"
@@ -190,7 +174,6 @@ export default class ChemicalManager extends Vue {
     }
 
     private generateChemicalList() {
-        const user = store.getters['auth/getUser'];
         API_CHEMICAL_FETCH_ALL( (data: any) =>  {
             for (const chemical of data) {
                 this.chemicalList.push({
@@ -205,7 +188,6 @@ export default class ChemicalManager extends Vue {
             // Turn the retrievingChemicalString boolean false to hide the message about retreiving chemicals
             this.retrievingChemicalString = false;
         });
-        console.log(this.chemicalList);
     }
 
     get chemicalCount() {
@@ -228,23 +210,6 @@ export default class ChemicalManager extends Vue {
         return this.$v.$invalid;
     }
 
-    private submitChemicalSearch() {
-        this.$v.$touch();
-        if (!this.$v.$invalid) {
-            // this.$router.push({ path: '/curation/ChemicalLoad/' + this.chemicalSearchQuery });
-            console.log(this.chemicalSearchQuery);
-            const user = store.getters['auth/getUser'];
-            API_CHEMICAL_FETCH( this.chemicalSearchQuery, (data: any) => {
-                 this.chemicalName = data.name;
-            });
-        }
-    }
-
-    private validations() {
-        return {
-            chemicalSearchQuery: { required, numeric },
-        };
-    }
 }
 </script>
 

@@ -40,45 +40,19 @@
                                         dark
                                         required
                                         dense
-                                        v-model.trim="curationGroupDescription"
-                                        @input="$v.curationGroupDescription.$touch()"
-                                        @blur="$v.curationGroupDescription.$touch()"
-                                    />
-                                </v-col>
-                                <v-col cols="12" xl="6" lg="6" md="6" sm="12" xs="12">
-                                    <v-select 
-                                        label="Curation Group Organisms"
-                                        v-model.trim="curationGroupOrganisms"
-                                        :items="organismOptions"
-                                        :menu-props="{ maxHeight: '400' }"
-                                        :error-messages="curationGroupOrganismsErrors"
-                                        dark
-                                        required
-                                        multiple
-                                        dense
-                                    />
-                                </v-col> 
-                                <v-col cols="12" xl="6" lg="6" md="6" sm="12" xs="12">
-                                    <v-select 
-                                        label="Curation Group Users"
-                                        v-model.trim="curationGroupUsers"
-                                        :items="userOptions"
-                                        :menu-props="{ maxHeight: '400' }"
-                                        :error-messages="curationGroupUsersErrors"
-                                        dark
-                                        required
-                                        multiple
-                                        dense
+                                        v-model.trim="chemicalDescription"
+                                        @input="$v.chemicalDescription.$touch()"
+                                        @blur="$v.chemicalDescription.$touch()"
                                     />
                                 </v-col>
                             </v-row>
                         <v-btn 
-                            @click="submitCurationGroup"
+                            @click="submitChemical"
                             size="x-large"
                             color="success"
                             dark
                             :disabled="isInvalid"
-                        >Update Curation Group</v-btn>
+                        >Update Chemical</v-btn>
                         </v-form>
                     </v-sheet>
                 </v-card-text>
@@ -94,106 +68,46 @@ import { State, namespace } from 'vuex-class';
 import { required } from 'vuelidate/lib/validators';
 import { printableAsciiOnly } from '@/utils/Validators';
 import { generateValidationError } from '@/utils/ValidationErrors';
-import { OrganismEntry } from '@/models/annotation/Organism';
-import { API_CURATION_GROUP_UPDATE } from '@/models/curation/CurationGroup';
+import { API_CHEMICAL_UPDATE, API_CHEMICAL_FETCH } from '@/models/annotation/Chemical';
 
 const auth = namespace( 'auth' );
-const annotation = namespace( 'annotation' );
-const curation = namespace( 'curation' );
 
 @Component
 export default class ChemicalEdit extends Vue {
-    @auth.State private users!: any;
-    @annotation.State private organisms!: OrganismEntry[];
-    @curation.State private curationGroups!: any;
-    private curationGroupID: number = 0;
-    private curationGroupName: string = '';
-    private curationGroupDescription: string = '';
-    private curationGroupOrganisms: string[] = [];
-    private curationGroupUsers: string[] = [];
-
+    private chemicalID: number = 0;
+    private chemicalName: string = '';
+    private chemicalDescription: string = '';
     public created() {
-        this.curationGroupID = Number(this.$route.params.id);
         this.initializeFieldValues();
     }
 
     private initializeFieldValues() {
-        const curationGroupInfo = this.curationGroups[this.curationGroupID];
-        this.curationGroupID = curationGroupInfo.curation_group_id;
-        this.curationGroupName = curationGroupInfo.name;
-        this.curationGroupDescription = curationGroupInfo.description;
-        this.curationGroupOrganisms = curationGroupInfo.organisms;
-        this.curationGroupUsers = curationGroupInfo.users;
+        API_CHEMICAL_FETCH( this.$route.params.id, (data: any) => {
+            this.chemicalName = data.name;
+            this.chemicalID = data.chemical_id;
+            this.chemicalDescription = data.description;
+        });
     }
 
-    get organismOptions() {
-        const organismOptions: object[] = [];
-        for (const organism of Object.values(this.organisms)) {
-            let organismName = organism.official_name;
-            if (organism.strain !== '' ) {
-                organismName += ' (' + organism.strain + ')';
-            }
-            if (organism.deprecated === 0) {
-                organismOptions.push({
-                    text: organismName,
-                    value: organism.id,
-                });
-            }
-        }
-        return organismOptions.sort( this.alphaOptionsSort );
-    }
-
-    get userOptions() {
-        const userOptions: object[] = [];
-        let user: any;
-        for (user of Object.values(this.users)) {
-            userOptions.push({
-                text: user.name,
-                value: user.id,
-            });
-        }
-        return userOptions.sort( this.alphaOptionsSort );
-    }
-
-    get curationGroupNameErrors() {
+    get chemicalNameErrors() {
         const errors = [];
-        if (this.$v.curationGroupName.$dirty) {
-            if (!this.$v.curationGroupName.required) {
-                errors.push( generateValidationError( 'required', 'Curation Group Name', null ));
-            } else if (!this.$v.curationGroupName.printableAsciiOnly) {
-                errors.push( generateValidationError( 'printableAsciiOnly', 'Curation Group Name', null ));
+        if (this.$v.chemicalName.$dirty) {
+            if (!this.$v.chemicalName.required) {
+                errors.push( generateValidationError( 'required', 'Chemical Name', null ));
+            } else if (!this.$v.chemicalName.printableAsciiOnly) {
+                errors.push( generateValidationError( 'printableAsciiOnly', 'Chemical Name', null ));
             }
         }
         return errors;
     }
 
-    get curationGroupDescriptionErrors() {
+    get chemicalDescriptionErrors() {
         const errors = [];
-        if (this.$v.curationGroupDescription.$dirty) {
-            if (!this.$v.curationGroupDescription.required) {
-                errors.push( generateValidationError( 'required', 'Curation Group Description', null ));
-            } else if (!this.$v.curationGroupDescription.printableAsciiOnly) {
-                errors.push( generateValidationError( 'printableAsciiOnly', 'Curation Group Description', null ));
-            }
-        }
-        return errors;
-    }
-
-    get curationGroupOrganismsErrors() {
-        const errors = [];
-        if (this.$v.curationGroupOrganisms.$dirty) {
-            if (!this.$v.curationGroupOrganisms.required) {
-                errors.push( generateValidationError( 'required', 'Curation Group Organisms', null ));
-            }
-        }
-        return errors;
-    }
-
-    get curationGroupUsersErrors() {
-        const errors = [];
-        if (this.$v.curationGroupUsers.$dirty) {
-            if (!this.$v.curationGroupUsers.required) {
-                errors.push( generateValidationError( 'required', 'Curation Group Users', null ));
+        if (this.$v.chemicalDescription.$dirty) {
+            if (!this.$v.chemicalDescription.required) {
+                errors.push( generateValidationError( 'required', 'Chemical Description', null ));
+            } else if (!this.$v.chemicalDescription.printableAsciiOnly) {
+                errors.push( generateValidationError( 'printableAsciiOnly', 'Chemical Description', null ));
             }
         }
         return errors;
@@ -203,46 +117,17 @@ export default class ChemicalEdit extends Vue {
         return this.$v.$invalid;
     }
 
-    private submitCurationGroup( ) {
+    private submitChemical( ) {
         this.$v.$touch();
         if (!this.$v.$invalid) {
-            this.updateCurationGroup({
-                curation_group_id: this.curationGroupID,
-                name: this.curationGroupName,
-                description: this.curationGroupDescription,
-                organisms: this.curationGroupOrganisms,
-                users: this.curationGroupUsers,
-                deprecated: 0,
-            });
+            // need to write this
         }
-    }
-
-    private updateCurationGroup( payload: object ) {
-        API_CURATION_GROUP_UPDATE( payload, () => {
-            Vue.prototype.$socket.sendObj({
-                target: 0,
-                namespace: 'curation',
-                mutation: '',
-                action: 'fetch_curation_groups',
-            });
-        });
-    }
-
-    private alphaOptionsSort( a: any, b: any ) {
-        if (a.text > b.text) {
-            return 1;
-        } else if (a.text < b.text) {
-            return -1;
-        }
-        return 0;
     }
 
     private validations() {
         return {
-            curationGroupName: { required, printableAsciiOnly },
-            curationGroupDescription: { required, printableAsciiOnly },
-            curationGroupOrganisms: { required },
-            curationGroupUsers: { required },
+            chemicalName: { required, printableAsciiOnly },
+            chemicalDescription: { required, printableAsciiOnly },
         };
     }
 }

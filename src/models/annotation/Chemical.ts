@@ -43,7 +43,6 @@ export function API_CHEMICAL_FETCH_ALL( successCallback?: (data: []) => void ): 
         headers: { Authorization: 'Bearer ' + user.access_key },
     })
     .then( (res) => {
-        console.log(res.status);
         if ( res.status === 200 ) {
             if (successCallback !== undefined) {
                 successCallback(res.data.data);
