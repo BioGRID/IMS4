@@ -19,7 +19,7 @@ export interface ChemicalEntry {
 }
 
 // Get Chemical/s from the Annotation API
-export function API_CHEMICAL_FETCH( chemicalQueryID: number, successCallback?: (data: []) => void ): any {
+export function API_CHEMICAL_FETCH( chemicalQueryID: string, successCallback?: (data: []) => void ): any {
     const user = store.getters['auth/getUser'];
     return axios.get( process.env.VUE_APP_ANNOTATION_URL! + '/chemical/' + chemicalQueryID, {
         headers: { Authorization: 'Bearer ' + user.access_key },

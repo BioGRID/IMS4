@@ -68,7 +68,7 @@ import { State, namespace } from 'vuex-class';
 import { required } from 'vuelidate/lib/validators';
 import { printableAsciiOnly } from '@/utils/Validators';
 import { generateValidationError } from '@/utils/ValidationErrors';
-import { API_CHEMICAL_UPDATE, API_CHEMICAL_FETCH } from '@/models/annotation/Chemical';
+import { API_CHEMICAL_FETCH } from '@/models/annotation/Chemical';
 
 const auth = namespace( 'auth' );
 
