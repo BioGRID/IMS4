@@ -41,7 +41,7 @@
                                 class='tableSearchTag'
                                 @click.stop="appendSearchTag( column.searchTag )"
                             >
-                                [#{{ column.searchTag }}]
+                                [{{ column.searchTag }}]
                             </span>
 
                             {{ column.title }}
@@ -175,6 +175,7 @@ export default class ACEElasticDataTable extends Vue {
 
     @Watch( 'filteredRowCount' )
     private onFilteredRowCountChanged() {
+        this.updateRange();
         this.updatePagination();
     }
 
@@ -244,19 +245,21 @@ export default class ACEElasticDataTable extends Vue {
     }
 
     private updateRange() {
+        console.log( 'UPDATE RANGE' );
         this.startRange = ((this.paginationPage - 1) * this.rowsPerPage) + 1;
         const endRange = this.paginationPage * this.rowsPerPage;
         if (endRange > this.filteredRowCount) {
+            console.log( 'HERE' );
             this.endRange = this.filteredRowCount;
         } else {
+            console.log( 'HERE2' );
             this.endRange = endRange;
         }
     }
 
     private generateDisplayRows() {
         this.$store.dispatch( 'toggleLoadingOverlay', {} );
-        const searchTerms = this.tokenizeSearchTerms();
-        this.$emit( 'query', this.paginationPage, this.tableSortDetails, this.sortOrderTracker, searchTerms );
+        this.$emit( 'query', this.paginationPage, this.tableSortDetails, this.sortOrderTracker, this.searchText );
         this.$store.dispatch( 'toggleLoadingOverlay', {} );
     }
 

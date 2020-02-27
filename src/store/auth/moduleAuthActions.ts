@@ -18,6 +18,8 @@ const moduleAuthActions = {
                 context.dispatch( 'annotation/fetch_organisms', {}, {root: true} );
                 // Fetch list of curation_groups from the API
                 context.dispatch( 'curation/fetch_curation_groups', {}, {root: true} );
+                // Fetch list of attribute types from the API
+                context.dispatch( 'curation/fetch_attribute_types', {}, {root: true} );
                 // Get the list of permissions
                 context.dispatch( 'fetch_permissions', {}, {} ).then( () => {
                     // Redirect to Dashboard

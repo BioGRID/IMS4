@@ -14,6 +14,9 @@ const moduleCurationMutations = {
     CURATION_UPDATE_CURRENT_HISTORY: (state: any, history: object[]) => {
         state.currentHistory = history;
     },
+    CURATION_UPDATE_ATTRIBUTE_TYPES: (state: any, attributeTypes: object) => {
+        state.attributeTypes = attributeTypes;
+    },
 };
 
 export default moduleCurationMutations;

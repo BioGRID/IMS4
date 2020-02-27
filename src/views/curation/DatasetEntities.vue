@@ -57,10 +57,11 @@ import DatasetDetails from '@/components/datasets/DatasetDetails.vue';
 import DatasetTools from '@/components/datasets/DatasetTools.vue';
 import HistoryList from '@/components/history/HistoryList.vue';
 import ACEElasticDataTable from '@/components/data/ACEElasticDataTable.vue';
-import { TableColumn, TableSort } from '@/models/table/Table';
+import { TableColumn, TableSort, SearchTagLookup } from '@/models/table/Table';
 import bodybuilder from 'bodybuilder';
 import { ELASTIC_QUERY, ELASTIC_COUNT } from '@/models/elastic/Query';
 import { elasticExtract } from '@/utils/ElasticExtractor';
+import { buildSearchQuery } from '@/utils/ElasticSearchBuilder';
 
 const curation = namespace( 'curation' );
 
@@ -79,15 +80,23 @@ export default class DatasetView extends Vue {
     private hasRowCheckbox: boolean = true;
     private filteredRowCount: number = 0;
     private rowsPerPage: number = 25;
+    private searchTagLookup: SearchTagLookup = {
+        '#B': 'participant_summary.BAIT.names',
+        '#P': 'participant_summary.PREY.names',
+        '#BO': 'participant_summary.BAIT.organism_abbreviations',
+        '#PO': 'participant_summary.PREY.organism_abbreviations',
+        '#U': 'history.user_name',
+        '#D': 'history.addeddate',
+    };
     private tableHeaders: TableColumn[] = [
         {
             title: 'Bait',
             field: 'participants.name_keyword',
             sortable: true,
             searchable: true,
-            searchType: 'Text',
+            searchType: 'Term',
             searchName: 'Bait',
-            searchTag: 'B',
+            searchTag: '#B',
             sortDirection: '',
             sortOrder: 0,
             sortNested: { path: 'participants',  filter: { term: { 'participants.keyword_attributes.ER.text': 'bait' }}},
@@ -100,9 +109,9 @@ export default class DatasetView extends Vue {
             field: 'participants.name_keyword',
             sortable: true,
             searchable: true,
-            searchType: 'Text',
+            searchType: 'Term',
             searchName: 'Prey',
-            searchTag: 'P',
+            searchTag: '#P',
             sortDirection: '',
             sortOrder: 0,
             sortNested: { path: 'participants',  filter: { term: { 'participants.keyword_attributes.ER.text': 'prey' }}},
@@ -115,9 +124,9 @@ export default class DatasetView extends Vue {
             field: 'participants.organism.abbreviation',
             sortable: true,
             searchable: true,
-            searchType: 'Text',
+            searchType: 'Term',
             searchName: 'Bait Organism',
-            searchTag: 'BO',
+            searchTag: '#BO',
             sortDirection: '',
             sortOrder: 0,
             sortNested: { path: 'participants',  filter: { term: { 'participants.keyword_attributes.ER': 'bait' }}},
@@ -130,9 +139,9 @@ export default class DatasetView extends Vue {
             field: 'participants.organism.abbreviation',
             sortable: true,
             searchable: true,
-            searchType: 'Text',
+            searchType: 'Term',
             searchName: 'Prey Organism',
-            searchTag: 'PO',
+            searchTag: '#PO',
             sortDirection: '',
             sortOrder: 0,
             sortNested: { path: 'participants',  filter: { term: { 'participants.keyword_attributes.ER': 'prey' }}},
@@ -145,9 +154,9 @@ export default class DatasetView extends Vue {
             field: 'keyword_attributes.ES.text',
             sortable: true,
             searchable: true,
-            searchType: 'Text',
+            searchType: 'Term',
             searchName: 'Email',
-            searchTag: 'S',
+            searchTag: '@ES',
             sortDirection: '',
             sortOrder: 0,
             sortNested: undefined,
@@ -160,9 +169,9 @@ export default class DatasetView extends Vue {
             field: 'history.user_name',
             sortable: true,
             searchable: true,
-            searchType: 'Text',
+            searchType: 'Term',
             searchName: 'User',
-            searchTag: 'U',
+            searchTag: '#U',
             sortDirection: '',
             sortOrder: 0,
             sortNested: undefined,
@@ -175,7 +184,7 @@ export default class DatasetView extends Vue {
             searchable: true,
             searchType: 'Date',
             searchName: 'Date',
-            searchTag: 'D',
+            searchTag: '#D',
             sortDirection: 'desc',
             sortOrder: 1,
             sortNested: undefined,
@@ -211,6 +220,7 @@ export default class DatasetView extends Vue {
             .filter( 'term', 'history.method', 'ACTIVATED' );
     }
 
+
     private buildSortOptions( tableSortDetails: TableSort[], sortOrderTracker: number[] ) {
         const sortOptions = [];
         for (const colID of sortOrderTracker) {
@@ -229,15 +239,17 @@ export default class DatasetView extends Vue {
         return sortOptions;
     }
 
-    private fetchData( paginationPage: number, tableSortDetails: TableSort[], sortOrderTracker: number[], searchTerms: string[] ) {
+    private fetchData( paginationPage: number, tableSortDetails: TableSort[], sortOrderTracker: number[], searchText: string ) {
         let query = this.getBaseQuery();
 
         const sortOptions = this.buildSortOptions( tableSortDetails, sortOrderTracker );
 
+        query = buildSearchQuery( searchText, query, this.searchTagLookup );
         query = query.size( this.rowsPerPage )
             .from( ((paginationPage - 1) * this.rowsPerPage));
 
         const formattedQuery: any = query.build();
+        console.log( formattedQuery );
         formattedQuery.sort = sortOptions;
 
         ELASTIC_QUERY( formattedQuery, 'entity', true, (data: any) => {
@@ -250,6 +262,9 @@ export default class DatasetView extends Vue {
                     this.displayRows.push(hit);
                 }
                 this.filteredRowCount = data.hits.total.value;
+            } else {
+                this.displayRows = [];
+                this.filteredRowCount = 0;
             }
         }, (error: any) => {
             console.log(error);

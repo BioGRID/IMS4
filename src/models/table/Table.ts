@@ -1,7 +1,6 @@
 export interface TableColumn {
     title: string;
     field: string;
-    query?: object;
     sortable: boolean;
     searchable: boolean;
     searchType: string;
@@ -19,4 +18,14 @@ export interface TableColumn {
 export interface TableSort {
     sortDirection: string;
     sortOrder: number;
+}
+
+export interface QueryRestriction {
+    type: string;
+    field: string;
+    value: string;
+}
+
+export interface SearchTagLookup {
+    [tag: string]: string;
 }

@@ -1,4 +1,5 @@
 import { CurationGroupEntry, CurationGroupHash, API_CURATION_GROUP_FETCH } from '@/models/curation/CurationGroup';
+import { AttributeTypeEntry, AttributeTypeHash, API_ATTRIBUTE_TYPE_FETCH } from '@/models/curation/AttributeType';
 import { API_HISTORY_FETCH, HistoryEntry } from '@/models/curation/History';
 import bodybuilder from 'bodybuilder';
 import { ELASTIC_QUERY } from '@/models/elastic/Query';
@@ -16,6 +17,15 @@ const moduleCurationActions = {
                 curationGroupHash[Number(curationGroup.curation_group_id)] = curationGroup;
             }
             context.commit( 'CURATION_UPDATE_CURATION_GROUPS', curationGroupHash );
+        });
+    },
+    fetch_attribute_types: (context: any) => {
+        return API_ATTRIBUTE_TYPE_FETCH( (data: AttributeTypeEntry[]) => {
+            const attributeTypeHash: AttributeTypeHash = {};
+            for (const attributeType of data) {
+                attributeTypeHash[attributeType.shortcode] = attributeType;
+            }
+            context.commit( 'CURATION_UPDATE_ATTRIBUTE_TYPES', attributeTypeHash );
         });
     },
     fetch_current_history: (context: any, payload: any) => {

@@ -14,6 +14,7 @@ const moduleCurationState = {
         UNABLETOACCESS: { text: 'Unable to Access', value: 'UNABLETOACCESS', color: 'pink', icon: 'mdi-cloud-lock'  },
         WRONGGROUP: { text: 'Wrong Group', value: 'WRONGGROUP', color: 'purple', icon: 'mdi-clock-fast'  },
     },
+    attributeTypes: {},
 };
 
 export default moduleCurationState;
