@@ -6,7 +6,6 @@ a {
 a.plainLink {
     font-weight: bold;
     text-decoration: none;
-    
 }
 
 a.plainLink:hover {
@@ -18,7 +17,6 @@ a.plainLink:hover {
         font-weight: bold;
         text-decoration: none;
         color: rgb(255, 166, 0);
-        
     }
     
     a.plainLink:hover {
@@ -30,8 +28,4 @@ a.plainLink:hover {
             color: #444 !important;
         }
     }
-}
-
-tbody tr:nth-of-type(odd) {
-    background-color: rgba(70, 68, 68, 0.05);
 }

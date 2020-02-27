@@ -30,6 +30,7 @@
                     <span 
                         v-for="(link,i) in MODLinks"
                         :key="i"
+                        class='text-left'
                     >
                         <a :href="link.to" target="_BLANK" class='plainLink body-2 pr-1 font-weight-bold' :title='"View in " + link.text'>{{ link.text }}</a>
                     </span> 
@@ -137,4 +138,7 @@ export default class DatasetDetails extends Vue {
 </script>
 
 <style lang="scss">
+.v-card {
+    overflow-wrap: normal !important;
+}
 </style>

@@ -7,3 +7,30 @@ export function syncDelay( delay: number ) {
         now = Date.now();
     }
 }
+
+// Split a string on spaces, except when the spaces
+// are surrounded by quotes
+// taken from here:
+// https://stackoverflow.com/questions/4031900/split-a-string-by-whitespace-keeping-quoted-segments-allowing-escaped-quotes/46946420#46946420
+// @credit Tsuneo Yoshioka
+export function tokenizeSearchString( searchText: string ): string[] {
+    const matches = searchText.match(/\\?.|^$/g)!.reduce((p: any, c: any) => {
+        if (c === '"') {
+            /* tslint:disable:no-bitwise */
+            p.quote ^= 1;
+            /* tslint:enable:no-bitwise */
+        } else if (!p.quote && c === ' ') {
+            p.a.push('');
+        } else {
+            p.a[p.a.length - 1] += c.replace(/\\(.)/, '$1');
+        }
+        return  p;
+    }, {a: ['']}).a;
+
+    if (matches != null) {
+        return matches;
+    }
+
+    return [];
+
+}
