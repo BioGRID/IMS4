@@ -172,6 +172,22 @@ const router = new Router({
                 },
             },
             {
+                path: '/admin/chemical/chemicalmanager',
+                name: 'Manage Chemicals',
+                component: () => import( '@/views/admin/chemical/ChemicalManager.vue' ),
+                beforeEnter: (to: any, from: any, next: any) => {
+                    isPermittedRoute( 'MANAGE CHEMICALS', next );
+                },
+            },
+            {
+                path: '/admin/chemical/chemicaledit/:id',
+                name: 'Chemical Edit',
+                component: () => import( '@/views/admin/chemical/ChemicalEdit.vue' ),
+                beforeEnter: (to: any, from: any, next: any) => {
+                    isPermittedRoute( 'MANAGE CHEMICALS', next );
+                },
+            },
+            {
                 path: '/curation/DatasetEntities',
                 name: 'Dataset Entities',
                 component: () => import( '@/views/curation/DatasetEntities.vue' ),
