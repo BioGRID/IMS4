@@ -7,12 +7,9 @@ export function buildSearchQuery( searchText: string, queryStructure: any, searc
         return queryStructure;
     }
 
-    console.log(searchText);
-
     // Extract all the tags via a regular expression
     const tagRegex = /([#|@])([A-Z0-9]+):/gm;
     const matchedTags = [...searchText.matchAll(tagRegex)];
-    console.log(matchedTags);
 
     // Check if tag is in either the search tag lookup
     // or the attribute type hash based on prefix

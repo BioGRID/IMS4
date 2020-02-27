@@ -89,6 +89,15 @@
                             <slot name="expandedRow" :row="row" :rowIndex="rowIndex"></slot>
                         </tr>
                     </template>
+                    <template>
+                        <tr v-if="displayRows.length <= 0">
+                            <td :colspan="expandedColspan">
+                                <div class='text-center'>
+                                    Your filter matched zero entries. Please try again or remove the filter to view more data... 
+                                </div>
+                            </td>
+                        </tr>
+                    </template>
                 </tbody>
             </table>
             <v-pagination
@@ -189,6 +198,14 @@ export default class ACEElasticDataTable extends Vue {
         if (this.searchText === null || this.searchText === '') {
             this.generateDisplayRows();
         }
+    }
+
+    get expandedColspan() {
+        let addonCols = 0;
+        if (this.hasExpanded) { addonCols++; }
+        if (this.hasRowCheckbox) { addonCols++; }
+
+        return this.columns.length + addonCols;
     }
 
     private filterSubmit() {
