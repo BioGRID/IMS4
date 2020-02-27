@@ -1,10 +1,15 @@
 import { CurationGroupEntry, CurationGroupHash, API_CURATION_GROUP_FETCH } from '@/models/curation/CurationGroup';
+import { AttributeTypeEntry, AttributeTypeHash, API_ATTRIBUTE_TYPE_FETCH } from '@/models/curation/AttributeType';
+import { API_HISTORY_FETCH, HistoryEntry } from '@/models/curation/History';
 import bodybuilder from 'bodybuilder';
 import { ELASTIC_QUERY } from '@/models/elastic/Query';
 import router from '@/router';
 import notification from '@/utils/Notifications';
 
 const moduleCurationActions = {
+    toggleDatasetCollapsed: (context: any) => {
+        context.commit( 'TOGGLE_DATASET_COLLAPSED' );
+    },
     fetch_curation_groups: (context: any) => {
         return API_CURATION_GROUP_FETCH( (data: CurationGroupEntry[]) => {
             const curationGroupHash: CurationGroupHash = {};
@@ -12,6 +17,20 @@ const moduleCurationActions = {
                 curationGroupHash[Number(curationGroup.curation_group_id)] = curationGroup;
             }
             context.commit( 'CURATION_UPDATE_CURATION_GROUPS', curationGroupHash );
+        });
+    },
+    fetch_attribute_types: (context: any) => {
+        return API_ATTRIBUTE_TYPE_FETCH( (data: AttributeTypeEntry[]) => {
+            const attributeTypeHash: AttributeTypeHash = {};
+            for (const attributeType of data) {
+                attributeTypeHash[attributeType.shortcode] = attributeType;
+            }
+            context.commit( 'CURATION_UPDATE_ATTRIBUTE_TYPES', attributeTypeHash );
+        });
+    },
+    fetch_current_history: (context: any, payload: any) => {
+        return API_HISTORY_FETCH( payload.refID, payload.refType, (data: HistoryEntry[]) => {
+            context.commit( 'CURATION_UPDATE_CURRENT_HISTORY', data );
         });
     },
     fetch_current_dataset: (context: any, payload: any) => {
@@ -22,9 +41,11 @@ const moduleCurationActions = {
         ELASTIC_QUERY( query, 'dataset', true, (data: any) => {
             context.commit( 'CURATION_UPDATE_CURRENT_DATASET', {} );
             context.commit( 'CURATION_UPDATE_DRAWER_LINKS', [] );
+            context.commit( 'CURATION_UPDATE_CURRENT_HISTORY', [] );
             if (data.hits.total.value === 1) {
                 const dataset = data.hits.hits[0]._source;
                 context.commit( 'CURATION_UPDATE_CURRENT_DATASET', dataset );
+                context.dispatch( 'fetch_current_history', { refID: dataset.dataset_id, refType: 'dataset' }, {} );
                 router.push( '/curation/DatasetView' );
             } else {
                 context.dispatch( 'notify/displayNotification', notification( 'error', 'dataset_fetch_nonexistant' ), {root: true });
@@ -55,6 +76,12 @@ const moduleCurationActions = {
             to: '/curation/DatasetView',
             icon: 'mdi-book-open-page-variant',
             text: 'Read Dataset',
+            subtitle: datasetInfo,
+        },
+        {
+            to: '/curation/DatasetEntities',
+            icon: 'mdi-axis-arrow',
+            text: 'Dataset Entities',
             subtitle: datasetInfo,
         }];
 

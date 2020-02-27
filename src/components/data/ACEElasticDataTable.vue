@@ -1,5 +1,5 @@
 <template>
-    <div class="ace-data-table">
+    <div class="ace-elastic-data-table">
         <v-card>
             <v-row no-gutters>
                 <v-col xl="8" lg="8" md="6" sm="12" xs="12">
@@ -7,7 +7,7 @@
                         <strong>{{ title }}</strong>
                     </v-card-title>
                     <v-card-subtitle>
-                        Showing <strong>{{ this.startRange }}</strong> to <strong>{{ this.endRange }}</strong> of <strong>{{ this.filteredRowCount }}</strong> entries <span v-if="this.filteredRowCount !== this.totalRows">(filtered from <strong>{{ this.totalRows }}</strong> total entries)</span>
+                        Showing <strong>{{ this.startRange }}</strong> to <strong>{{ this.endRange }}</strong> of <strong>{{ this.filteredRowCount }}</strong> entries <span v-if="this.filteredRowCount !== this.totalRowCount">(filtered from <strong>{{ this.totalRowCount }}</strong> total entries)</span>
                     </v-card-subtitle>
                 </v-col>
                 <v-col xl="4" lg="4" md="6" sm="12" xs="12">
@@ -28,6 +28,7 @@
             <table :class='tableClass'>
                 <thead>
                     <tr>
+                        <th v-if="hasRowCheckbox"></th>
                         <th
                             v-for="(column,index) in columns" 
                             :class="columnClass(column)"
@@ -35,6 +36,14 @@
                             :width="columnWidth(column)"
                             @click="column.sortable ? sortBy(index) : null"
                         >
+                            <span 
+                                v-if="column.searchTag !== undefined" 
+                                class='tableSearchTag'
+                                @click.stop="appendSearchTag( column.searchTag )"
+                            >
+                                [{{ column.searchTag }}]
+                            </span>
+
                             {{ column.title }}
                             <v-icon v-if="tableSortDetails[index].sortDirection === 'asc'"
                                 dark
@@ -55,13 +64,40 @@
                                 mdi-numeric-{{ tableSortDetails[index].sortOrder }}-box
                             </v-icon>
                         </th>
+                        <th v-if="hasExpanded"></th>
                     </tr>
                 </thead>
                 
                 <tbody>
-                    <tr :class="rowClass(rowIndex)" v-for="(row, rowIndex) in displayRows" :key="rowIndex">
-                        <slot :row="row"></slot>
-                    </tr>
+                    <template v-for="(row, rowIndex) in displayRows">
+                        <tr :class="rowClass(rowIndex)">
+                            <slot name="defaultRow" :row="row" :rowIndex="rowIndex"></slot>
+                            <td class='text-center' v-if="hasExpanded">
+                                <v-btn 
+                                    medium 
+                                    class='datatable-expand-row'
+                                    :icon="true"
+                                    title="Click to expand row for additional details"
+                                    @click="toggleExpandRow(rowIndex)"
+                                >
+                                    <v-icon v-if="row.is_expanded">mdi-chevron-up</v-icon>
+                                    <v-icon v-if="!row.is_expanded">mdi-chevron-down</v-icon>
+                                </v-btn>
+                            </td>
+                        </tr>
+                        <tr v-if="hasExpanded" v-show="row.is_expanded">
+                            <slot name="expandedRow" :row="row" :rowIndex="rowIndex"></slot>
+                        </tr>
+                    </template>
+                    <template>
+                        <tr v-if="displayRows.length <= 0">
+                            <td :colspan="expandedColspan">
+                                <div class='text-center'>
+                                    Your filter matched zero entries. Please try again or remove the filter to view more data... 
+                                </div>
+                            </td>
+                        </tr>
+                    </template>
                 </tbody>
             </table>
             <v-pagination
@@ -82,32 +118,34 @@ import { Component, Vue, Prop, Watch } from 'vue-property-decorator';
 import ACEDataTableHeader from '@/components/data/ACEDataTableHeader.vue';
 import { NumericHash } from '@/utils/Interfaces.ts';
 import { TableColumn, TableSort } from '@/models/table/Table';
+import { tokenizeSearchString } from '@/utils/HelperUtils.ts';
 
 @Component
-export default class ACEDataTable extends Vue {
+export default class ACEElasticDataTable extends Vue {
     @Prop(String) private title!: string;
     @Prop(Boolean) private showSearch!: boolean;
     @Prop(Array) private columns!: TableColumn[];
-    @Prop(Array) private rows!: object[];
+    @Prop(Array) private displayRows!: any[];
     @Prop(Number) private rowsPerPage!: number;
-    @Prop(Number) private totalRows!: number;
+    @Prop(Number) private totalRowCount!: number;
+    @Prop(Number) private filteredRowCount!: number;
     @Prop(Boolean) private pagination!: boolean;
     @Prop(String) private tableClass!: string;
+    @Prop(Boolean) private hasExpanded!: boolean;
+    @Prop(Boolean) private hasRowCheckbox!: boolean;
     private tableSortDetails: TableSort[] = [];
     private searchText: string = '';
     private sortOrderTracker: number[] = [];
     private paginationPage: number = 1;
     private paginationSize: number = 1;
-    private displayRows: object[] = [];
-    private filteredRowCount: number = this.totalRows;
     private startRange: number = 1;
     private endRange: number = this.rowsPerPage;
     private loading: boolean = true;
+    private rowsExpanded: boolean[] = [];
     private showPagination: boolean = this.pagination;
 
     private created() {
         this.initializeSortDetails();
-        this.setupPagination();
         this.generateDisplayRows();
     }
 
@@ -135,32 +173,81 @@ export default class ACEDataTable extends Vue {
 
     @Watch( 'rowsPerPage' )
     private onRowsPerPageChanged() {
-        this.setupPagination();
+        this.updatePagination();
     }
 
     @Watch( 'paginationPage' )
     private onPaginationPageChanged() {
         this.generateDisplayRows();
+        this.updateRange();
+    }
+
+    @Watch( 'filteredRowCount' )
+    private onFilteredRowCountChanged() {
+        this.updateRange();
+        this.updatePagination();
+    }
+
+    @Watch( 'totalRowCount' )
+    private onTotalRowCountChanged() {
+        // this.updatePagination();
     }
 
     @Watch( 'searchText' )
     private onSearchTextChanged() {
-        if ((this.searchText === null || this.searchText === '')) {
+        if (this.searchText === null || this.searchText === '') {
             this.generateDisplayRows();
         }
     }
 
-    @Watch( 'rows' )
-    private onRowsChanged() {
-        this.generateDisplayRows();
+    get expandedColspan() {
+        let addonCols = 0;
+        if (this.hasExpanded) { addonCols++; }
+        if (this.hasRowCheckbox) { addonCols++; }
+
+        return this.columns.length + addonCols;
     }
 
     private filterSubmit() {
-        this.paginationPage = 1;
-        this.generateDisplayRows();
+        this.refreshResults();
     }
 
-    private setupPagination() {
+    private refreshResults() {
+        // We do not need to generate display rows
+        // if the pagination page needs to be reset to 1
+        // since changing that, will also call generateDisplayRows
+        if (this.paginationPage !== 1) {
+            this.paginationPage = 1;
+        } else {
+            this.generateDisplayRows();
+        }
+    }
+
+    private tokenizeSearchTerms() {
+        // If Undefined/Null, then no tokens
+        if (this.searchText === null || this.searchText === undefined) {
+            return [];
+        }
+
+        // If nothing but empty space, also no tokens
+        const parseText = this.searchText.trim();
+        if (parseText === '') {
+            return [];
+        }
+
+        const searchTerms: string[] = tokenizeSearchString( this.searchText );
+        const finalTerms: string[] = [];
+        for (const term of searchTerms) {
+            if (term.trim().length !== 0) {
+                finalTerms.push(term);
+            }
+        }
+
+        return finalTerms;
+
+    }
+
+    private updatePagination() {
         const rowsToShow = this.rowsPerPage;
         let numPages = Math.floor(this.filteredRowCount / rowsToShow);
         if ((this.filteredRowCount % this.rowsPerPage) > 0) {
@@ -174,11 +261,7 @@ export default class ACEDataTable extends Vue {
         }
     }
 
-    private generateDisplayRows() {
-        this.$store.dispatch( 'toggleLoadingOverlay', {} );
-        const displayRows = this.rows.filter( this.defaultFilter ).sort( this.defaultSort );
-        this.filteredRowCount = displayRows.length;
-        this.displayRows = displayRows.slice( (this.paginationPage - 1) * this.rowsPerPage, this.paginationPage * this.rowsPerPage );
+    private updateRange() {
         this.startRange = ((this.paginationPage - 1) * this.rowsPerPage) + 1;
         const endRange = this.paginationPage * this.rowsPerPage;
         if (endRange > this.filteredRowCount) {
@@ -186,7 +269,11 @@ export default class ACEDataTable extends Vue {
         } else {
             this.endRange = endRange;
         }
-        this.setupPagination();
+    }
+
+    private generateDisplayRows() {
+        this.$store.dispatch( 'toggleLoadingOverlay', {} );
+        this.$emit( 'query', this.paginationPage, this.tableSortDetails, this.sortOrderTracker, this.searchText );
         this.$store.dispatch( 'toggleLoadingOverlay', {} );
     }
 
@@ -209,7 +296,8 @@ export default class ACEDataTable extends Vue {
                     this.tableSortDetails[trackerIndex].sortOrder = this.sortOrderTracker.indexOf(trackerIndex) + 1;
                 });
             }
-            this.generateDisplayRows();
+
+            this.refreshResults();
         }
     }
 
@@ -224,6 +312,27 @@ export default class ACEDataTable extends Vue {
         return classes.join(' ');
     }
 
+    private columnWidth(column: TableColumn) {
+        if (column.width !== undefined && column.width !== '') {
+            return column.width;
+        }
+    }
+
+    private compareByString( value: any, search: string ) {
+        return value != null &&
+        search != null &&
+        typeof value !== 'boolean' &&
+        value.toString().toLocaleLowerCase().indexOf(search.toLocaleLowerCase()) !== -1;
+    }
+
+    private appendSearchTag( searchTag: string ) {
+        if (this.searchText === undefined || this.searchText === null || this.searchText === '' ) {
+            this.searchText = searchTag + ':';
+        } else {
+            this.searchText = this.searchText + ' ' + searchTag + ':';
+        }
+    }
+
     private rowClass( index: number ) {
         if ((index % 2) === 0) {
             return 'even-row';
@@ -232,59 +341,13 @@ export default class ACEDataTable extends Vue {
         return 'odd-row';
     }
 
-    private columnWidth(column: TableColumn) {
-        if (column.width !== undefined && column.width !== '') {
-            return column.width;
-        }
-    }
-
-    private defaultSort( a: any, b: any ) {
-        if (this.sortOrderTracker.length <= 0) {
-            return a[this.columns[0].field] - b[this.columns[0].field];
+    private toggleExpandRow( rowID: number ) {
+        if (this.displayRows[rowID].is_expanded === true) {
+            this.displayRows[rowID].is_expanded = false;
+        } else {
+            this.displayRows[rowID].is_expanded = true;
         }
 
-        for (const colID of this.sortOrderTracker) {
-            let directionModifier = 1;
-            if (this.tableSortDetails[colID].sortDirection === 'asc') {
-                directionModifier = -1;
-            }
-
-            const aval = a[this.columns[colID].field];
-            const bval = b[this.columns[colID].field];
-
-            if (aval > bval) {
-                return -1 * directionModifier;
-            } else if (aval < bval) {
-                return 1 * directionModifier;
-            }
-        }
-
-        return 0;
-    }
-
-    private defaultFilter( item: any ) {
-        if (this.searchText === null || this.searchText === '' ) {
-            return true;
-        }
-
-        let foundMatch = false;
-        for (const column of this.columns) {
-            if ( column.searchable ) {
-                foundMatch = this.compareByString( item[column.field], this.searchText );
-                if (foundMatch) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    private compareByString( value: any, search: string ) {
-        return value != null &&
-        search != null &&
-        typeof value !== 'boolean' &&
-        value.toString().toLocaleLowerCase().indexOf(search.toLocaleLowerCase()) !== -1;
     }
 
 }
@@ -311,6 +374,14 @@ export default class ACEDataTable extends Vue {
                 &.columnSortable {
                     cursor: pointer;
                 }
+
+                .tableSearchTag {
+                    cursor: pointer;
+                    color: var( --v-tertiary-base );
+                    &:hover {
+                        color: var( --v-secondary-base );
+                    }
+                }
             }
 
             td {
@@ -321,5 +392,6 @@ export default class ACEDataTable extends Vue {
         tbody tr.even-row {
             background-color: rgba(70, 68, 68, 0.05);
         }
+
     }
 </style>
