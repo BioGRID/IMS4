@@ -27,42 +27,62 @@
                 <v-icon class='ml-2'>mdi-account-plus</v-icon>
             </v-btn>
              
-            <ACEDataTable
+            <ACEElasticDataTable
                 class='mt-5'
                 title="Chemicals"
                 tableClass="pa-1"
-                :columns="chemicalTableHeaders"
-                :rows="chemicalList"
-                :rowsPerPage="100"
-                :totalRows="chemicalCount"
+                :columns="tableHeaders"
+                :rowsPerPage="rowsPerPage"
+                :displayRows="displayRows"
+                :filteredRowCount="filteredRowCount"
+                :totalRowCount="totalRowCount"
+                :hasExpanded="hasExpanded"
+                :hasRowCheckbox="hasRowCheckbox"
                 :pagination="true"
                 :showSearch="true"
+                @query="fetchData"
             >
-                <template slot-scope="{ row }">
-                    <td class='text-left' nowrap>{{ row.chemical_id }}</td>
-                    <td class='text-left' nowrap>{{ row.name }}</td>
-                    <td class='text-left' wrap>{{ row.description }}</td>
-                    <td class='text-left' nowrap>{{ row.chemical_type }}</td>
-                    <td class='text-left' nowrap>{{ row.source }}</td>
-                    <td class='text-left' nowrap>{{ row.source_id }}</td>
-                    <td class='nowrap text-center'>
+
+                <template slot="defaultRow" slot-scope="{ row, rowIndex }">
+                    <td class='text-left pa-3' nowrap>{{ row._source.chemical_id }}</td>
+                    <td class='text-left pa-3'>{{ row._source.name }}</td>
+                    <td class='text-left pa-3' wrap>{{ row._source.description }}</td>
+                    <td class='text-left pa-3' nowrap>{{ row._source.chemical_type }}</td>
+                    <td class='text-left pa-3' nowrap>{{ row._source.source }}</td>
+                    <td class='text-left pa-3' nowrap>{{ row._source.source_id }}</td>
+                    <td class='nowrap text-center pa-3'>
                         <v-btn 
                             x-small 
                             dark 
                             fab 
                             elevation="0" 
                             color="info" 
-                            :title='"Edit chemical: " + row.name' 
-                            :to="'/admin/chemical/chemicaledit/' + row.chemical_id"
+                            :title='"Edit chemical: " + row._source.name' 
+                            :to="'/admin/chemical/chemicaledit/' + row._source.chemical_id"
                         >
                             <v-icon>mdi-account-edit</v-icon>
                         </v-btn>
                     </td>   
                 </template>
+                <template slot="expandedRow" slot-scope="{ row, rowIndex }">
+                    <td :colspan='expandedColspan'>
+                        <v-sheet
+                            color="amber lighten-4"
+                            class="pa-2"
+                        >
+                            <ul>
+                                <li><strong>InChi</strong>: {{ row._source.inchi }}</li>
+                                <li><strong>InChiKey</strong>: {{ row._source.inchikey }}</li>
+                                <li><strong>Molecular Formula</strong>: {{ row._source.formula }}</li>
+                                <li><strong>Smile</strong>: {{ row._source.smile }}</li>
+                            </ul>
 
-            </ACEDataTable>
-            
-            <div v-if="retrievingChemicalString">Retrieving chemicals.</div>
+                        </v-sheet>
+                    </td>
+                </template>
+
+            </ACEElasticDataTable>
+        
 
         </v-container>
     </div>
@@ -71,45 +91,57 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { State, namespace } from 'vuex-class';
-import { required, numeric } from 'vuelidate/lib/validators';
-import { generateValidationError } from '@/utils/ValidationErrors';
-import Vuelidate from 'vuelidate';
-import { ChemicalEntry, API_CHEMICAL_FETCH, API_CHEMICAL_FETCH_ALL } from '@/models/annotation/Chemical';
-import axios from 'axios';
-import store from '@/store/store';
-import ACEDataTable from '@/components/data/ACEDataTable.vue';
+
+import ACEElasticDataTable from '@/components/data/ACEElasticDataTable.vue';
+import { TableColumn, TableSort, SearchTagLookup } from '@/models/table/Table';
+import bodybuilder from 'bodybuilder';
+import { ELASTIC_QUERY, ELASTIC_COUNT } from '@/models/elastic/Query';
+import { buildSearchQuery } from '@/utils/ElasticSearchBuilder';
 
 @Component({
     components: {
-        ACEDataTable,
+        ACEElasticDataTable,
     },
 })
 export default class ChemicalManager extends Vue {
-    private chemicalSearchQuery: number = 301;
-    private retrievingChemicalString: boolean = true;
-    private chemicalName: string = '';
-    private chemicalList: object[] = [];
-    private chemicalTableHeaders: object[] = [
+    private displayRows: object[] = [];
+    private darkMode: boolean = false;
+    private totalRowCount: number = 0;
+    private hasExpanded: boolean = true;
+    private hasRowCheckbox: boolean = false;
+    private filteredRowCount: number = 0;
+    private rowsPerPage: number = 25;
+    private searchTagLookup: SearchTagLookup = {
+        '#CID': 'chemical_id',
+        '#CN': 'name',
+        '#CT': 'chemical_type',
+        '#CD': 'description',
+        '#CS': 'source',
+        '#CSID': 'source_id',
+    };
+    private tableHeaders: TableColumn[] = [
          {
             title: 'ID',
             field: 'chemical_id',
             sortable: true,
             searchable: true,
-            searchType: 'NumericRange',
+            searchTag: '#CID',
             searchName: 'ID',
-            sortDirection: '',
-            sortOrder: 0,
+            sortDirection: 'asc',
+            sortOrder: 1,
+            sortNested: undefined,
             className: 'text-center',
         },
         {
             title: 'Name',
-            field: 'name',
+            field: 'name_keyword',
             sortable: true,
             searchable: true,
-            searchType: 'Text',
+            searchTag: '#CN',
             searchName: 'Name',
-            sortDirection: 'asc',
-            sortOrder: 1,
+            sortDirection: '',
+            sortOrder: 0,
+            sortNested: undefined,
             className: 'text-left',
         },
         {
@@ -117,10 +149,11 @@ export default class ChemicalManager extends Vue {
             field: 'description',
             sortable: true,
             searchable: true,
-            searchType: 'Text',
+            searchTag: '#CD',
             searchName: 'Description',
             sortDirection: '',
             sortOrder: 0,
+            sortNested: undefined,
             className: 'text-left',
         },
         {
@@ -128,10 +161,11 @@ export default class ChemicalManager extends Vue {
             field: 'chemical_type',
             sortable: true,
             searchable: true,
-            searchType: 'Text',
+            searchTag: '#CT',
             searchName: 'Chemical Type',
             sortDirection: '',
             sortOrder: 0,
+            sortNested: undefined,
             className: 'text-left',
         },
         {
@@ -139,10 +173,12 @@ export default class ChemicalManager extends Vue {
             field: 'source',
             sortable: true,
             searchable: true,
+            searchTag: '#CS',
             searchType: 'Text',
             searchName: 'Source',
             sortDirection: '',
             sortOrder: 0,
+            sortNested: undefined,
             className: 'text-left',
         },
         {
@@ -150,10 +186,12 @@ export default class ChemicalManager extends Vue {
             field: 'source_id',
             sortable: true,
             searchable: true,
+            searchTag: '#CSID',
             searchType: 'Text',
             searchName: 'Source ID',
             sortDirection: '',
             sortOrder: 0,
+            sortNested: undefined,
             className: 'text-left',
         },
         {
@@ -161,53 +199,94 @@ export default class ChemicalManager extends Vue {
             field: 'tools',
             sortable: false,
             searchable: false,
+            searchTag: '',
             searchType: '',
             searchName: 'Tools',
             sortDirection: '',
             sortOrder: 0,
+            sortNested: undefined,
             className: 'nowrap text-center',
         },
     ];
 
     private created() {
-        this.generateChemicalList();
+        this.getTotalCount();
     }
 
-    private generateChemicalList() {
-        API_CHEMICAL_FETCH_ALL( (data: any) =>  {
-            for (const chemical of data) {
-                this.chemicalList.push({
-                    chemical_id: chemical.chemical_id,
-                    name: chemical.name,
-                    description: chemical.description,
-                    chemical_type: chemical.chemical_type,
-                    source: chemical.source,
-                    source_id: chemical.source_id,
-                });
-            }
-            // Turn the retrievingChemicalString boolean false to hide the message about retreiving chemicals
-            this.retrievingChemicalString = false;
+    get expandedColspan() {
+        let addonCols = 0;
+        if (this.hasExpanded) { addonCols++; }
+        if (this.hasRowCheckbox) { addonCols++; }
+
+        return this.tableHeaders.length + addonCols;
+    }
+
+    private getTotalCount() {
+        const query = this.getBaseQuery();
+        ELASTIC_COUNT( query.build(), 'chemical', false, (data: any) => {
+            this.totalRowCount = data.count;
+        }, (error: any) => {
+            console.log(error);
         });
     }
 
-    get chemicalCount() {
-        return this.chemicalList.length;
+    private getBaseQuery() {
+        return bodybuilder()
+            .filter( 'term', 'deprecated', false );
     }
 
-    get chemicalSearchErrors() {
-        const errors = [];
-        if (this.$v.chemicalSearchQuery.$dirty) {
-            if (!this.$v.chemicalSearchQuery.required) {
-                errors.push( generateValidationError( 'required', 'Chemical ID', null ));
-            } else if (!this.$v.chemicalSearchQuery.numeric) {
-                errors.push( generateValidationError( 'numeric', 'Chemical ID', null ));
+    private buildSortOptions( tableSortDetails: TableSort[], sortOrderTracker: number[] ) {
+        const sortOptions = [];
+        for (const colID of sortOrderTracker) {
+            const sortOption: any = {};
+            const col = this.tableHeaders[colID];
+            sortOption[col.field] = {
+                order: tableSortDetails[colID].sortDirection,
+            };
+
+            if (col.sortNested !== undefined) {
+                sortOption[col.field].nested = col.sortNested;
             }
+
+            sortOptions.push(sortOption);
         }
-        return errors;
+        return sortOptions;
     }
 
-    get isInvalid() {
-        return this.$v.$invalid;
+    private fetchData( paginationPage: number, tableSortDetails: TableSort[], sortOrderTracker: number[], searchText: string ) {
+        let query = this.getBaseQuery();
+
+        const sortOptions = this.buildSortOptions( tableSortDetails, sortOrderTracker );
+
+        query = buildSearchQuery( searchText, query, this.searchTagLookup, {} );
+        query = query.size( this.rowsPerPage )
+            .from( ((paginationPage - 1) * this.rowsPerPage));
+
+        const formattedQuery: any = query.build();
+        formattedQuery.sort = sortOptions;
+
+        ELASTIC_QUERY( formattedQuery, 'chemical', true, (data: any) => {
+            if (data.hits.total.value > 0 ) {
+                this.displayRows = [];
+                let hit: any;
+                for (hit of data.hits.hits) {
+                    hit.is_expanded = false;
+                    hit.is_checked = false;
+                    this.displayRows.push(hit);
+                }
+                this.filteredRowCount = data.hits.total.value;
+            } else {
+                this.displayRows = [];
+                this.filteredRowCount = 0;
+            }
+        }, (error: any) => {
+            console.log(error);
+        });
+
+    }
+
+    private displayExpandedContent( row: any ) {
+        return 'THIS IS EXPANDED CONTENT NOW';
     }
 
 }

@@ -55,7 +55,7 @@ import { Component, Vue, Mixins } from 'vue-property-decorator';
 import { State, namespace } from 'vuex-class';
 import DatasetDetails from '@/components/datasets/DatasetDetails.vue';
 import DatasetTools from '@/components/datasets/DatasetTools.vue';
-import HistoryList from '@/components/history/HistoryList.vue';
+// import HistoryList from '@/components/history/HistoryList.vue';
 import ACEElasticDataTable from '@/components/data/ACEElasticDataTable.vue';
 import { TableColumn, TableSort, SearchTagLookup } from '@/models/table/Table';
 import bodybuilder from 'bodybuilder';

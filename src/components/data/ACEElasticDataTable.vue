@@ -385,7 +385,7 @@ export default class ACEElasticDataTable extends Vue {
             }
 
             td {
-                padding: 5px;
+                padding: 25px !important;
             }
         }
 

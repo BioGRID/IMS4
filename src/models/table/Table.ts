@@ -3,7 +3,7 @@ export interface TableColumn {
     field: string;
     sortable: boolean;
     searchable: boolean;
-    searchType: string;
+    searchType?: string;
     searchTag: string | undefined;
     searchName: string;
     sortDirection: string;
