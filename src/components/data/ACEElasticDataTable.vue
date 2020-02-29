@@ -76,7 +76,7 @@
                     <template v-for="(row, rowIndex) in displayRows">
                         <tr :class="rowClass(rowIndex)">
                             <slot name="defaultRow" :row="row" :rowIndex="rowIndex"></slot>
-                            <td class='text-center' v-if="hasExpanded">
+                            <td class='text-center expandedColumn' v-if="hasExpanded">
                                 <v-btn 
                                     medium 
                                     class='datatable-expand-row'
@@ -393,7 +393,9 @@ export default class ACEElasticDataTable extends Vue {
             }
 
             td {
-                padding: 25px !important;
+                &.expandedColumn {
+                    width: 4%;
+                }
             }
         }
 
