@@ -42,8 +42,6 @@ export function buildSearchQuery( searchText: string, queryStructure: any, searc
         }
     }
 
-    console.log(searchText);
-
     // create a query using the newly build search string
     queryStructure = queryStructure.query( 'query_string', {
         query: searchText,
