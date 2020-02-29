@@ -36,33 +36,37 @@
                             :width="columnWidth(column)"
                             @click="column.sortable ? sortBy(index) : null"
                         >
-                            <span 
-                                v-if="column.searchTag !== undefined" 
-                                class='tableSearchTag'
-                                @click.stop="appendSearchTag( column.searchTag )"
-                            >
-                                [{{ column.searchTag }}]
-                            </span>
+                            <div class='tableSearchTagWrap'>
+                                <span 
+                                    v-if="column.searchTag !== undefined" 
+                                    class='tableSearchTag'
+                                    @click.stop="appendSearchTag( column.searchTag )"
+                                >
+                                    [{{ column.searchTag }}]
+                                </span>
+                            </div>
 
-                            {{ column.title }}
-                            <v-icon v-if="tableSortDetails[index].sortDirection === 'asc'"
-                                dark
-                                small
-                            >
-                                mdi-arrow-up
-                            </v-icon>
-                            <v-icon v-if="tableSortDetails[index].sortDirection === 'desc'"
-                                dark
-                                small
-                            >
-                                mdi-arrow-down
-                            </v-icon>
-                            <v-icon v-if="tableSortDetails[index].sortOrder && tableSortDetails[index].sortDirection"
-                                dark
-                                small
-                            >
-                                mdi-numeric-{{ tableSortDetails[index].sortOrder }}-box
-                            </v-icon>
+                            <div>
+                                {{ column.title }}
+                                <v-icon v-if="tableSortDetails[index].sortDirection === 'asc'"
+                                    dark
+                                    small
+                                >
+                                    mdi-arrow-up
+                                </v-icon>
+                                <v-icon v-if="tableSortDetails[index].sortDirection === 'desc'"
+                                    dark
+                                    small
+                                >
+                                    mdi-arrow-down
+                                </v-icon>
+                                <v-icon v-if="tableSortDetails[index].sortOrder && tableSortDetails[index].sortDirection"
+                                    dark
+                                    small
+                                >
+                                    mdi-numeric-{{ tableSortDetails[index].sortOrder }}-box
+                                </v-icon>
+                            </div>
                         </th>
                         <th v-if="hasExpanded"></th>
                     </tr>
@@ -375,11 +379,15 @@ export default class ACEElasticDataTable extends Vue {
                     cursor: pointer;
                 }
 
-                .tableSearchTag {
-                    cursor: pointer;
-                    color: var( --v-tertiary-base );
-                    &:hover {
-                        color: var( --v-secondary-base );
+                .tableSearchTagWrap {
+                    height: 20px;
+                    display: block;
+                    .tableSearchTag {
+                        cursor: pointer;
+                        color: var( --v-tertiary-base );
+                        &:hover {
+                            color: var( --v-secondary-base );
+                        }
                     }
                 }
             }

@@ -1,5 +1,5 @@
 
-import { SearchTagLookup } from '@/models/table/Table';
+import { SearchTagLookup, TableSort, TableColumn } from '@/models/table/Table';
 import { AttributeTypeHash } from '@/models/curation/AttributeType';
 
 export function buildSearchQuery( searchText: string, queryStructure: any, searchTagLookup: SearchTagLookup, attributeLookup: AttributeTypeHash  ) {
@@ -52,4 +52,22 @@ export function buildSearchQuery( searchText: string, queryStructure: any, searc
 
     return queryStructure;
 
+}
+
+export function buildSortQuery( tableSortDetails: TableSort[], sortOrderTracker: number[], tableHeaders: TableColumn[] ) {
+    const sortOptions = [];
+    for (const colID of sortOrderTracker) {
+        const sortOption: any = {};
+        const col = tableHeaders[colID];
+        sortOption[col.field] = {
+            order: tableSortDetails[colID].sortDirection,
+        };
+
+        if (col.sortNested !== undefined) {
+            sortOption[col.field].nested = col.sortNested;
+        }
+
+        sortOptions.push(sortOption);
+    }
+    return sortOptions;
 }

@@ -44,12 +44,15 @@
             >
 
                 <template slot="defaultRow" slot-scope="{ row, rowIndex }">
-                    <td class='text-left pa-3' nowrap>{{ row._source.chemical_id }}</td>
-                    <td class='text-left pa-3'>{{ row._source.name }}</td>
-                    <td class='text-left pa-3' wrap>{{ row._source.description }}</td>
-                    <td class='text-left pa-3' nowrap>{{ row._source.chemical_type }}</td>
-                    <td class='text-left pa-3' nowrap>{{ row._source.source }}</td>
-                    <td class='text-left pa-3' nowrap>{{ row._source.source_id }}</td>
+                    <td class='text-center pa-3' nowrap>{{ row._source.chemical_id }}</td>
+                    <td class='text-center pa-3'>{{ row._source.name }}</td>
+                    <td class='text-left pa-3' wrap>
+                        {{ buildDescription(row._source.description, row.show_full_description, 30, rowIndex) }}
+                        <a v-if="!row.show_full_description" class='plainLink' @click='expandDescription( rowIndex )'>[more]</a>
+                    </td>
+                    <td class='text-center pa-3' nowrap>{{ row._source.chemical_type }}</td>
+                    <td class='text-center pa-3' nowrap>{{ row._source.source }}</td>
+                    <td class='text-center pa-3' nowrap>{{ row._source.source_id }}</td>
                     <td class='nowrap text-center pa-3'>
                         <v-btn 
                             x-small 
@@ -68,13 +71,13 @@
                     <td :colspan='expandedColspan'>
                         <v-sheet
                             color="amber lighten-4"
-                            class="pa-2"
+                            class="pa-2 ml-2 mr-2"
                         >
                             <ul>
-                                <li><strong>InChi</strong>: {{ row._source.inchi }}</li>
-                                <li><strong>InChiKey</strong>: {{ row._source.inchikey }}</li>
-                                <li><strong>Molecular Formula</strong>: {{ row._source.formula }}</li>
-                                <li><strong>Smile</strong>: {{ row._source.smile }}</li>
+                                <li v-for="(content,index) in buildExpandedContent(row)">
+                                    
+                                    <strong>{{ content.title }}</strong>: {{ content.value }}
+                                </li>
                             </ul>
 
                         </v-sheet>
@@ -93,10 +96,10 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 import { State, namespace } from 'vuex-class';
 
 import ACEElasticDataTable from '@/components/data/ACEElasticDataTable.vue';
-import { TableColumn, TableSort, SearchTagLookup } from '@/models/table/Table';
+import { TableColumn, TableSort, SearchTagLookup, ElasticContentField, ElasticContentValue } from '@/models/table/Table';
 import bodybuilder from 'bodybuilder';
 import { ELASTIC_QUERY, ELASTIC_COUNT } from '@/models/elastic/Query';
-import { buildSearchQuery } from '@/utils/ElasticSearchBuilder';
+import { buildSearchQuery, buildSortQuery } from '@/utils/ElasticSearchBuilder';
 
 @Component({
     components: {
@@ -104,13 +107,21 @@ import { buildSearchQuery } from '@/utils/ElasticSearchBuilder';
     },
 })
 export default class ChemicalManager extends Vue {
-    private displayRows: object[] = [];
+    private displayRows: any[] = [];
     private darkMode: boolean = false;
     private totalRowCount: number = 0;
     private hasExpanded: boolean = true;
     private hasRowCheckbox: boolean = false;
     private filteredRowCount: number = 0;
     private rowsPerPage: number = 25;
+    private expandedContentFields: ElasticContentField[] = [
+        { title: 'InChi', field: 'inchi' },
+        { title: 'InChiKey', field: 'inchikey' },
+        { title: 'Molecular Formula', field: 'formula' },
+        { title: 'Smile', field: 'smile' },
+        { title: 'Molecular Weight', field: 'molecular_weight' },
+        { title: 'Synonyms', field: 'synonyms' },
+    ];
     private searchTagLookup: SearchTagLookup = {
         '#CID': 'chemical_id',
         '#CN': 'name',
@@ -129,8 +140,8 @@ export default class ChemicalManager extends Vue {
             searchName: 'ID',
             sortDirection: 'asc',
             sortOrder: 1,
-            sortNested: undefined,
             className: 'text-center',
+            width: '5%',
         },
         {
             title: 'Name',
@@ -141,19 +152,17 @@ export default class ChemicalManager extends Vue {
             searchName: 'Name',
             sortDirection: '',
             sortOrder: 0,
-            sortNested: undefined,
-            className: 'text-left',
+            className: 'text-center',
         },
         {
             title: 'Description',
             field: 'description',
-            sortable: true,
+            sortable: false,
             searchable: true,
             searchTag: '#CD',
             searchName: 'Description',
             sortDirection: '',
             sortOrder: 0,
-            sortNested: undefined,
             className: 'text-left',
         },
         {
@@ -165,8 +174,7 @@ export default class ChemicalManager extends Vue {
             searchName: 'Chemical Type',
             sortDirection: '',
             sortOrder: 0,
-            sortNested: undefined,
-            className: 'text-left',
+            className: 'text-center',
         },
         {
             title: 'Source',
@@ -174,12 +182,10 @@ export default class ChemicalManager extends Vue {
             sortable: true,
             searchable: true,
             searchTag: '#CS',
-            searchType: 'Text',
             searchName: 'Source',
             sortDirection: '',
             sortOrder: 0,
-            sortNested: undefined,
-            className: 'text-left',
+            className: 'text-center',
         },
         {
             title: 'Source ID',
@@ -187,24 +193,19 @@ export default class ChemicalManager extends Vue {
             sortable: true,
             searchable: true,
             searchTag: '#CSID',
-            searchType: 'Text',
             searchName: 'Source ID',
             sortDirection: '',
             sortOrder: 0,
-            sortNested: undefined,
-            className: 'text-left',
+            className: 'text-center',
         },
         {
             title: 'Tools',
             field: 'tools',
             sortable: false,
             searchable: false,
-            searchTag: '',
-            searchType: '',
             searchName: 'Tools',
             sortDirection: '',
             sortOrder: 0,
-            sortNested: undefined,
             className: 'nowrap text-center',
         },
     ];
@@ -231,39 +232,20 @@ export default class ChemicalManager extends Vue {
     }
 
     private getBaseQuery() {
-        return bodybuilder()
-            .filter( 'term', 'deprecated', false );
-    }
-
-    private buildSortOptions( tableSortDetails: TableSort[], sortOrderTracker: number[] ) {
-        const sortOptions = [];
-        for (const colID of sortOrderTracker) {
-            const sortOption: any = {};
-            const col = this.tableHeaders[colID];
-            sortOption[col.field] = {
-                order: tableSortDetails[colID].sortDirection,
-            };
-
-            if (col.sortNested !== undefined) {
-                sortOption[col.field].nested = col.sortNested;
-            }
-
-            sortOptions.push(sortOption);
-        }
-        return sortOptions;
+        return bodybuilder();
     }
 
     private fetchData( paginationPage: number, tableSortDetails: TableSort[], sortOrderTracker: number[], searchText: string ) {
         let query = this.getBaseQuery();
 
-        const sortOptions = this.buildSortOptions( tableSortDetails, sortOrderTracker );
+        const sortQuery = buildSortQuery( tableSortDetails, sortOrderTracker, this.tableHeaders );
 
         query = buildSearchQuery( searchText, query, this.searchTagLookup, {} );
         query = query.size( this.rowsPerPage )
             .from( ((paginationPage - 1) * this.rowsPerPage));
 
         const formattedQuery: any = query.build();
-        formattedQuery.sort = sortOptions;
+        formattedQuery.sort = sortQuery;
 
         ELASTIC_QUERY( formattedQuery, 'chemical', true, (data: any) => {
             if (data.hits.total.value > 0 ) {
@@ -272,6 +254,7 @@ export default class ChemicalManager extends Vue {
                 for (hit of data.hits.hits) {
                     hit.is_expanded = false;
                     hit.is_checked = false;
+                    hit.show_full_description = false;
                     this.displayRows.push(hit);
                 }
                 this.filteredRowCount = data.hits.total.value;
@@ -285,8 +268,52 @@ export default class ChemicalManager extends Vue {
 
     }
 
-    private displayExpandedContent( row: any ) {
-        return 'THIS IS EXPANDED CONTENT NOW';
+    private buildDescription( description: string, showFullDescription: boolean, splitSize: number, rowIndex: number ) {
+        if (description.length <= 0) {
+            this.displayRows[rowIndex].show_full_description = true;
+            return '-';
+        }
+
+        if (showFullDescription) {
+            this.displayRows[rowIndex].show_full_description = true;
+            return description;
+        }
+
+        const splitDescription = description.split(' ');
+        if (splitDescription.length > splitSize) {
+            this.displayRows[rowIndex].show_full_description = false;
+            return splitDescription.slice(0, splitSize).join(' ') + ' ... ';
+        } else {
+            this.displayRows[rowIndex].show_full_description = true;
+            return description;
+        }
+    }
+
+    private expandDescription( rowIndex: number ) {
+        this.displayRows[rowIndex].show_full_description = true;
+    }
+
+    private buildExpandedContent( row: any ) {
+        const expandedContent: ElasticContentValue[] = [];
+        for (const entry of this.expandedContentFields) {
+            if (row._source[entry.field].length > 0) {
+                if (entry.field === 'synonyms') {
+                    expandedContent.push({ title: entry.title, value: row._source[entry.field].join( ' | ' ) });
+                } else {
+                    expandedContent.push({ title: entry.title, value: row._source[entry.field] });
+                }
+            }
+        }
+
+        const dbxrefs = Object.entries(row._source.dbxrefs);
+        const dbxrefSet: string[] = [];
+        for (const [key, value] of dbxrefs) {
+            dbxrefSet.push(key + ':' + value);
+        }
+
+        expandedContent.push({ title: 'DBXrefs', value: dbxrefSet.join(' | ') });
+
+        return expandedContent;
     }
 
 }
