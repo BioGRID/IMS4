@@ -38,7 +38,7 @@
                     <td :colspan='expandedColspan'>
                         <v-sheet
                             color="amber lighten-4"
-                            class="pa-2"
+                            class="pa-2 ml-2 mr-2"
                         >
                             EXPANDED CONTENT
                         </v-sheet>
@@ -55,13 +55,12 @@ import { Component, Vue, Mixins } from 'vue-property-decorator';
 import { State, namespace } from 'vuex-class';
 import DatasetDetails from '@/components/datasets/DatasetDetails.vue';
 import DatasetTools from '@/components/datasets/DatasetTools.vue';
-// import HistoryList from '@/components/history/HistoryList.vue';
 import ACEElasticDataTable from '@/components/data/ACEElasticDataTable.vue';
 import { TableColumn, TableSort, SearchTagLookup } from '@/models/table/Table';
 import bodybuilder from 'bodybuilder';
 import { ELASTIC_QUERY, ELASTIC_COUNT } from '@/models/elastic/Query';
 import { elasticExtract } from '@/utils/ElasticExtractor';
-import { buildSearchQuery } from '@/utils/ElasticSearchBuilder';
+import { buildSearchQuery, buildSortQuery } from '@/utils/ElasticSearchBuilder';
 
 const curation = namespace( 'curation' );
 
@@ -95,7 +94,6 @@ export default class DatasetView extends Vue {
             field: 'participants.name_keyword',
             sortable: true,
             searchable: true,
-            searchType: 'Term',
             searchName: 'Bait',
             searchTag: '#B',
             sortDirection: '',
@@ -110,7 +108,6 @@ export default class DatasetView extends Vue {
             field: 'participants.name_keyword',
             sortable: true,
             searchable: true,
-            searchType: 'Term',
             searchName: 'Prey',
             searchTag: '#P',
             sortDirection: '',
@@ -125,7 +122,6 @@ export default class DatasetView extends Vue {
             field: 'participants.organism.abbreviation',
             sortable: true,
             searchable: true,
-            searchType: 'Term',
             searchName: 'Bait Organism',
             searchTag: '#BO',
             sortDirection: '',
@@ -140,7 +136,6 @@ export default class DatasetView extends Vue {
             field: 'participants.organism.abbreviation',
             sortable: true,
             searchable: true,
-            searchType: 'Term',
             searchName: 'Prey Organism',
             searchTag: '#PO',
             sortDirection: '',
@@ -155,12 +150,10 @@ export default class DatasetView extends Vue {
             field: 'keyword_attributes.ES.text',
             sortable: true,
             searchable: true,
-            searchType: 'Term',
             searchName: 'Email',
             searchTag: '@ES',
             sortDirection: '',
             sortOrder: 0,
-            sortNested: undefined,
             className: 'text-center',
             formatFunc: 'EKA_SC',
             formatFuncParams: { shortcode: 'ES' },
@@ -170,12 +163,10 @@ export default class DatasetView extends Vue {
             field: 'history.user_name',
             sortable: true,
             searchable: true,
-            searchType: 'Term',
             searchName: 'User',
             searchTag: '#U',
             sortDirection: '',
             sortOrder: 0,
-            sortNested: undefined,
             className: 'text-center',
         },
         {
@@ -183,12 +174,10 @@ export default class DatasetView extends Vue {
             field: 'history.addeddate',
             sortable: true,
             searchable: true,
-            searchType: 'Date',
             searchName: 'Date',
             searchTag: '#D',
             sortDirection: 'desc',
             sortOrder: 1,
-            sortNested: undefined,
             className: 'text-center',
         },
     ];
@@ -221,37 +210,17 @@ export default class DatasetView extends Vue {
             .filter( 'term', 'history.method', 'ACTIVATED' );
     }
 
-
-    private buildSortOptions( tableSortDetails: TableSort[], sortOrderTracker: number[] ) {
-        const sortOptions = [];
-        for (const colID of sortOrderTracker) {
-            const sortOption: any = {};
-            const col = this.tableHeaders[colID];
-            sortOption[col.field] = {
-                order: tableSortDetails[colID].sortDirection,
-            };
-
-            if (col.sortNested !== undefined) {
-                sortOption[col.field].nested = col.sortNested;
-            }
-
-            sortOptions.push(sortOption);
-        }
-        return sortOptions;
-    }
-
     private fetchData( paginationPage: number, tableSortDetails: TableSort[], sortOrderTracker: number[], searchText: string ) {
         let query = this.getBaseQuery();
 
-        const sortOptions = this.buildSortOptions( tableSortDetails, sortOrderTracker );
+        const sortQuery = buildSortQuery( tableSortDetails, sortOrderTracker, this.tableHeaders );
 
         query = buildSearchQuery( searchText, query, this.searchTagLookup, this.attributeTypes );
         query = query.size( this.rowsPerPage )
             .from( ((paginationPage - 1) * this.rowsPerPage));
 
         const formattedQuery: any = query.build();
-        console.log( formattedQuery );
-        formattedQuery.sort = sortOptions;
+        formattedQuery.sort = sortQuery;
 
         ELASTIC_QUERY( formattedQuery, 'entity', true, (data: any) => {
             if (data.hits.total.value > 0 ) {
