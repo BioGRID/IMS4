@@ -34,7 +34,47 @@
                                     />
                                 </v-col>
                                 <v-col cols="12" xl="6" lg="6" md="6" sm="12" xs="12">
+                                    <v-text-field
+                                        label="Chemical Type" 
+                                        :error-messages="chemicalTypeErrors"
+                                        dark
+                                        required
+                                        dense
+                                        v-model.trim="chemicalType"
+                                        @input="$v.chemicalType.$touch()"
+                                        @blur="$v.chemicalType.$touch()"
+                                    />
+                                </v-col>
+                            </v-row>
+                            <v-row>
+                                <v-col cols="12" xl="6" lg="6" md="6" sm="12" xs="12">
                                     <v-text-field 
+                                        label="Chemical Source"
+                                        :error-messages="chemicalSourceErrors"
+                                        dark
+                                        required
+                                        dense
+                                        v-model.trim="chemicalSource"
+                                        @input="$v.chemicalSource.$touch()"
+                                        @blur="$v.chemicalSource.$touch()"
+                                    />
+                                </v-col>
+                                <v-col cols="12" xl="6" lg="6" md="6" sm="12" xs="12">
+                                    <v-text-field
+                                        label="Chemical Source ID" 
+                                        :error-messages="chemicalSourceIDErrors"
+                                        dark
+                                        required
+                                        dense
+                                        v-model.trim="chemicalSourceID"
+                                        @input="$v.chemicalSourceID.$touch()"
+                                        @blur="$v.chemicalSourceID.$touch()"
+                                    />
+                                </v-col>
+                            </v-row>
+                             <v-row>
+                                <v-col cols="12" xl="12" lg="12" md="21" sm="12" xs="12">
+                                    <v-textarea 
                                         label="Chemical Description" 
                                         :error-messages="chemicalDescriptionErrors"
                                         dark
@@ -44,6 +84,46 @@
                                         @input="$v.chemicalDescription.$touch()"
                                         @blur="$v.chemicalDescription.$touch()"
                                     />
+                                </v-col>
+                            </v-row>
+                            <v-row>
+                                <v-col cols="12" xl="12" lg="12" md="21" sm="12" xs="12">
+                                    <v-expansion-panels>
+                                        <v-expansion-panel>
+                                            <v-expansion-panel-header>
+                                                <template v-slot:default="{ open }">
+                                                    <v-row no-gutters>
+                                                    <v-col cols="4">Trip name</v-col>
+                                                    <v-col
+                                                        cols="8"
+                                                        class="text--secondary"
+                                                    >
+                                                        <v-fade-transition leave-absolute>
+                                                        <span
+                                                            v-if="open"
+                                                            key="0"
+                                                        >
+                                                            Enter a name for the trip
+                                                        </span>
+                                                        <span
+                                                            v-else
+                                                            key="1"
+                                                        >
+                                                            {{ tripName }}
+                                                        </span>
+                                                        </v-fade-transition>
+                                                    </v-col>
+                                                    </v-row>
+                                                </template>
+                                            </v-expansion-panel-header>
+                                            <v-expansion-panel-content>
+                                            <v-text-field
+                                                v-model="tripName"
+                                                placeholder="Caribbean Cruise"
+                                            ></v-text-field>
+                                            </v-expansion-panel-content>
+                                        </v-expansion-panel>
+                                    </v-expansion-panels>
                                 </v-col>
                             </v-row>
                         <v-btn 
@@ -76,7 +156,15 @@ const auth = namespace( 'auth' );
 export default class ChemicalEdit extends Vue {
     private chemicalID: number = 0;
     private chemicalName: string = '';
+    private chemicalType: string = '';
+    private chemicalSource: string = '';
+    private chemicalSourceID: string = '';
     private chemicalDescription: string = '';
+    
+    private tripName: string = '';
+
+    private chemicalSourceID: string = '';
+
     public created() {
         this.initializeFieldValues();
     }
@@ -85,8 +173,47 @@ export default class ChemicalEdit extends Vue {
         API_CHEMICAL_FETCH( this.$route.params.id, (data: any) => {
             this.chemicalName = data.name;
             this.chemicalID = data.chemical_id;
+            this.chemicalType = data.chemical_type;
+            this.chemicalSource = data.source;
+            this.chemicalSourceID = data.source_id;
             this.chemicalDescription = data.description;
         });
+    }
+
+    get chemicalSourceErrors() {
+        const errors = [];
+        if (this.$v.chemicalSource.$dirty) {
+            if (!this.$v.chemicalSource.required) {
+                errors.push( generateValidationError( 'required', 'Chemical Source', null ));
+            } else if (!this.$v.chemicalSource.printableAsciiOnly) {
+                errors.push( generateValidationError( 'printableAsciiOnly', 'Chemical Source', null ));
+            }
+        }
+        return errors;
+    }
+
+    get chemicalSourceIDErrors() {
+        const errors = [];
+        if (this.$v.chemicalSourceID.$dirty) {
+            if (!this.$v.chemicalSourceID.required) {
+                errors.push( generateValidationError( 'required', 'Chemical Source ID', null ));
+            } else if (!this.$v.chemicalSourceID.printableAsciiOnly) {
+                errors.push( generateValidationError( 'printableAsciiOnly', 'Chemical Source ID', null ));
+            }
+        }
+        return errors;
+    }
+
+    get chemicalTypeErrors() {
+        const errors = [];
+        if (this.$v.chemicalType.$dirty) {
+            if (!this.$v.chemicalType.required) {
+                errors.push( generateValidationError( 'required', 'Chemical Type', null ));
+            } else if (!this.$v.chemicalType.printableAsciiOnly) {
+                errors.push( generateValidationError( 'printableAsciiOnly', 'Chemical Type', null ));
+            }
+        }
+        return errors;
     }
 
     get chemicalNameErrors() {
@@ -127,6 +254,9 @@ export default class ChemicalEdit extends Vue {
     private validations() {
         return {
             chemicalName: { required, printableAsciiOnly },
+            chemicalType: { required, printableAsciiOnly },
+            chemicalSource: { required, printableAsciiOnly },
+            chemicalSourceID: { required, printableAsciiOnly },
             chemicalDescription: { required, printableAsciiOnly },
         };
     }
