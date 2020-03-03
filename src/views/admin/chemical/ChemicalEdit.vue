@@ -93,7 +93,7 @@
                                             <v-expansion-panel-header>
                                                 <template v-slot:default="{ open }">
                                                     <v-row no-gutters>
-                                                    <v-col cols="4">Trip name</v-col>
+                                                    <v-col cols="4">Synonyms:</v-col>
                                                     <v-col
                                                         cols="8"
                                                         class="text--secondary"
@@ -103,24 +103,28 @@
                                                             v-if="open"
                                                             key="0"
                                                         >
-                                                            Enter a name for the trip
+                                                            Update/Add chemical synonyms
                                                         </span>
                                                         <span
                                                             v-else
                                                             key="1"
                                                         >
-                                                            {{ tripName }}
+                                                            {{ chemicalSynonyms }}
                                                         </span>
                                                         </v-fade-transition>
                                                     </v-col>
                                                     </v-row>
                                                 </template>
                                             </v-expansion-panel-header>
-                                            <v-expansion-panel-content>
-                                            <v-text-field
-                                                v-model="tripName"
-                                                placeholder="Caribbean Cruise"
+                                            <v-expansion-panel-content >
+
+                                            <v-text-field v-for="(item, index) in chemicalSynonyms" :key="index"
+                                                v-model="chemicalSynonyms[index]"
+                                                placeholder="Update Synonym Name"
+                                                clearable
+                                                @click:clear="deleteChemicalSynonym(index)"
                                             ></v-text-field>
+                                            
                                             </v-expansion-panel-content>
                                         </v-expansion-panel>
                                     </v-expansion-panels>
@@ -160,10 +164,8 @@ export default class ChemicalEdit extends Vue {
     private chemicalSource: string = '';
     private chemicalSourceID: string = '';
     private chemicalDescription: string = '';
-    
+    private chemicalSynonyms: any[] = [];
     private tripName: string = '';
-
-    private chemicalSourceID: string = '';
 
     public created() {
         this.initializeFieldValues();
@@ -177,6 +179,7 @@ export default class ChemicalEdit extends Vue {
             this.chemicalSource = data.source;
             this.chemicalSourceID = data.source_id;
             this.chemicalDescription = data.description;
+            this.chemicalSynonyms = data.synonyms.split('|');
         });
     }
 
@@ -242,6 +245,13 @@ export default class ChemicalEdit extends Vue {
 
     get isInvalid() {
         return this.$v.$invalid;
+    }
+
+    private deleteChemicalSynonym(index: any) {
+        console.log('index to delete: ' + index);
+        console.log('before: ' + this.chemicalSynonyms );
+        this.chemicalSynonyms.splice(index, 1);
+        console.log('After: ' + this.chemicalSynonyms );
     }
 
     private submitChemical( ) {
