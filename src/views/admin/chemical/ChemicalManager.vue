@@ -53,6 +53,7 @@
                     <td class='text-center pa-3' nowrap>{{ row._source.chemical_type }}</td>
                     <td class='text-center pa-3' nowrap>{{ row._source.source }}</td>
                     <td class='text-center pa-3' nowrap>{{ row._source.source_id }}</td>
+                    <td class='text-center pa-3' nowrap>{{ row._source.deprecated }}</td>
                     <td class='nowrap text-center pa-3'>
                         <v-btn 
                             x-small 
@@ -106,6 +107,7 @@ import { buildSearchQuery, buildSortQuery } from '@/utils/ElasticSearchBuilder';
         ACEElasticDataTable,
     },
 })
+
 export default class ChemicalManager extends Vue {
     private displayRows: any[] = [];
     private darkMode: boolean = false;
@@ -129,6 +131,7 @@ export default class ChemicalManager extends Vue {
         '#CD': 'description',
         '#CS': 'source',
         '#CSID': 'source_id',
+        '#CDEP': 'deprecated',
     };
     private tableHeaders: TableColumn[] = [
          {
@@ -194,6 +197,17 @@ export default class ChemicalManager extends Vue {
             searchable: true,
             searchTag: '#CSID',
             searchName: 'Source ID',
+            sortDirection: '',
+            sortOrder: 0,
+            className: 'text-center',
+        },
+        {
+            title: 'Deprectaed',
+            field: 'deprecated',
+            sortable: true,
+            searchable: true,
+            searchTag: '#CDEP',
+            searchName: 'Deprecated',
             sortDirection: '',
             sortOrder: 0,
             className: 'text-center',
