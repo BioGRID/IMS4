@@ -18,6 +18,10 @@ export interface ChemicalEntry {
     deprecated: number;
 }
 
+export interface ChemicalSynonymMap {
+    [synonymID: string]: string;
+}
+
 // Get Chemical/s from the Annotation API
 export function API_CHEMICAL_FETCH( chemicalQueryID: string, successCallback?: (data: []) => void ): any {
     const user = store.getters['auth/getUser'];

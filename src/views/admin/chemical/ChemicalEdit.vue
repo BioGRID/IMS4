@@ -109,7 +109,7 @@
                                                             v-else
                                                             key="1"
                                                         >
-                                                            {{ chemicalSynonyms }}
+                                                            {{ synonymListValues() }}
                                                         </span>
                                                         </v-fade-transition>
                                                     </v-col>
@@ -118,12 +118,13 @@
                                             </v-expansion-panel-header>
                                             <v-expansion-panel-content >
 
-                                            <v-text-field v-for="(item, index) in chemicalSynonyms" :key="index"
-                                                v-model="chemicalSynonyms[index]"
-                                                placeholder="Update Synonym Name"
-                                                clearable
-                                                @click:clear="deleteChemicalSynonym(index)"
-                                            ></v-text-field>
+                                                <v-text-field v-for="(item, index) in synonymList" :key="index"
+                                                    placeholder="Update Synonym Name"
+                                                    clearable
+                                                    v-model.trim="synonymList[index]"
+                                                    @click:clear="deleteChemicalSynonym(index)"
+                                                >
+                                                </v-text-field>
                                             
                                             </v-expansion-panel-content>
                                         </v-expansion-panel>
@@ -152,7 +153,7 @@ import { State, namespace } from 'vuex-class';
 import { required } from 'vuelidate/lib/validators';
 import { printableAsciiOnly } from '@/utils/Validators';
 import { generateValidationError } from '@/utils/ValidationErrors';
-import { API_CHEMICAL_FETCH } from '@/models/annotation/Chemical';
+import { API_CHEMICAL_FETCH, ChemicalSynonymMap } from '@/models/annotation/Chemical';
 
 const auth = namespace( 'auth' );
 
@@ -164,7 +165,9 @@ export default class ChemicalEdit extends Vue {
     private chemicalSource: string = '';
     private chemicalSourceID: string = '';
     private chemicalDescription: string = '';
-    private chemicalSynonyms: any[] = [];
+    private chemicalSynonyms: string[] = [];
+    private synonymCount = 0;
+    private synonymList: ChemicalSynonymMap = {};
     private tripName: string = '';
 
     public created() {
@@ -180,7 +183,16 @@ export default class ChemicalEdit extends Vue {
             this.chemicalSourceID = data.source_id;
             this.chemicalDescription = data.description;
             this.chemicalSynonyms = data.synonyms.split('|');
+            this.buildSynonymList();
         });
+    }
+
+    private buildSynonymList() {
+        this.synonymList = {};
+        for (const synonym of this.chemicalSynonyms) {
+            this.synonymList['synonym' + this.synonymCount] = synonym;
+            this.synonymCount++;
+        }
     }
 
     get chemicalSourceErrors() {
@@ -249,9 +261,15 @@ export default class ChemicalEdit extends Vue {
 
     private deleteChemicalSynonym(index: any) {
         console.log('index to delete: ' + index);
-        console.log('before: ' + this.chemicalSynonyms );
-        this.chemicalSynonyms.splice(index, 1);
-        console.log('After: ' + this.chemicalSynonyms );
+        console.log('before: ' + this.synonymList );
+        Vue.delete( this.synonymList, index );
+        // this.chemicalSynonyms.splice(index, 1);
+        console.log('After: ' + this.synonymList );
+        // this.buildSynonymList();
+    }
+
+    private synonymListValues() {
+        return Object.values(this.synonymList);
     }
 
     private submitChemical( ) {
