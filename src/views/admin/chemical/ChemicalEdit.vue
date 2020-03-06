@@ -145,13 +145,23 @@
                                     </v-expansion-panels>
                                 </v-col>
                             </v-row>
-                        <v-btn 
-                            @click="submitChemical"
-                            size="x-large"
-                            color="success"
-                            dark
-                            :disabled="isInvalid"
-                        >Update Chemical</v-btn>
+                            <v-row>
+                                <v-col cols="12" xl="12" lg="12" md="21" sm="12" xs="12">
+                                    <ExpandableInputPanel
+                                        panelLabel="Synonyms"
+                                        panelDesc="Update/Add chemical synonyms"
+                                        :panelEntries="this.chemicalSynonyms"
+                                        @updateEntries="updateChemicalSynonyms"
+                                    ></ExpandableInputPanel>
+                                </v-col>
+                            </v-row>
+                            <v-btn 
+                                @click="submitChemical"
+                                size="x-large"
+                                color="success"
+                                dark
+                                :disabled="isInvalid"
+                            >Update Chemical</v-btn>
                         </v-form>
                     </v-sheet>
                 </v-card-text>
@@ -168,10 +178,15 @@ import { required } from 'vuelidate/lib/validators';
 import { printableAsciiOnly } from '@/utils/Validators';
 import { generateValidationError } from '@/utils/ValidationErrors';
 import { API_CHEMICAL_FETCH, ChemicalSynonymMap } from '@/models/annotation/Chemical';
+import ExpandableInputPanel from '@/components/forms/ExpandableInputPanel.vue';
 
 const auth = namespace( 'auth' );
 
-@Component
+@Component({
+    components: {
+        ExpandableInputPanel,
+    },
+})
 export default class ChemicalEdit extends Vue {
     private chemicalID: number = 0;
     private chemicalName: string = '';
@@ -201,6 +216,10 @@ export default class ChemicalEdit extends Vue {
             this.chemicalSynonyms = data.synonyms.split('|');
             this.buildSynonymList();
         });
+    }
+
+    private updateChemicalSynonyms( synonyms: string[] ) {
+        this.chemicalSynonyms = synonyms;
     }
 
     private buildSynonymList() {
@@ -317,6 +336,7 @@ export default class ChemicalEdit extends Vue {
 
     private submitChemical( ) {
         this.$v.$touch();
+        console.log(this.chemicalSynonyms);
         if (!this.$v.$invalid) {
             // need to write this
         }
