@@ -35,15 +35,18 @@
                         title="Current Curation Groups"
                         tableClass="pa-1"
                         :columns="panelEntryTableHeaders"
-                        :displayRows="panelDisplayRows"
+                        :rows="panelDisplayRows"
                         :rowsPerPage="100"
                         :totalRows="panelEntryTableCount"
                         :pagination="true"
                         :showSearch="true"
                     >
-                        <template slot="defaultRow" slot-scope="{ row, rowIndex }">
+                          <template slot-scope="{ row, rowIndex }">
                             <td class='text-left' wrap v-for="(column, colIndex) in panelEntryTableHeaders">
-                                {{ row.name }}
+                                {{ row[column.field] }}
+                            </td>
+                           <td>
+                                {{rowIndex}}
                             </td>
                         </template>
 
@@ -95,7 +98,7 @@ export default class ExpandableInputPanel extends Vue {
     @Prop({type: String, default: ''}) private panelDesc!: string;
     @Prop({type: Array, default: []}) private panelEntries!: string[];
     @Prop({type: String, default: 'Add New Entry'}) private panelFieldPlaceholder!: string;
-    @Prop({type: Array, default: () => []}) private panelEntryTableHeaders!: any[];
+    @Prop({type: Array}) private panelEntryTableHeaders!: any[];
     @Prop({type: Array, default: () => []}) private panelDisplayRows!: any[];
     // @Prop({type: Array, default: () => ({})}) private panelEntryTableHeaders!: string[];
     // @Prop({type: Array, default: () => ({})}) private panelDisplayRows!: string[];

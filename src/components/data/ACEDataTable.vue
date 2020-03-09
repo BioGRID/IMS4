@@ -60,7 +60,7 @@
                 
                 <tbody>
                     <tr :class="rowClass(rowIndex)" v-for="(row, rowIndex) in displayRows" :key="rowIndex">
-                        <slot :row="row"></slot>
+                        <slot :row="row" :rowIndex="rowIndex"></slot>
                     </tr>
                 </tbody>
             </table>
