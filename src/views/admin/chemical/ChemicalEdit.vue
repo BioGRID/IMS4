@@ -88,70 +88,23 @@
                             </v-row>
                             <v-row>
                                 <v-col cols="12" xl="12" lg="12" md="21" sm="12" xs="12">
-                                    <v-expansion-panels
-                                        ref="addNewUserSynonymField" 
-                                    >
-                                        <v-expansion-panel>
-                                            <v-expansion-panel-header>
-                                                <template v-slot:default="{ open }">
-                                                    <v-row no-gutters>
-                                                    <v-col cols="4">Synonyms:</v-col>
-                                                    <v-col
-                                                        cols="8"
-                                                        class="text--secondary"
-                                                    >
-                                                        <v-fade-transition leave-absolute>
-                                                        <span
-                                                            v-if="open"
-                                                            key="0"
-                                                        >
-                                                            Update/Add chemical synonyms
-                                                        </span>
-                                                        <span
-                                                            v-else
-                                                            key="1"
-                                                        >
-                                                            {{ synonymListValues() }}
-                                                        </span>
-                                                        </v-fade-transition>
-                                                    </v-col>
-                                                    </v-row>
-                                                </template>
-                                            </v-expansion-panel-header>
-                                            <v-expansion-panel-content >
-
-                                                <v-text-field v-for="(item, index) in synonymList" :key="index"
-                                                    placeholder="Update Synonym Name"
-                                                    clearable
-                                                    readonly
-                                                    v-model.trim="synonymList[index]"
-                                                    @click:clear="deleteChemicalSynonym(index)"
-                                                >
-                                                </v-text-field>
-
-                                                <v-text-field
-                                                    label="Add New Synonym"  
-                                                    :hint="showNewUserSynonymHint === true ? newUserSynonymHint : ''" 
-                                                    ref="addNewUserSynonymField" 
-                                                    dense
-                                                    prepend-icon=mdi-plus
-                                                    @click:prepend="addNewUserSynonym"
-                                                    v-model.trim="newUserSynonym"
-                                                >
-                                                </v-text-field>
-       
-                                            </v-expansion-panel-content>
-                                        </v-expansion-panel>
-                                    </v-expansion-panels>
+                                    <ExpandableInputPanel
+                                        panelLabel="Synonyms"
+                                        panelDesc="Update/Add chemical synonyms"
+                                        :panelEntries="this.chemicalSynonyms"
+                                        :panelEntryTableHeaders="this.synonymTableHeaders"
+                                        :panelDisplayRows="this.displaySynonmRows"
+                                        @updateEntries="updateChemicalSynonyms"
+                                    ></ExpandableInputPanel>
                                 </v-col>
                             </v-row>
                             <v-row>
                                 <v-col cols="12" xl="12" lg="12" md="21" sm="12" xs="12">
                                     <ExpandableInputPanel
-                                        panelLabel="Synonyms"
-                                        panelDesc="Update/Add chemical synonyms"
-                                        :panelEntries="this.chemicalSynonyms"
-                                        @updateEntries="updateChemicalSynonyms"
+                                        panelLabel="External Database References"
+                                        panelDesc="Update/Add chemical external database references"
+                                        :panelEntries="this.chemicalDBxrefs"   
+                                        @updateEntries="updateChemicalDBxrefs"
                                     ></ExpandableInputPanel>
                                 </v-col>
                             </v-row>
@@ -195,11 +148,32 @@ export default class ChemicalEdit extends Vue {
     private chemicalSourceID: string = '';
     private chemicalDescription: string = '';
     private chemicalSynonyms: string[] = [];
-    private synonymCount = 0;
-    private synonymList: ChemicalSynonymMap = {};
-    private newUserSynonym: string = '';
-    private showNewUserSynonymHint: boolean = false;
-    private newUserSynonymHint: string = '';
+    private chemicalDBxrefs: string[] = [];
+    private synonymTableHeaders: any[] = [
+        {
+            title: 'Synonm Name',
+            field: 'name',
+            sortable: true,
+            searchable: true,
+            searchType: 'Text',
+            searchName: 'Name',
+            sortDirection: 'asc',
+            sortOrder: 1,
+            className: 'text-left',
+        },
+        {
+            title: 'Tools',
+            field: 'tools',
+            sortable: false,
+            searchable: false,
+            searchType: '',
+            searchName: 'Tools',
+            sortDirection: '',
+            sortOrder: 0,
+            className: 'nowrap text-center',
+        },
+    ];
+    private displaySynonmRows: any[] = [];
 
     public created() {
         this.initializeFieldValues();
@@ -214,7 +188,13 @@ export default class ChemicalEdit extends Vue {
             this.chemicalSourceID = data.source_id;
             this.chemicalDescription = data.description;
             this.chemicalSynonyms = data.synonyms.split('|');
-            this.buildSynonymList();
+            let hit: any;
+            for (hit of this.chemicalSynonyms) {
+                this.displaySynonmRows.push( {['name']: hit} );
+            }
+            console.log( this.displaySynonmRows );
+            this.chemicalDBxrefs = data.dbxrefs;
+            console.log( this.chemicalDBxrefs );
         });
     }
 
@@ -222,13 +202,10 @@ export default class ChemicalEdit extends Vue {
         this.chemicalSynonyms = synonyms;
     }
 
-    private buildSynonymList() {
-        this.synonymList = {};
-        for (const synonym of this.chemicalSynonyms) {
-            this.synonymList['synonym' + this.synonymCount] = synonym;
-            this.synonymCount++;
-        }
+    private updateChemicalDBxrefs( DBxrefs: string[] ) {
+        this.chemicalDBxrefs = DBxrefs;
     }
+
 
     get chemicalSourceErrors() {
         const errors = [];
@@ -237,18 +214,6 @@ export default class ChemicalEdit extends Vue {
                 errors.push( generateValidationError( 'required', 'Chemical Source', null ));
             } else if (!this.$v.chemicalSource.printableAsciiOnly) {
                 errors.push( generateValidationError( 'printableAsciiOnly', 'Chemical Source', null ));
-            }
-        }
-        return errors;
-    }
-
-    get newUserSynonymErrors() {
-        const errors = [];
-        if (this.$v.newUserSynonym.$dirty) {
-            if (!this.$v.newUserSynonym.required) {
-                errors.push( generateValidationError( 'required', 'Synonym', null ));
-            } else if (!this.$v.newUserSynonym.printableAsciiOnly) {
-                errors.push( generateValidationError( 'printableAsciiOnly', 'Synonym', null ));
             }
         }
         return errors;
@@ -304,34 +269,6 @@ export default class ChemicalEdit extends Vue {
 
     get isInvalid() {
         return this.$v.$invalid;
-    }
-
-    private deleteChemicalSynonym(index: any) {
-       Vue.delete( this.synonymList, index );
-    }
-
-    private synonymListValues() {
-        return Object.values(this.synonymList);
-    }
-
-    private addNewUserSynonym() {
-
-        if ( !this.newUserSynonym ) {
-            this.newUserSynonymHint = 'Please add a synonym';
-            this.showNewUserSynonymHint = true;
-            this.$refs.addNewUserSynonymField.focus();
-        } else {
-            if (Object.values(this.synonymList).indexOf(this.newUserSynonym) > -1) {
-                this.newUserSynonymHint = 'Synonym already exists';
-                this.showNewUserSynonymHint = true;
-                this.$refs.addNewUserSynonymField.focus();
-            } else {
-                this.synonymList['synonym' + this.synonymCount] = this.newUserSynonym;
-                this.synonymCount++;
-                this.showNewUserSynonymHint = false;
-                this.newUserSynonym = '';
-            }
-        }
     }
 
     private submitChemical( ) {
