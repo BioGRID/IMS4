@@ -30,6 +30,25 @@
                 </v-expansion-panel-header>
                 <v-expansion-panel-content >
 
+                    <ACEDataTable
+                        class='mt-5'
+                        title="Current Curation Groups"
+                        tableClass="pa-1"
+                        :columns="panelEntryTableHeaders"
+                        :displayRows="panelDisplayRows"
+                        :rowsPerPage="100"
+                        :totalRows="panelEntryTableCount"
+                        :pagination="true"
+                        :showSearch="true"
+                    >
+                        <template slot="defaultRow" slot-scope="{ row, rowIndex }">
+                            <td class='text-left' wrap v-for="(column, colIndex) in panelEntryTableHeaders">
+                                {{ row.name }}
+                            </td>
+                        </template>
+
+                    </ACEDataTable>
+
                     <v-text-field v-for="(item, index) in panelList" :key="index"
                         :placeholder="panelFieldPlaceholder"
                         clearable
@@ -59,22 +78,37 @@
 <script lang="ts">
 import { Component, Vue, Prop, Watch } from 'vue-property-decorator';
 import { State, namespace } from 'vuex-class';
+import ACEDataTable from '@/components/data/ACEDataTable.vue';
+import { TableColumn, TableSort, SearchTagLookup } from '@/models/table/Table';
 
 export interface EntryMap {
     [id: string]: string;
 }
 
-@Component
+@Component({
+    components: {
+        ACEDataTable,
+    },
+})
 export default class ExpandableInputPanel extends Vue {
     @Prop({type: String, default: ''}) private panelLabel!: string;
     @Prop({type: String, default: ''}) private panelDesc!: string;
     @Prop({type: Array, default: []}) private panelEntries!: string[];
     @Prop({type: String, default: 'Add New Entry'}) private panelFieldPlaceholder!: string;
+    @Prop({type: Array, default: () => []}) private panelEntryTableHeaders!: any[];
+    @Prop({type: Array, default: () => []}) private panelDisplayRows!: any[];
+    // @Prop({type: Array, default: () => ({})}) private panelEntryTableHeaders!: string[];
+    // @Prop({type: Array, default: () => ({})}) private panelDisplayRows!: string[];
     private panelList: EntryMap = {};
     private entryCount: number = 0;
     private showHint: boolean = false;
     private newHint: string = '';
     private newEntry: string = '';
+
+    get panelEntryTableCount() {
+        return this.panelEntries.length;
+    }
+
 
     @Watch( 'panelEntries' )
     private onPanelEntriesChanged() {
