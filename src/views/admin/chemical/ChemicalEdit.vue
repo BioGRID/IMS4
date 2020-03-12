@@ -89,21 +89,26 @@
                             <v-row>
                                 <v-col cols="12" xl="12" lg="12" md="21" sm="12" xs="12">
                                     <ExpandableInputPanel
+                                        panelDataTableTitle="Chemical Synonyms"
                                         panelLabel="Synonyms"
                                         panelDesc="Update/Add chemical synonyms"
-                                        :panelEntries="this.chemicalSynonyms"
+                                        :fieldsToRemoveEntry="this.fieldsToRemoveSynonymEntry"
                                         :panelEntryTableHeaders="this.synonymTableHeaders"
                                         :panelDisplayRows="this.displaySynonmRows"
                                         @updateEntries="updateChemicalSynonyms"
-                                    ></ExpandableInputPanel>
+                                    >
+                                    </ExpandableInputPanel>
                                 </v-col>
                             </v-row>
                             <v-row>
                                 <v-col cols="12" xl="12" lg="12" md="21" sm="12" xs="12">
                                     <ExpandableInputPanel
+                                        panelDataTableTitle="Chemical External Database References"
                                         panelLabel="External Database References"
                                         panelDesc="Update/Add chemical external database references"
-                                        :panelEntries="this.chemicalDBxrefs"   
+                                        :fieldsToRemoveEntry="this.fieldsToRemoveDBxrefsEntry"
+                                        :panelEntryTableHeaders="this.dBxrefsTableHeaders"
+                                        :panelDisplayRows="this.chemicalDBxrefs"  
                                         @updateEntries="updateChemicalDBxrefs"
                                     ></ExpandableInputPanel>
                                 </v-col>
@@ -148,6 +153,7 @@ export default class ChemicalEdit extends Vue {
     private chemicalSourceID: string = '';
     private chemicalDescription: string = '';
     private chemicalSynonyms: string[] = [];
+    private fieldsToRemoveSynonymEntry: string[] = [];
     private chemicalDBxrefs: string[] = [];
     private synonymTableHeaders: any[] = [
         {
@@ -174,6 +180,42 @@ export default class ChemicalEdit extends Vue {
         },
     ];
     private displaySynonmRows: any[] = [];
+    private fieldsToRemoveDBxrefsEntry: string[] = [];
+    private dBxrefsTableHeaders: any[] = [
+        {
+            title: 'Source',
+            field: 'source',
+            sortable: true,
+            searchable: true,
+            searchType: 'Text',
+            searchName: 'Name',
+            sortDirection: 'asc',
+            sortOrder: 1,
+            className: 'text-left',
+        },
+        {
+            title: 'Source ID',
+            field: 'source_id',
+            sortable: true,
+            searchable: true,
+            searchType: 'Text',
+            searchName: 'Name',
+            sortDirection: 'asc',
+            sortOrder: 0,
+            className: 'text-left',
+        },
+        {
+            title: 'Tools',
+            field: 'tools',
+            sortable: false,
+            searchable: false,
+            searchType: '',
+            searchName: 'Tools',
+            sortDirection: '',
+            sortOrder: 0,
+            className: 'nowrap text-center',
+        },
+    ];
 
     public created() {
         this.initializeFieldValues();
@@ -195,6 +237,8 @@ export default class ChemicalEdit extends Vue {
             console.log( this.displaySynonmRows );
             this.chemicalDBxrefs = data.dbxrefs;
             console.log( this.chemicalDBxrefs );
+            this.fieldsToRemoveSynonymEntry = ['name'];
+            this.fieldsToRemoveDBxrefsEntry = ['source', 'source_id'];
         });
     }
 

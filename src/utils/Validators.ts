@@ -50,3 +50,19 @@ export function passwordComplexity(value: string) {
 
     return true;
 }
+
+// Check if a string contains only specific characters
+export function inArray(listOfOptions: string[]) {
+    return (value: string) => {
+        if (!helpers.req(value)) {
+            return true;
+        }
+        let tempObject = {source: "ATC", source_id: value};
+        console.log( tempObject );
+        console.log( listOfOptions.find( ({ source_id }) => source_id === value ));
+        // Test to see if value is in list of options
+        // return true or false
+        return listOfOptions.findIndex( ({ source_id }) => source_id === value);
+
+    };
+}
