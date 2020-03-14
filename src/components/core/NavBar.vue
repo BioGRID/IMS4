@@ -53,7 +53,7 @@ import { canAccess, isPermitted } from '@/utils/Permission';
 
 @Component
 export default class NavBar extends Vue {
-    private pageTitle: string | undefined = '';
+    private pageTitle: string | undefined | null = '';
     private drawerIcon: string = 'mdi-arrow-expand-left';
     private settingsMenuLinks: object[] = [{
         to: '/admin/user/changemypassword',
