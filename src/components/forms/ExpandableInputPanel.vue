@@ -110,10 +110,14 @@ export default class ExpandableInputPanel extends Vue {
         // go through fieldsToRemoveEntry and find any matches that need to be deleted
         let indexToRemove = -1;
         for (const [index, val] of this.panelDisplayRows.entries()) {
+            let foundHit = true;
             for (const fieldType of this.fieldsToRemoveEntry) {
-                if (val[fieldType] === rowToDelete[fieldType] ) {
-                    indexToRemove = index;
+                if (val[fieldType] !== rowToDelete[fieldType] ) {
+                    foundHit = false;
                 }
+            }
+            if ( foundHit ) {
+                indexToRemove = index;
             }
         }
 

@@ -18,6 +18,7 @@
                         :error-messages="newSourceIDErrors"
                         dense
                         required
+                        :disabled="isSourceEmpty"
                         v-model.trim="newSourceID"
                         @input="$v.newSourceID.$touch()"
                         @blur="$v.newSourceID.$touch()"
@@ -43,7 +44,7 @@
 import { Component, Vue, Prop, Watch } from 'vue-property-decorator';
 import { State, namespace } from 'vuex-class';
 import { required } from 'vuelidate/lib/validators';
-import { printableAsciiOnly, lettersAndSpacesOnly, inArray } from '@/utils/Validators';
+import { printableAsciiOnly, lettersAndSpacesOnly, inArrayOfObjects } from '@/utils/Validators';
 import { generateValidationError } from '@/utils/ValidationErrors';
 
 @Component
@@ -53,10 +54,16 @@ export default class AddChemicalNameForm extends Vue {
     private newHint: string = '';
     private newSourceID: string = '';
     private newSource: string = '';
-    private chemicalSources: string[] = ['ChemSpider', 'ChEMBL'];
+    private chemicalSources: string[] = ['ChemSpider', 'CHEMBL'];
 
     private addEntry() {
-        // need to work
+        this.panelDisplayRows.push( {['source']: this.newSource, ['source_id']: this.newSourceID} );
+        this.newSource = '';
+        this.newSourceID = '';
+    }
+
+    get isSourceEmpty() {
+        return !this.newSource;
     }
 
     get newSourceIDErrors() {
@@ -64,8 +71,8 @@ export default class AddChemicalNameForm extends Vue {
         if (this.$v.newSourceID.$dirty) {
             if (!this.$v.newSourceID.required) {
                 errors.push( generateValidationError( 'required', 'External Database ID', null ));
-            } else if (!this.$v.newSourceID.inArray) {
-                errors.push( generateValidationError( 'inArray', 'Source ID name', null ));
+            } else if (!this.$v.newSourceID.inArrayOfObjects) {
+                errors.push( generateValidationError( 'valueinarray', 'Source and Source ID name', null ));
             }
         }
         return errors;
@@ -77,7 +84,7 @@ export default class AddChemicalNameForm extends Vue {
 
     private validations() {
         return {
-            newSourceID: { required, inArray: inArray( this.panelDisplayRows ) },
+            newSourceID: { required, inArrayOfObjects: inArrayOfObjects( this.panelDisplayRows, 'source_id', [{source: this.newSource}] ) },
         };
     }
 

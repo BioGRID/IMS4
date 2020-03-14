@@ -234,9 +234,7 @@ export default class ChemicalEdit extends Vue {
             for (hit of this.chemicalSynonyms) {
                 this.displaySynonmRows.push( {['name']: hit} );
             }
-            console.log( this.displaySynonmRows );
             this.chemicalDBxrefs = data.dbxrefs;
-            console.log( this.chemicalDBxrefs );
             this.fieldsToRemoveSynonymEntry = ['name'];
             this.fieldsToRemoveDBxrefsEntry = ['source', 'source_id'];
         });

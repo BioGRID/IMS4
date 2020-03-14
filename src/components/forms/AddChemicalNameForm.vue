@@ -1,51 +1,66 @@
 <template>
     <div class='add-chemical-name-form'>
-       
+        <v-form>
             <v-text-field
                 label="Add New Entry"  
-                :hint="showHint === true ? newHint : ''" 
                 ref="addPanelField" 
+                :error-messages="newChemicalNameErrors"
                 dense
-                prepend-icon=mdi-plus
-                @click:prepend="addEntry"
                 v-model.trim="newEntry"
+                @input="$v.newEntry.$touch()"
+                @blur="$v.newEntry.$touch()"
             >
             </v-text-field>
-   
+
+            <v-btn 
+                @click="addEntry"
+                size="x-large"
+                color="success"
+                :disabled="isInvalid"
+            >Add New Chemical Name</v-btn>
+
+        </v-form>
     </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue, Prop, Watch } from 'vue-property-decorator';
 import { State, namespace } from 'vuex-class';
+import { required } from 'vuelidate/lib/validators';
+import { printableAsciiOnly, lettersAndSpacesOnly, inArrayOfObjects } from '@/utils/Validators';
+import { generateValidationError } from '@/utils/ValidationErrors';
 
 @Component
 export default class AddChemicalNameForm extends Vue {
     @Prop(Array) private panelDisplayRows!: any[];
-    private showHint: boolean = false;
-    private newHint: string = '';
     private newEntry: string = '';
 
     private addEntry() {
+        this.panelDisplayRows.push( {['name']: this.newEntry} );
+        this.newEntry = '';
+        this.$v.$reset();
+    }
 
-        const addPanelField = this.$refs.addPanelField as HTMLElement;
-
-        if ( !this.newEntry ) {
-            this.newHint = 'Please add a new entry';
-            this.showHint = true;
-            addPanelField.focus();
-        } else {
-            if (this.panelDisplayRows.findIndex( ({ name }) => name === this.newEntry ) > -1) {
-                this.newHint = 'Entry already exists';
-                this.showHint = true;
-                addPanelField.focus();
-            } else {
-                this.panelDisplayRows.push( {['name']: this.newEntry} );
-                this.newEntry = '';
-                this.showHint = false;
-                this.newEntry = '';
+    get newChemicalNameErrors() {
+        const errors = [];
+        if (this.$v.newEntry.$dirty) {
+            if (!this.$v.newEntry.required) {
+                errors.push( generateValidationError( 'required', 'Chemical Name', null ));
+            } else if (!this.$v.newEntry.inArrayOfObjects) {
+                errors.push( generateValidationError( 'valueinarray', 'Chemical Name', null ));
             }
         }
+        return errors;
+    }
+
+    get isInvalid() {
+        return this.$v.$invalid;
+    }
+
+    private validations() {
+        return {
+            newEntry: { required, inArrayOfObjects: inArrayOfObjects( this.panelDisplayRows, 'name', [] ) },
+        };
     }
 
 }
