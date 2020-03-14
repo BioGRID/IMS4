@@ -7,10 +7,13 @@
             
                 <v-col cols="12" xl="6" lg="6" md="6" sm="12" xs="12">
                     <v-select
+                        class="dbxrefSource"
                         v-model="newSource"
                         :items="chemicalSources"
                         label="Select"
+                        attach
                     ></v-select>
+                    
                 </v-col>
                 <v-col cols="12" xl="6" lg="6" md="6" sm="12" xs="12">
                     <v-text-field
@@ -36,8 +39,8 @@
             >Add New Chemical Database Reference</v-btn>
 
         </v-form>
-
     </div>
+    
 </template>
 
 <script lang="ts">
@@ -95,5 +98,9 @@ export default class AddChemicalNameForm extends Vue {
 <style lang="scss">
 .add-chemical-dbxrefs-form {
     padding-top: 25px;
+}
+
+.dbxrefSource {
+    margin-top: -14px;
 }
 </style>
