@@ -28,5 +28,8 @@ export function generateValidationError(validationType: string, field: string, p
 
         case 'numeric' :
             return field + ' must contain only numbers';
+
+        case 'valueinarray' :
+            return field + ' already exists';
     }
 }
