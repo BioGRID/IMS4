@@ -145,7 +145,6 @@ export function API_USER_LOGIN( payload: object, successCallback?: (data: User) 
     store.dispatch( 'toggleLoadingOverlay', {}, {root: true} );
     return axios.post( process.env.VUE_APP_AUTH_URL! + '/login', payload, {} )
     .then( (res) => {
-        store.dispatch( 'toggleLoadingOverlay', {}, {root: true} );
         if ( res.status === 200 ) {
             if (successCallback !== undefined) {
                 successCallback(res.data);
@@ -153,8 +152,8 @@ export function API_USER_LOGIN( payload: object, successCallback?: (data: User) 
         }
     })
     .catch( (error) => {
-        store.dispatch( 'toggleLoadingOverlay', {}, {root: true} );
         console.log(error);
+        store.dispatch( 'toggleLoadingOverlay', {}, {root: true} );
         if ( error.response.status === 404 ) {
             // Unrecognized User Name
             store.dispatch( 'notify/displayNotification', notification( 'error', 'login_error_notfound' ), {root: true });
