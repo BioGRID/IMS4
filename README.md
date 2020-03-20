@@ -1,53 +1,22 @@
 # BioGRID ACE
-The annotation and curation engine for the BioGRID.
+The annotation and curation engine for the BioGRID. This project manages interaction with the various BioGRID related apis and applications.
 
-## Requirements (for windows)
-* GIT 2.23+ (https://git-scm.com/download/win)
+## Requirements
+* GIT 2.23+ (https://git-scm.com/download)
 * Node.js 10.16.3+ (https://nodejs.org/en/)
 
-## Project Setup
-1. Create a new file `.env.development.local` and `.env.production.local` and fill in the environment variable `VUE_APP_AUTH_URL=http://example.com:1234` matching your AUTH API location.
-2. Run `npm install`
-3. Using the `.env.production-example` file as an example, create a new file `.env.production` and fill in the appropriate details as suited to your environment where you intend to run this API.
-3. Make sure you have `go-dep` installed for installation of go dependencies.
-4. Run `dep ensure` from this repository root to obtain all dependencies. 
-4. Run `make` at the command prompt to build the executable for API.
-5. Copy the created `app` executable to your chosen environment.
+## .env file variables
++ `VUE_APP_AUTH_URL` (url to authentication API)
++ `VUE_APP_ACE_WEBSOCKET` (url to websocket API)
++ `VUE_APP_ACE_URL` (url to curation API)
++ `VUE_APP_ANNOTATION_URL` (url to annotation API)
++ `VUE_APP_SEARCH_URL` (url to search API)
 
-## Project setup
-```
-npm install
-```
-
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
-
-### Compiles and minifies for production
-```
-npm run build
-```
-
-### Run your tests
-```
-npm run test
-```
-
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Run your end-to-end tests
-```
-npm run test:e2e
-```
-
-### Run your unit tests
-```
-npm run test:unit
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+## Project Setup for Development
+1. Manually install all of the requirements listed above
+2. Create a directory for development
+3. Clone this repository `git clone git@github.com:BioGRID/BioGRID-ACE.git`
+4. Create a `.env.development.local` and `.env.production.local` file to match your setup using the descriptions above in the .env file variables section
+5. Run `npm install` to install all dependencies
+6. Run `npm run electron:serve` to launch the application with hotloading
+7. Run `npm run electron:build` to compile the application for your platform
