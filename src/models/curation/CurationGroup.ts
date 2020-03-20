@@ -30,6 +30,7 @@ export function API_CURATION_GROUP_FETCH( successCallback?: (data: []) => void )
     })
     .catch( (error) => {
         console.log(error);
+        throw new Error(error.response.data.message);
     });
 }
 

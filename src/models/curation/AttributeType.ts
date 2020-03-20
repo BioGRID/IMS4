@@ -28,5 +28,6 @@ export function API_ATTRIBUTE_TYPE_FETCH( successCallback?: (data: []) => void )
     })
     .catch( (error) => {
         console.log(error);
+        throw new Error(error.response.data.message);
     });
 }

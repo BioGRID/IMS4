@@ -1,6 +1,7 @@
 import router from '@/router';
 import { PermHash, PermRecord, API_PERMISSION_GETALL } from '@/models/auth/Permission';
 import { UserHash, User, API_USER_GETALL, API_USER_GETME, API_USER_LOGOUT, API_USER_LOGIN } from '@/models/auth/User';
+import notification from '@/utils/Notifications';
 
 const moduleAuthActions = {
     update_user: (context: any, payload: any) => {
@@ -13,18 +14,31 @@ const moduleAuthActions = {
                 // Connect to websocket
                 payload.vm.$connect( process.env.VUE_APP_ACE_WEBSOCKET + '?access_token=' + data.access_key + '&id=' + data.id );
                 // Fetch list of users from the API for the store
-                context.dispatch( 'fetch_users', {}, {} );
+                const userPromise = context.dispatch( 'fetch_users', {}, {} );
                 // Fetch list of organisms from the API for the store
-                context.dispatch( 'annotation/fetch_organisms', {}, {root: true} );
+                const orgPromise = context.dispatch( 'annotation/fetch_organisms', {}, {root: true} );
                 // Fetch list of curation_groups from the API
-                context.dispatch( 'curation/fetch_curation_groups', {}, {root: true} );
+                const groupPromise = context.dispatch( 'curation/fetch_curation_groups', {}, {root: true} );
                 // Fetch list of attribute types from the API
-                context.dispatch( 'curation/fetch_attribute_types', {}, {root: true} );
+                const attributePromise = context.dispatch( 'curation/fetch_attribute_types', {}, {root: true} );
                 // Get the list of permissions
-                context.dispatch( 'fetch_permissions', {}, {} ).then( () => {
+                const permissionPromise = context.dispatch( 'fetch_permissions', {}, {} );
+
+                Promise.all([
+                    userPromise,
+                    orgPromise,
+                    groupPromise,
+                    attributePromise,
+                    permissionPromise,
+                ]).then( () => {
                     // Redirect to Dashboard
+                    context.dispatch( 'toggleLoadingOverlay', {}, {root: true} );
                     router.push( '/' );
+                }).catch( (error) => {
+                    context.dispatch( 'toggleLoadingOverlay', {}, {root: true} );
+                    context.dispatch( 'notify/displayNotification', notification( 'error', 'login_error_apisdown' ), {root: true });
                 });
+
             });
         });
     },

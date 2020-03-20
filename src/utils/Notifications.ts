@@ -23,6 +23,7 @@ export default function notification(type: string, id: string) {
                 notfound: 'Unrecognized username',
                 unauthorized: 'Unrecognized username/password combination',
                 serverdown: 'Authentication server is not accessible',
+                apisdown: 'Requests to one or more required apis has failed, please try again later',
             },
         },
         permission: {

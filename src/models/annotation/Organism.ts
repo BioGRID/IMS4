@@ -29,5 +29,6 @@ export function API_ORGANISM_FETCH( successCallback?: (data: []) => void ): any 
     })
     .catch( (error) => {
         console.log(error);
+        throw new Error(error.response.data.message);
     });
 }
