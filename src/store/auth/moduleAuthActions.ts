@@ -1,6 +1,7 @@
 import router from '@/router';
 import { PermHash, PermRecord, API_PERMISSION_GETALL } from '@/models/auth/Permission';
 import { UserHash, User, API_USER_GETALL, API_USER_GETME, API_USER_LOGOUT, API_USER_LOGIN } from '@/models/auth/User';
+import notification from '@/utils/Notifications';
 
 const moduleAuthActions = {
     update_user: (context: any, payload: any) => {
@@ -33,6 +34,9 @@ const moduleAuthActions = {
                     // Redirect to Dashboard
                     context.dispatch( 'toggleLoadingOverlay', {}, {root: true} );
                     router.push( '/' );
+                }).catch( (error) => {
+                    context.dispatch( 'toggleLoadingOverlay', {}, {root: true} );
+                    context.dispatch( 'notify/displayNotification', notification( 'error', 'login_error_apisdown' ), {root: true });
                 });
 
             });

@@ -93,6 +93,7 @@ export function API_USER_GETALL( successCallback?: (data: User[]) => void ): any
     .catch( (error) => {
         console.log( error );
         console.log( error.response );
+        throw new Error(error.response.data.message);
     });
 }
 
@@ -113,6 +114,7 @@ export function API_USER_GETME( successCallback?: (data: User) => void ): any {
     .catch( (error) => {
         console.log( error );
         console.log( error.response );
+        throw new Error(error.response.data.message);
     });
 }
 

@@ -85,5 +85,6 @@ export function API_PERMISSION_GETALL( successCallback?: (data: []) => void ): a
     })
     .catch( (error) => {
         console.log(error);
+        throw new Error(error.response.data.message);
     });
 }
