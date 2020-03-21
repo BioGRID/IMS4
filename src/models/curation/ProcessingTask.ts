@@ -1,6 +1,5 @@
 import axios from 'axios';
 import store from '@/store/store';
-import notification from '@/utils/Notifications';
 
 export interface StringHash {
     [key: string]: string;
@@ -12,7 +11,7 @@ export interface NumericHash {
 
 export interface TaskPayload {
     options: StringHash;
-    data: object;
+    data: object | null;
 }
 
 export interface TaskNotes {
@@ -25,7 +24,7 @@ export interface LastRun {
 }
 
 export interface ProcessingTask {
-    processing_id?: number;
+    processing_id: number;
     task: string;
     payload: TaskPayload;
     processing_code?: string;
@@ -38,6 +37,9 @@ export interface ProcessingTask {
     added_date: string;
 }
 
+export interface ProcessingTaskHash {
+    [key: number]: ProcessingTask;
+}
 
 // Add a Task to the Processing Task Queue
 export function API_ADD_TASK( task: ProcessingTask, successCallback?: (data: any[]) => void, errorCallback?: (error: any) => void ): any {
@@ -57,5 +59,28 @@ export function API_ADD_TASK( task: ProcessingTask, successCallback?: (data: any
         if (errorCallback !== undefined) {
             errorCallback(error);
         }
+    });
+}
+
+// Get Tasks from the Curation API
+export function API_TASK_FETCH( count: number, fetchAll: boolean, successCallback?: (data: []) => void ): any {
+    const user = store.getters['auth/getUser'];
+    let url = process.env.VUE_APP_ACE_URL! + '/tasks';
+    if (!fetchAll) {
+        url += '/' + user.id;
+    }
+    return axios.get( url + '?count=' + count, {
+        headers: { Authorization: 'Bearer ' + user.access_key },
+    })
+    .then( (res) => {
+        if ( res.status === 200 ) {
+            if (successCallback !== undefined) {
+                successCallback(res.data.data);
+            }
+        }
+    })
+    .catch( (error) => {
+        console.log(error);
+        throw new Error(error.response.data.message);
     });
 }

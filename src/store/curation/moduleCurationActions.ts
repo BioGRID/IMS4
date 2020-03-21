@@ -1,5 +1,6 @@
 import { CurationGroupEntry, CurationGroupHash, API_CURATION_GROUP_FETCH } from '@/models/curation/CurationGroup';
 import { AttributeTypeEntry, AttributeTypeHash, API_ATTRIBUTE_TYPE_FETCH } from '@/models/curation/AttributeType';
+import { ProcessingTask, ProcessingTaskHash, API_TASK_FETCH } from '@/models/curation/ProcessingTask';
 import { API_HISTORY_FETCH, HistoryEntry } from '@/models/curation/History';
 import bodybuilder from 'bodybuilder';
 import { ELASTIC_QUERY } from '@/models/elastic/Query';
@@ -26,6 +27,15 @@ const moduleCurationActions = {
                 attributeTypeHash[attributeType.shortcode] = attributeType;
             }
             context.commit( 'CURATION_UPDATE_ATTRIBUTE_TYPES', attributeTypeHash );
+        });
+    },
+    fetch_processing_tasks: (context: any) => {
+        return API_TASK_FETCH( context.state.maxProcessingTasks, false, (data: ProcessingTask[]) => {
+            const processingTaskHash: ProcessingTaskHash = {};
+            for (const task of data) {
+                processingTaskHash[task.processing_id] = task;
+            }
+            context.commit( 'CURATION_UPDATE_PROCESSING_TASKS', processingTaskHash );
         });
     },
     fetch_current_history: (context: any, payload: any) => {

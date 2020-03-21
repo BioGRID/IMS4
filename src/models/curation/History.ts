@@ -29,5 +29,6 @@ export function API_HISTORY_FETCH( refID: number, refType: string, successCallba
     })
     .catch( (error) => {
         console.log(error);
+        throw new Error(error.response.data.message);
     });
 }
