@@ -14,7 +14,7 @@ export interface AttributeTypeHash {
 }
 
 // Get Attribute Types from the Curation API
-export function API_ATTRIBUTE_TYPE_FETCH( successCallback?: (data: []) => void ): any {
+export async function API_ATTRIBUTE_TYPE_FETCH( successCallback?: (data: []) => void ): Promise<any> {
     const user = store.getters['auth/getUser'];
     return axios.get( process.env.VUE_APP_ACE_URL! + '/attributetypes?count=100000&activeonly=1', {
         headers: { Authorization: 'Bearer ' + user.access_key },

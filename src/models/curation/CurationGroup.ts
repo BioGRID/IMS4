@@ -63,7 +63,7 @@ export function API_CURATION_GROUP_ADD( payload: object, successCallback?: () =>
 }
 
 // Update an existing curation group
-export function API_CURATION_GROUP_UPDATE( payload: object, successCallback?: () => void ) {
+export async function API_CURATION_GROUP_UPDATE( payload: object, successCallback?: () => void ): Promise<any> {
     const user = store.getters['auth/getUser'];
     store.dispatch( 'toggleLoadingOverlay', {}, {root: true} );
     return axios.put( process.env.VUE_APP_ACE_URL! + '/curationgroup', payload, {
