@@ -102,6 +102,39 @@
                     />
                 </v-col>
             </v-row>
+
+            <v-row no-gutters>
+                <v-col cols="12" xl="12" lg="12" md="12" sm="12" xs="12">
+                    <v-expansion-panels>
+                        <v-expansion-panel>
+                            <v-expansion-panel-header>
+                                Experimental System
+                                <template v-slot:actions>
+                                <v-icon color="primary">$expand</v-icon>
+                                </template>
+                            </v-expansion-panel-header>
+                            <v-expansion-panel-content>
+                                <OntologyTools
+                                   
+                                >
+                                </OntologyTools>
+                            </v-expansion-panel-content>
+                        </v-expansion-panel>
+                        <v-expansion-panel>
+                            <v-expansion-panel-header disable-icon-rotate>
+                                Phosphorylation
+                                <template v-slot:actions>
+                                <v-icon color="primary">$expand</v-icon>
+                                </template>
+                            </v-expansion-panel-header>
+                            <v-expansion-panel-content>
+                                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                            </v-expansion-panel-content>
+                        </v-expansion-panel>
+                    </v-expansion-panels>
+                </v-col>
+            </v-row>
+            
             <v-divider class='pt-0 mt-1 mb-3' />
             <h2>Curation Queue</h2>
             <div>{{ attributeTypes }}</div>
@@ -114,12 +147,15 @@ import { Component, Vue } from 'vue-property-decorator';
 import { State, namespace } from 'vuex-class';
 import StatsCard from '@/components/cards/StatsCard.vue';
 
+import OntologyTools from '@/components/data/OntologyTools.vue';
+
 const auth = namespace( 'auth' );
 const curation = namespace( 'curation' );
 
 @Component({
     components: {
         StatsCard,
+        OntologyTools,
     },
 })
 export default class Dashboard extends Vue {

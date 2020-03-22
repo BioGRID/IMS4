@@ -188,6 +188,14 @@ const router = new Router({
                 },
             },
             {
+                path: '/admin/chemical/chemicaladd',
+                name: 'Chemical Add',
+                component: () => import( '@/views/admin/chemical/ChemicalAdd.vue' ),
+                beforeEnter: (to: any, from: any, next: any) => {
+                    isPermittedRoute( 'MANAGE CHEMICALS', next );
+                },
+            },
+            {
                 path: '/curation/DatasetEntities',
                 name: 'Dataset Entities',
                 component: () => import( '@/views/curation/DatasetEntities.vue' ),
