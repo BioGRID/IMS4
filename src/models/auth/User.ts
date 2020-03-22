@@ -78,7 +78,7 @@ export function API_USER_ADD( payload: object, successCallback?: () => void ) {
 }
 
 // Get Users
-export function API_USER_GETALL( successCallback?: (data: User[]) => void ): any {
+export async function API_USER_GETALL( successCallback?: (data: User[]) => void ): Promise<any> {
     const user = store.getters['auth/getUser'];
     return axios.get( process.env.VUE_APP_AUTH_URL! + '/users', {
         headers: { Authorization: 'Bearer ' + user.access_key },

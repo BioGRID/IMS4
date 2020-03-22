@@ -71,7 +71,7 @@ export function API_PERMISSION_ADD( payload: object, successCallback?: () => voi
 }
 
 // Get Permissions
-export function API_PERMISSION_GETALL( successCallback?: (data: []) => void ): any {
+export async function API_PERMISSION_GETALL( successCallback?: (data: []) => void ): Promise<any> {
     const user = store.getters['auth/getUser'];
     return axios.get( process.env.VUE_APP_AUTH_URL! + '/permissions', {
         headers: { Authorization: 'Bearer ' + user.access_key },

@@ -15,7 +15,7 @@ export interface OrganismHash {
 }
 
 // Get Organisms from the Annotation API
-export function API_ORGANISM_FETCH( successCallback?: (data: []) => void ): any {
+export async function API_ORGANISM_FETCH( successCallback?: (data: []) => void ): Promise<any> {
     const user = store.getters['auth/getUser'];
     return axios.get( process.env.VUE_APP_ANNOTATION_URL! + '/organisms?count=10000', {
         headers: { Authorization: 'Bearer ' + user.access_key },

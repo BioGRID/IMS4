@@ -63,7 +63,7 @@ export function API_ADD_TASK( task: ProcessingTask, successCallback?: (data: any
 }
 
 // Get Tasks from the Curation API
-export function API_TASK_FETCH( count: number, fetchAll: boolean, successCallback?: (data: []) => void ): any {
+export async function API_TASK_FETCH( count: number, fetchAll: boolean, successCallback?: (data: []) => void ): Promise<any> {
     const user = store.getters['auth/getUser'];
     let url = process.env.VUE_APP_ACE_URL! + '/tasks';
     if (!fetchAll) {
