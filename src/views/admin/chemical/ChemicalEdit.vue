@@ -1,5 +1,5 @@
 <template>
-    <div id="permission-manager">
+    <div id="chemical-edit">
         <v-container fluid class='pt-0'>
             <v-btn 
                 class='float-right mt-4'
@@ -72,7 +72,7 @@
                                     />
                                 </v-col>
                             </v-row>
-                             <v-row>
+                            <v-row>
                                 <v-col cols="12" xl="12" lg="12" md="21" sm="12" xs="12">
                                     <v-textarea 
                                         label="Chemical Description" 
@@ -83,6 +83,54 @@
                                         v-model.trim="chemicalDescription"
                                         @input="$v.chemicalDescription.$touch()"
                                         @blur="$v.chemicalDescription.$touch()"
+                                    />
+                                </v-col>
+                            </v-row>
+                            <v-row>
+                                <v-col cols="12" xl="12" lg="12" md="21" sm="12" xs="12">
+                                    <v-textarea 
+                                        label="Chemical Smile" 
+                                        dark
+                                        dense
+                                        v-model.trim="chemicalSmile"
+                                    />
+                                </v-col>
+                            </v-row>
+                            <v-row>
+                                <v-col cols="12" xl="6" lg="6" md="6" sm="12" xs="12">
+                                    <v-text-field 
+                                        label="Molecular Formula"
+                                        dark
+                                        dense
+                                        v-model.trim="chemicalFormula"
+                                    />
+                                </v-col>
+                                <v-col cols="12" xl="6" lg="6" md="6" sm="12" xs="12">
+                                    <v-text-field
+                                        label="Molecular Weight" 
+                                        dark
+                                        dense
+                                        v-model.trim="chemicalMolecularWeight"
+                                    />
+                                </v-col>
+                            </v-row>
+                            <v-row>
+                                <v-col cols="12" xl="12" lg="12" md="21" sm="12" xs="12">
+                                    <v-text-field 
+                                        label="InChiKey" 
+                                        dark
+                                        dense
+                                        v-model.trim="chemicalInChiKey"
+                                    />
+                                </v-col>
+                            </v-row>
+                            <v-row>
+                                <v-col cols="12" xl="12" lg="12" md="21" sm="12" xs="12">
+                                    <v-textarea 
+                                        label="InChi" 
+                                        dark
+                                        dense
+                                        v-model.trim="chemicalInChi"
                                     />
                                 </v-col>
                             </v-row>
@@ -153,6 +201,11 @@ export default class ChemicalEdit extends Vue {
     private chemicalSourceID: string = '';
     private chemicalDescription: string = '';
     private chemicalSynonyms: string[] = [];
+    private chemicalFormula: string = '';
+    private chemicalMolecularWeight: string = '';
+    private chemicalSmile: string = '';
+    private chemicalInChi: string = '';
+    private chemicalInChiKey: string = '';
     private fieldsToRemoveSynonymEntry: string[] = [];
     private chemicalDBxrefs: string[] = [];
     private synonymTableHeaders: any[] = [
@@ -228,6 +281,11 @@ export default class ChemicalEdit extends Vue {
             this.chemicalType = data.chemical_type;
             this.chemicalSource = data.source;
             this.chemicalSourceID = data.source_id;
+            this.chemicalFormula = data.formula;
+            this.chemicalMolecularWeight = data.molecular_weight;
+            this.chemicalSmile = data.smile;
+            this.chemicalInChi = data.inchi;
+            this.chemicalInChiKey = data.inchikey;
             this.chemicalDescription = data.description;
             this.chemicalSynonyms = data.synonyms.split('|');
             let hit: any;
