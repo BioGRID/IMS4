@@ -17,6 +17,9 @@ const moduleCurationMutations = {
     CURATION_UPDATE_ATTRIBUTE_TYPES: (state: any, attributeTypes: object) => {
         state.attributeTypes = attributeTypes;
     },
+    CURATION_UPDATE_PROCESSING_TASKS: (state: any, processingTasks: object) => {
+        state.processingTasks = processingTasks;
+    },
 };
 
 export default moduleCurationMutations;

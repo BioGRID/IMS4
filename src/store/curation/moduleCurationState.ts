@@ -15,6 +15,8 @@ const moduleCurationState = {
         WRONGGROUP: { text: 'Wrong Group', value: 'WRONGGROUP', color: 'purple', icon: 'mdi-clock-fast'  },
     },
     attributeTypes: {},
+    processingTasks: {},
+    maxProcessingTasks: 60,
 };
 
 export default moduleCurationState;

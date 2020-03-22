@@ -23,6 +23,8 @@ const moduleAuthActions = {
                 const attributePromise = context.dispatch( 'curation/fetch_attribute_types', {}, {root: true} );
                 // Get the list of permissions
                 const permissionPromise = context.dispatch( 'fetch_permissions', {}, {} );
+                // Get latest 60 processing tasks
+                const processingPromise = context.dispatch( 'curation/fetch_processing_tasks', {}, {root: true} );
 
                 Promise.all([
                     userPromise,
@@ -30,6 +32,7 @@ const moduleAuthActions = {
                     groupPromise,
                     attributePromise,
                     permissionPromise,
+                    processingPromise,
                 ]).then( () => {
                     // Redirect to Dashboard
                     context.dispatch( 'toggleLoadingOverlay', {}, {root: true} );
