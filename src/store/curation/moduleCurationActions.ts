@@ -43,38 +43,34 @@ const moduleCurationActions = {
             context.commit( 'CURATION_UPDATE_CURRENT_HISTORY', data );
         });
     },
-    fetch_current_dataset: (context: any, payload: any) => {
+    fetch_current_dataset: async (context: any, payload: any) => {
         const query = bodybuilder()
             .filter( 'term', 'source_id', payload.sourceID )
             .filter( 'term', 'source_type', payload.sourceType )
             .build();
-        ELASTIC_QUERY( query, 'dataset', true, (data: any) => {
+
+        const data = await ELASTIC_QUERY( query, 'dataset', true );
+
+        if (data !== undefined && data.hits.total.value >= 0) {
             context.commit( 'CURATION_UPDATE_CURRENT_DATASET', {} );
             context.commit( 'CURATION_UPDATE_DRAWER_LINKS', [] );
             context.commit( 'CURATION_UPDATE_CURRENT_HISTORY', [] );
+
             if (data.hits.total.value === 1) {
                 const dataset = data.hits.hits[0]._source;
                 context.commit( 'CURATION_UPDATE_CURRENT_DATASET', dataset );
                 context.dispatch( 'fetch_current_history', { refID: dataset.dataset_id, refType: 'dataset' }, {} );
                 router.push( '/curation/DatasetView' );
+                return;
             } else {
                 context.dispatch( 'notify/displayNotification', notification( 'error', 'dataset_fetch_nonexistant' ), {root: true });
-                router.push( '/elements/dashboard' );
             }
-        }, (error: any) => {
-            if ( !error.response ) {
-                context.dispatch( 'notify/displayNotification', notification( 'error', 'dataset_fetch_offline' ), {root: true });
-            } else {
-                if ( error.response.status === 400 ) {
-                    context.dispatch( 'notify/displayNotification', notification( 'error', 'dataset_fetch_improper' ), {root: true });
-                } else if ( error.response.status === 500 ) {
-                    context.dispatch( 'notify/displayNotification', notification( 'error', 'dataset_fetch_offline' ), {root: true });
-                } else if ( error.response.status === 404 ) {
-                    context.dispatch( 'notify/displayNotification', notification( 'error', 'dataset_fetch_unrecognized' ), {root: true });
-                }
-            }
-            router.push( '/elements/dashboard' );
-        });
+        } else {
+            context.dispatch( 'notify/displayNotification', notification( 'error', 'dataset_fetch_offline' ), {root: true });
+        }
+
+        router.push( '/elements/dashboard' );
+
     },
     build_curation_drawer_links: (context: any, payload: any) => {
         const currentDataset = context.state.currentDataset;

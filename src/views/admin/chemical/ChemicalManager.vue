@@ -236,20 +236,17 @@ export default class ChemicalManager extends Vue {
         return this.tableHeaders.length + addonCols;
     }
 
-    private getTotalCount() {
+    private async getTotalCount() {
         const query = this.getBaseQuery();
-        ELASTIC_COUNT( query.build(), 'chemical', false, (data: any) => {
-            this.totalRowCount = data.count;
-        }, (error: any) => {
-            console.log(error);
-        });
+        const count = await ELASTIC_COUNT( query.build(), 'chemical' );
+        this.totalRowCount = count;
     }
 
     private getBaseQuery() {
         return bodybuilder();
     }
 
-    private fetchData( paginationPage: number, tableSortDetails: TableSort[], sortOrderTracker: number[], searchText: string ) {
+    private async fetchData( paginationPage: number, tableSortDetails: TableSort[], sortOrderTracker: number[], searchText: string ) {
         let query = this.getBaseQuery();
 
         const sortQuery = buildSortQuery( tableSortDetails, sortOrderTracker, this.tableHeaders );
@@ -261,24 +258,21 @@ export default class ChemicalManager extends Vue {
         const formattedQuery: any = query.build();
         formattedQuery.sort = sortQuery;
 
-        ELASTIC_QUERY( formattedQuery, 'chemical', true, (data: any) => {
-            if (data.hits.total.value > 0 ) {
-                this.displayRows = [];
-                let hit: any;
-                for (hit of data.hits.hits) {
-                    hit.is_expanded = false;
-                    hit.is_checked = false;
-                    hit.show_full_description = false;
-                    this.displayRows.push(hit);
-                }
-                this.filteredRowCount = data.hits.total.value;
-            } else {
-                this.displayRows = [];
-                this.filteredRowCount = 0;
+        const data = await ELASTIC_QUERY( formattedQuery, 'chemical', true );
+        if (data !== undefined && data.hits.total.value > 0) {
+            this.displayRows = [];
+            let hit: any;
+            for (hit of data.hits.hits) {
+                hit.is_expanded = false;
+                hit.is_checked = false;
+                hit.show_full_description = false;
+                this.displayRows.push(hit);
             }
-        }, (error: any) => {
-            console.log(error);
-        });
+            this.filteredRowCount = data.hits.total.value;
+        } else {
+            this.displayRows = [];
+            this.filteredRowCount = 0;
+        }
 
     }
 
