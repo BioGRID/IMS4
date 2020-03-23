@@ -258,15 +258,16 @@ export default class UserAdd extends Vue {
         });
     }
 
-    private addUser( payload: object ) {
-        API_USER_ADD( payload, () => {
+    private async addUser( payload: object ) {
+        const status = await API_USER_ADD( payload );
+        if (status) {
             Vue.prototype.$socket.sendObj({
                 target: 0,
                 namespace: 'auth',
                 mutation: '',
                 action: 'fetch_users',
             });
-        });
+        }
     }
 
     private validations() {

@@ -168,15 +168,16 @@ export default class PermissionAdd extends Vue {
         }
     }
 
-    private addPermission( payload: object ) {
-        API_PERMISSION_ADD( payload, () => {
+    private async addPermission( payload: object ) {
+        const status = await API_PERMISSION_ADD( payload );
+        if (status) {
             Vue.prototype.$socket.sendObj({
                 target: 0,
                 namespace: 'auth',
                 mutation: '',
                 action: 'fetch_permissions',
             });
-        });
+        }
     }
 
     private validations() {

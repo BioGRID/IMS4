@@ -262,8 +262,9 @@ export default class UserEdit extends Vue {
         return userOptions;
     }
 
-    private updateUserData( payload: object ) {
-        API_USER_UPDATE( payload, this.userID, () => {
+    private async updateUserData( payload: object ) {
+        const status = await API_USER_UPDATE( payload, this.userID );
+        if (status) {
             Vue.prototype.$socket.sendObj({
                 target: 0,
                 namespace: 'auth',
@@ -278,7 +279,7 @@ export default class UserEdit extends Vue {
                 action: 'fetch_me',
                 value: '',
             });
-        });
+        }
     }
 
     private validations() {

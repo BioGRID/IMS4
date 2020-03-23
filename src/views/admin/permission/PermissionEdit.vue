@@ -187,15 +187,16 @@ export default class PermissionEdit extends Vue {
         }
     }
 
-    private updatePermission( payload: object ) {
-        API_PERMISSION_UPDATE( payload, this.permID, () => {
+    private async updatePermission( payload: object ) {
+        const status = await API_PERMISSION_UPDATE( payload, this.permID );
+        if (status) {
             Vue.prototype.$socket.sendObj({
                 target: 0,
                 namespace: 'auth',
                 mutation: '',
                 action: 'fetch_permissions',
             });
-        });
+        }
     }
 
     private validations() {

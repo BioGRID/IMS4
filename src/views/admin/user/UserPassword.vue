@@ -174,8 +174,9 @@ export default class UserPassword extends Vue {
         });
     }
 
-    private changePassword( payload: object ) {
-        API_USER_UPDATE( payload, this.userID, () => {
+    private async changePassword( payload: object ) {
+        const status = await API_USER_UPDATE( payload, this.userID );
+        if (status) {
             Vue.prototype.$socket.sendObj({
                 target: 0,
                 namespace: 'auth',
@@ -188,7 +189,7 @@ export default class UserPassword extends Vue {
                 mutation: '',
                 action: 'force_logout',
             });
-        });
+        }
     }
 
     private validations() {

@@ -14,20 +14,25 @@ export interface AttributeTypeHash {
 }
 
 // Get Attribute Types from the Curation API
-export async function API_ATTRIBUTE_TYPE_FETCH( successCallback?: (data: []) => void ): Promise<any> {
+export async function API_ATTRIBUTE_TYPE_FETCH( ) {
     const user = store.getters['auth/getUser'];
-    return axios.get( process.env.VUE_APP_ACE_URL! + '/attributetypes?count=100000&activeonly=1', {
-        headers: { Authorization: 'Bearer ' + user.access_key },
-    })
-    .then( (res) => {
-        if ( res.status === 200 ) {
-            if (successCallback !== undefined) {
-                successCallback(res.data.data);
-            }
+
+    try {
+        const res = await axios.get( process.env.VUE_APP_ACE_URL! + '/attributetypes?count=100000&activeonly=1', {
+            headers: { Authorization: 'Bearer ' + user.access_key },
+        });
+
+        if (res.status !== 200) {
+            console.error( res );
+            console.log( 'Received ' + res.status + ' response code' );
+        } else {
+            return res.data.data;
         }
-    })
-    .catch( (error) => {
+
+    } catch (error) {
         console.log(error);
         throw new Error(error.response.data.message);
-    });
+    }
+
+    return undefined;
 }

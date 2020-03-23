@@ -202,15 +202,16 @@ export default class CurationGroupAdd extends Vue {
         }
     }
 
-    private addCurationGroup( payload: object ) {
-        API_CURATION_GROUP_ADD( payload, () => {
+    private async addCurationGroup( payload: object ) {
+        const status = await API_CURATION_GROUP_ADD( payload );
+        if (status) {
             Vue.prototype.$socket.sendObj({
                 target: 0,
                 namespace: 'curation',
                 mutation: '',
                 action: 'fetch_curation_groups',
             });
-        });
+        }
     }
 
     private alphaOptionsSort( a: any, b: any ) {

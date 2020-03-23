@@ -11,37 +11,47 @@ const moduleCurationActions = {
     toggleDatasetCollapsed: (context: any) => {
         context.commit( 'TOGGLE_DATASET_COLLAPSED' );
     },
-    fetch_curation_groups: (context: any) => {
-        return API_CURATION_GROUP_FETCH( (data: CurationGroupEntry[]) => {
+    fetch_curation_groups: async (context: any) => {
+        const data: CurationGroupEntry[] = await API_CURATION_GROUP_FETCH( );
+        if (data !== undefined) {
             const curationGroupHash: CurationGroupHash = {};
             for (const curationGroup of data) {
                 curationGroupHash[Number(curationGroup.curation_group_id)] = curationGroup;
             }
             context.commit( 'CURATION_UPDATE_CURATION_GROUPS', curationGroupHash );
-        });
+        } else {
+            throw new Error( 'Unable to fetch list of curation groups from curation api' );
+        }
     },
-    fetch_attribute_types: (context: any) => {
-        return API_ATTRIBUTE_TYPE_FETCH( (data: AttributeTypeEntry[]) => {
+    fetch_attribute_types: async (context: any) => {
+        const data: AttributeTypeEntry[] = await API_ATTRIBUTE_TYPE_FETCH( );
+        if (data !== undefined) {
             const attributeTypeHash: AttributeTypeHash = {};
             for (const attributeType of data) {
                 attributeTypeHash[attributeType.shortcode] = attributeType;
             }
             context.commit( 'CURATION_UPDATE_ATTRIBUTE_TYPES', attributeTypeHash );
-        });
+        } else {
+            throw new Error( 'Unable to fetch list of attribute types from curation api' );
+        }
     },
-    fetch_processing_tasks: (context: any) => {
-        return API_TASK_FETCH( context.state.maxProcessingTasks, false, (data: ProcessingTask[]) => {
+    fetch_processing_tasks: async (context: any) => {
+        const data: ProcessingTask[] = await API_TASK_FETCH( context.state.maxProcessingTasks, false );
+        if (data !== undefined) {
             const processingTaskHash: ProcessingTaskHash = {};
             for (const task of data) {
                 processingTaskHash[task.processing_id] = task;
             }
             context.commit( 'CURATION_UPDATE_PROCESSING_TASKS', processingTaskHash );
-        });
+        } else {
+            throw new Error( 'Unable to fetch recent processing tasks from curation api' );
+        }
     },
-    fetch_current_history: (context: any, payload: any) => {
-        return API_HISTORY_FETCH( payload.refID, payload.refType, (data: HistoryEntry[]) => {
+    fetch_current_history: async (context: any, payload: any) => {
+        const data: HistoryEntry[] = await API_HISTORY_FETCH( payload.refID, payload.refType );
+        if (data !== undefined) {
             context.commit( 'CURATION_UPDATE_CURRENT_HISTORY', data );
-        });
+        }
     },
     fetch_current_dataset: async (context: any, payload: any) => {
         const query = bodybuilder()
