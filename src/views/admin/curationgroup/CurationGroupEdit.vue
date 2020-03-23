@@ -217,15 +217,16 @@ export default class CurationGroupEdit extends Vue {
         }
     }
 
-    private updateCurationGroup( payload: object ) {
-        API_CURATION_GROUP_UPDATE( payload, () => {
+    private async updateCurationGroup( payload: object ) {
+        const status = await API_CURATION_GROUP_UPDATE( payload );
+        if (status) {
             Vue.prototype.$socket.sendObj({
                 target: 0,
                 namespace: 'curation',
                 mutation: '',
                 action: 'fetch_curation_groups',
             });
-        });
+        }
     }
 
     private alphaOptionsSort( a: any, b: any ) {

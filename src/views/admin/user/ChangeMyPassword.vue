@@ -120,8 +120,11 @@ export default class ChangeMyPassword extends Vue {
         }
     }
 
-    private changePassword( payload: object ) {
-        API_USER_UPDATE( payload, this.user.id, () => this.$router.push({ name: 'Login' }) );
+    private async changePassword( payload: object ) {
+        const status = await API_USER_UPDATE( payload, this.user.id );
+        if (status) {
+            this.$router.push({ name: 'Login' });
+        }
     }
 
     private validations() {

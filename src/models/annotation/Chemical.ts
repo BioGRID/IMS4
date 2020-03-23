@@ -23,38 +23,47 @@ export interface ChemicalSynonymMap {
 }
 
 // Get Chemical/s from the Annotation API
-export function API_CHEMICAL_FETCH( chemicalQueryID: string, successCallback?: (data: []) => void ): any {
+export async function API_CHEMICAL_FETCH( chemicalQueryID: string ) {
     const user = store.getters['auth/getUser'];
-    return axios.get( process.env.VUE_APP_ANNOTATION_URL! + '/chemical/' + chemicalQueryID, {
-        headers: { Authorization: 'Bearer ' + user.access_key },
-    })
-    .then( (res) => {
-        if ( res.status === 200 ) {
-            if (successCallback !== undefined) {
-                successCallback(res.data);
-            }
+
+    try {
+        const res = await axios.get( process.env.VUE_APP_ANNOTATION_URL! + '/chemical/' + chemicalQueryID, {
+            headers: { Authorization: 'Bearer ' + user.access_key },
+        });
+
+        if (res.status !== 200) {
+            console.error( res );
+            console.log( 'Received ' + res.status + ' response code' );
+        } else {
+            return res.data;
         }
-    })
-    .catch( (error) => {
+
+    } catch (error) {
         console.log(error);
-    });
+    }
+
+    return undefined;
 }
 
 // Get All Chemical/s from the Annotation API
-export function API_CHEMICAL_FETCH_ALL( successCallback?: (data: []) => void ): any {
+export async function API_CHEMICAL_FETCH_ALL( ) {
     const user = store.getters['auth/getUser'];
-    return axios.get( process.env.VUE_APP_ANNOTATION_URL! + '/chemicals', {
-        headers: { Authorization: 'Bearer ' + user.access_key },
-    })
-    .then( (res) => {
-        if ( res.status === 200 ) {
-            if (successCallback !== undefined) {
-                successCallback(res.data.data);
-            }
-        }
-    })
 
-    .catch( (error) => {
+    try {
+        const res = await axios.get( process.env.VUE_APP_ANNOTATION_URL! + '/chemicals', {
+            headers: { Authorization: 'Bearer ' + user.access_key },
+        });
+
+        if (res.status !== 200) {
+            console.error( res );
+            console.log( 'Received ' + res.status + ' response code' );
+        } else {
+            return res.data.data;
+        }
+
+    } catch (error) {
         console.log(error);
-    });
+    }
+
+    return undefined;
 }

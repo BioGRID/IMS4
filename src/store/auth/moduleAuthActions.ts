@@ -7,8 +7,9 @@ const moduleAuthActions = {
     update_user: (context: any, payload: any) => {
         return context.commit( 'AUTH_UPDATE_USER', payload );
     },
-    login: (context: any, payload: any) => {
-        return API_USER_LOGIN( payload.userDetails, (data: User) => {
+    login: async (context: any, payload: any) => {
+        const data: User | undefined = await API_USER_LOGIN( payload.userDetails );
+        if (data !== undefined) {
             // Valid User, Set User Object
             context.dispatch( 'update_user', data ).then( () => {
                 // Connect to websocket
@@ -35,52 +36,62 @@ const moduleAuthActions = {
                     processingPromise,
                 ]).then( () => {
                     // Redirect to Dashboard
-                    context.dispatch( 'toggleLoadingOverlay', {}, {root: true} );
                     router.push( '/' );
                 }).catch( (error) => {
-                    context.dispatch( 'toggleLoadingOverlay', {}, {root: true} );
+                    console.error( error );
                     context.dispatch( 'notify/displayNotification', notification( 'error', 'login_error_apisdown' ), {root: true });
+                }).finally( () => {
+                    context.dispatch( 'toggleLoadingOverlay', {}, {root: true} );
                 });
 
             });
-        });
+        }
     },
-    logout: (context: any, payload: any) => {
+    logout: async (context: any, payload: any) => {
         // Logout and Reset State Variables
-        return API_USER_LOGOUT( () => {
+        const status = await API_USER_LOGOUT( );
+        if (status) {
             context.commit( 'AUTH_UPDATE_USER', undefined );
             context.commit( 'AUTH_UPDATE_USERS', {} );
             context.commit( 'AUTH_UPDATE_PERMISSIONS', {} );
             payload.vm.$disconnect( );
-        });
+        }
     },
     force_logout: (context: any, payload: any) => {
         // Force a person to logout when sent by the websocket server
         router.push( '/pages/login' );
     },
-    fetch_users: (context: any, payload: any) => {
-        return API_USER_GETALL( (data: User[]) => {
+    fetch_users: async (context: any, payload: any) => {
+        const data: User[] = await API_USER_GETALL();
+        if (data !== undefined) {
             const userHash: UserHash = {};
             for (const user of data) {
                 userHash[String(user.id)] = user;
             }
             context.commit( 'AUTH_UPDATE_USERS', userHash );
-        });
+        } else {
+            throw new Error( 'Unable to fetch list of users from auth api' );
+        }
     },
-    fetch_permissions: (context: any, payload: any) => {
-        return API_PERMISSION_GETALL( (data: PermRecord[]) => {
+    fetch_permissions: async (context: any, payload: any) => {
+        const data: PermRecord[] = await API_PERMISSION_GETALL();
+        if (data !== undefined) {
             const permHash: PermHash = {};
             for (const permRecord of data) {
                 permHash[permRecord.name] = permRecord;
             }
             context.commit( 'AUTH_UPDATE_PERMISSIONS', permHash );
-        });
+        } else {
+            throw new Error( 'Unable to fetch list of permissions from auth api' );
+        }
     },
-    fetch_me: (context: any, payload: any) => {
-        return API_USER_GETME( (data: User) => {
-            console.log( 'FETCHED ME' );
+    fetch_me: async (context: any, payload: any) => {
+        const data: User = await API_USER_GETME( );
+        if (data !== undefined) {
             context.commit( 'AUTH_UPDATE_USER', data );
-        });
+        } else {
+            throw new Error( 'Unable to fetch ME from auth api' );
+        }
     },
 };
 

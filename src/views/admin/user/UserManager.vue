@@ -242,6 +242,15 @@ export default class UserManager extends Vue {
         return false;
     }
 
+    private refreshUsers() {
+        Vue.prototype.$socket.sendObj({
+            target: 0,
+            namespace: 'auth',
+            mutation: '',
+            action: 'fetch_users',
+        });
+    }
+
 }
 
 </script>

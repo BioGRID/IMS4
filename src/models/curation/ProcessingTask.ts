@@ -42,45 +42,51 @@ export interface ProcessingTaskHash {
 }
 
 // Add a Task to the Processing Task Queue
-export function API_ADD_TASK( task: ProcessingTask, successCallback?: (data: any[]) => void, errorCallback?: (error: any) => void ): any {
+export async function API_ADD_TASK( task: ProcessingTask ) {
     const user = store.getters['auth/getUser'];
-    return axios.post( process.env.VUE_APP_ACE_URL! + '/task', {
-        headers: { Authorization: 'Bearer ' + user.access_key },
-    })
-    .then( (res) => {
-        if ( res.status === 200 ) {
-            if (successCallback !== undefined) {
-                successCallback(res.data.data);
-            }
+
+    try {
+        const res = await axios.post( process.env.VUE_APP_ACE_URL! + '/task', {
+            headers: { Authorization: 'Bearer ' + user.access_key },
+        });
+
+        if (res.status !== 200) {
+            console.error( res );
+            console.log( 'Received ' + res.status + ' response code' );
+        } else {
+            return res.data.data;
         }
-    })
-    .catch( (error) => {
+
+    } catch (error) {
         console.log(error);
-        if (errorCallback !== undefined) {
-            errorCallback(error);
-        }
-    });
+    }
+
+    return undefined;
 }
 
 // Get Tasks from the Curation API
-export async function API_TASK_FETCH( count: number, fetchAll: boolean, successCallback?: (data: []) => void ): Promise<any> {
+export async function API_TASK_FETCH( count: number, fetchAll: boolean ) {
     const user = store.getters['auth/getUser'];
-    let url = process.env.VUE_APP_ACE_URL! + '/tasks';
-    if (!fetchAll) {
-        url += '/' + user.id;
-    }
-    return axios.get( url + '?count=' + count, {
-        headers: { Authorization: 'Bearer ' + user.access_key },
-    })
-    .then( (res) => {
-        if ( res.status === 200 ) {
-            if (successCallback !== undefined) {
-                successCallback(res.data.data);
-            }
+    try {
+        let url = process.env.VUE_APP_ACE_URL! + '/tasks';
+        if (!fetchAll) {
+            url += '/' + user.id;
         }
-    })
-    .catch( (error) => {
+        const res = await axios.get( url + '?count=' + count, {
+            headers: { Authorization: 'Bearer ' + user.access_key },
+        });
+
+        if (res.status !== 200) {
+            console.error( res );
+            console.log( 'Received ' + res.status + ' response code' );
+        } else {
+            return res.data.data;
+        }
+
+    } catch (error) {
         console.log(error);
         throw new Error(error.response.data.message);
-    });
+    }
+
+    return undefined;
 }

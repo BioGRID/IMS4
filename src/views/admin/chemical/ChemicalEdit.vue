@@ -274,8 +274,9 @@ export default class ChemicalEdit extends Vue {
         this.initializeFieldValues();
     }
 
-    private initializeFieldValues() {
-        API_CHEMICAL_FETCH( this.$route.params.id, (data: any) => {
+    private async initializeFieldValues() {
+        const data = await API_CHEMICAL_FETCH( this.$route.params.id );
+        if (data !== undefined) {
             this.chemicalName = data.name;
             this.chemicalID = data.chemical_id;
             this.chemicalType = data.chemical_type;
@@ -295,7 +296,7 @@ export default class ChemicalEdit extends Vue {
             this.chemicalDBxrefs = data.dbxrefs;
             this.fieldsToRemoveSynonymEntry = ['name'];
             this.fieldsToRemoveDBxrefsEntry = ['source', 'source_id'];
-        });
+        }
     }
 
     private updateChemicalSynonyms( synonyms: string[] ) {
