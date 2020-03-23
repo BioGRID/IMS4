@@ -51,37 +51,27 @@ export default class OntologyTools extends Vue {
     }
 
     private async fetchItems( item: any ) {
+        console.log( 'FETCHING' );
+        console.log( item );
+        console.log( item.id );
 
-        return new Promise((resolve, reject) => {
+        let query = this.getBaseQuery(item.id);
 
-            console.log( 'FETCHING' );
-            console.log( item );
-            console.log( item.id );
-
-            let query = this.getBaseQuery(item.id);
-            // query = query.size( this.getTotalCount(item.id) );
-            query = query.size( 10000 );
-
-            ELASTIC_QUERY( query.build(), 'ontology', false, (data: any) => {
-                if (data.hits.total.value > 0 ) {
-                    let hit: any;
-                    for (hit of data.hits.hits) {
-                        console.log( hit );
-                        if ( hit._source.child_count === 0 ) {
-                            item.children.push({id: hit._id, name: hit._source.name});
-                        } else {
-                            item.children.push({id: hit._id, name: hit._source.name, children: []});
-                        }
+        const count = await ELASTIC_COUNT( query.build(), 'ontology' );
+        if (count !== 0) {
+            query = query.size( count );
+            const data = await ELASTIC_QUERY( query.build(), 'ontology', false );
+            if (data !== undefined && data.hits.total.value > 0) {
+                let hit: any;
+                for (hit of data.hits.hits) {
+                    if ( hit._source.child_count === 0 ) {
+                        item.children.push({id: hit._id, name: hit._source.name});
+                    } else {
+                        item.children.push({id: hit._id, name: hit._source.name, children: []});
                     }
-                    resolve();
                 }
-            }, (error: any) => {
-                console.log(error);
-            });
-
-        });
-
-        console.log('finished');
+            }
+        }
 
     }
 
@@ -89,17 +79,6 @@ export default class OntologyTools extends Vue {
         return bodybuilder()
             .filter( 'term', 'ontology.ontology_id', this.ontologyID )
             .filter( 'term', 'parent_terms', itemID );
-    }
-
-    private getTotalCount(itemID: string) {
-        const query = this.getBaseQuery(itemID);
-        ELASTIC_COUNT( query.build(), 'ontology', false, (data: any) => {
-            console.log( data.count );
-            return data.count;
-        }, (error: any) => {
-            console.log(error);
-        });
-        return -1;
     }
 
 

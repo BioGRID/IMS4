@@ -2,60 +2,63 @@ import axios from 'axios';
 import store from '@/store/store';
 
 // Query Elastic Search
-export function ELASTIC_QUERY( search: object, index: string, displayLoading: boolean, successCallback?: (data: any) => void, errorCallback?: (error: any) => void ) {
+export async function ELASTIC_QUERY( search: object, index: string, displayLoading: boolean, errorCallback?: (error: any) => void ) {
+
     const user = store.getters['auth/getUser'];
     if (displayLoading) {
         store.dispatch( 'toggleLoadingOverlay', {}, {root: true} );
     }
 
-    return axios.post( process.env.VUE_APP_SEARCH_URL! + '/query/' + index, search, {
-        headers: { Authorization: 'Bearer ' + user.access_key },
-    })
-    .then( (res) => {
-        if ( res.status === 200 ) {
-            if (successCallback !== undefined) {
-                successCallback(res.data);
-            }
+    try {
+
+        const res = await axios.post( process.env.VUE_APP_SEARCH_URL! + '/query/' + index, search, {
+            headers: { Authorization: 'Bearer ' + user.access_key },
+        });
+
+        console.log( res );
+        console.log( res.data );
+
+        if (res.status !== 200) {
+            console.error( res );
+            console.log( 'Recieved ' + res.status + ' response code' );
+        } else {
+            return res.data;
         }
-    })
-    .catch( (error) => {
-        console.log( error );
+
+    } catch (error) {
+        console.error( error.response );
         if (errorCallback !== undefined) {
             errorCallback(error);
         }
-    })
-    .finally( () => {
+    } finally {
         if (displayLoading) {
             store.dispatch( 'toggleLoadingOverlay', {}, {root: true} );
         }
-    });
+    }
+
+    return undefined;
+
 }
 
-export function ELASTIC_COUNT( search: object, index: string, displayLoading: boolean, successCallback?: (data: any) => void, errorCallback?: (error: any) => void ) {
+// Get the count of results for a query, rather than the actual results
+export async function ELASTIC_COUNT( search: object, index: string ) {
     const user = store.getters['auth/getUser'];
-    if (displayLoading) {
-        store.dispatch( 'toggleLoadingOverlay', {}, {root: true} );
+
+    try {
+        const res = await axios.post( process.env.VUE_APP_SEARCH_URL! + '/count/' + index, search, {
+            headers: { Authorization: 'Bearer ' + user.access_key },
+        });
+
+        if (res.status !== 200) {
+            console.error( res );
+            console.log( 'Recieved ' + res.status + ' response code' );
+        } else {
+            return res.data.count;
+        }
+
+    } catch (error) {
+        console.error( error.response );
     }
 
-    return axios.post( process.env.VUE_APP_SEARCH_URL! + '/count/' + index, search, {
-        headers: { Authorization: 'Bearer ' + user.access_key },
-    })
-    .then( (res) => {
-        if ( res.status === 200 ) {
-            if (successCallback !== undefined) {
-                successCallback(res.data);
-            }
-        }
-    })
-    .catch( (error) => {
-        console.log( error );
-        if (errorCallback !== undefined) {
-            errorCallback(error);
-        }
-    })
-    .finally( () => {
-        if (displayLoading) {
-            store.dispatch( 'toggleLoadingOverlay', {}, {root: true} );
-        }
-    });
+    return 0;
 }

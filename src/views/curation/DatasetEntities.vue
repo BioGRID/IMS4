@@ -194,13 +194,10 @@ export default class DatasetView extends Vue {
         return this.tableHeaders.length + addonCols;
     }
 
-    private getTotalCount() {
+    private async getTotalCount() {
         const query = this.getBaseQuery();
-        ELASTIC_COUNT( query.build(), 'entity', false, (data: any) => {
-            this.totalRowCount = data.count;
-        }, (error: any) => {
-            console.log(error);
-        });
+        const count = await ELASTIC_COUNT( query.build(), 'entity' );
+        this.totalRowCount = count;
     }
 
     private getBaseQuery() {
@@ -210,7 +207,7 @@ export default class DatasetView extends Vue {
             .filter( 'term', 'history.method', 'ACTIVATED' );
     }
 
-    private fetchData( paginationPage: number, tableSortDetails: TableSort[], sortOrderTracker: number[], searchText: string ) {
+    private async fetchData( paginationPage: number, tableSortDetails: TableSort[], sortOrderTracker: number[], searchText: string ) {
         let query = this.getBaseQuery();
 
         const sortQuery = buildSortQuery( tableSortDetails, sortOrderTracker, this.tableHeaders );
@@ -222,23 +219,20 @@ export default class DatasetView extends Vue {
         const formattedQuery: any = query.build();
         formattedQuery.sort = sortQuery;
 
-        ELASTIC_QUERY( formattedQuery, 'entity', true, (data: any) => {
-            if (data.hits.total.value > 0 ) {
-                this.displayRows = [];
-                let hit: any;
-                for (hit of data.hits.hits) {
-                    hit.is_expanded = false;
-                    hit.is_checked = false;
-                    this.displayRows.push(hit);
-                }
-                this.filteredRowCount = data.hits.total.value;
-            } else {
-                this.displayRows = [];
-                this.filteredRowCount = 0;
+        const data = await ELASTIC_QUERY( formattedQuery, 'entity', true );
+        if (data !== undefined && data.hits.total.value > 0) {
+            this.displayRows = [];
+            let hit: any;
+            for (hit of data.hits.hits) {
+                hit.is_expanded = false;
+                hit.is_checked = false;
+                this.displayRows.push(hit);
             }
-        }, (error: any) => {
-            console.log(error);
-        });
+            this.filteredRowCount = data.hits.total.value;
+        } else {
+            this.displayRows = [];
+            this.filteredRowCount = 0;
+        }
 
     }
 
