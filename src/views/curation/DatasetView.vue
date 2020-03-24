@@ -29,6 +29,7 @@ import { State, namespace } from 'vuex-class';
 import DatasetDetails from '@/components/datasets/DatasetDetails.vue';
 import DatasetTools from '@/components/datasets/DatasetTools.vue';
 import HistoryList from '@/components/history/HistoryList.vue';
+import { HistoryEntry } from '@/models/curation/History';
 
 const curation = namespace( 'curation' );
 
@@ -42,6 +43,7 @@ const curation = namespace( 'curation' );
 export default class DatasetView extends Vue {
     @curation.State private currentDataset!: any;
     @curation.State private curationDrawerLinks!: object[];
+    @curation.State private currentHistory!: HistoryEntry[];
     private darkMode: boolean = false;
 
     private created() {

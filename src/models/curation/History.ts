@@ -38,3 +38,37 @@ export async function API_HISTORY_FETCH( refID: number, refType: string ) {
 
     return undefined;
 }
+
+// Add History entry
+export async function API_HISTORY_ADD( payload: HistoryEntry ) {
+    const user = store.getters['auth/getUser'];
+
+    try {
+        const res = await axios.post( process.env.VUE_APP_ACE_URL! + '/history', payload, {
+            headers: { Authorization: 'Bearer ' + user.access_key },
+        });
+
+        if (res.status !== 200) {
+            console.error( res );
+            console.log( 'Received ' + res.status + ' response code' );
+        } else {
+            return true;
+        }
+
+    } catch (error) {
+        if (error.response === undefined) {
+            store.dispatch( 'notify/displayNotification', notification( 'error', 'history_add_unknown' ), {root: true });
+            console.log( error );
+        } else {
+            if ( error.response.status === 500 ) {
+                store.dispatch( 'notify/displayNotification', notification( 'error', 'history_add_improper' ), {root: true });
+            } else {
+                console.log( error );
+                console.log( error.response );
+                store.dispatch( 'notify/displayNotification', notification( 'error', 'history_add_unknown' ), {root: true });
+            }
+        }
+    }
+
+    return false;
+}

@@ -74,6 +74,12 @@ export default function notification(type: string, id: string) {
                 unrecognized: 'Unrecognized elastic search index',
             },
         },
+        history: {
+            add: {
+                unknown: 'Unable to add new history entry',
+                improper: 'Improperly formatted history entry, unable to add',
+            },
+        },
     };
 
     const getMessage = ( source: string, operation: string, msgtype: string ) => {

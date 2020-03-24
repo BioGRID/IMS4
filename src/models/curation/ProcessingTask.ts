@@ -30,23 +30,43 @@ export interface ProcessingTask {
     processing_code?: string;
     priority: number;
     state: string;
+    status_code: number;
+    status_message: string;
     stats?: NumericHash;
     notes?: TaskNotes;
     user_id: number;
-    last_run: LastRun;
-    added_date: string;
+    last_run?: LastRun;
+    added_date?: string;
 }
 
 export interface ProcessingTaskHash {
     [key: number]: ProcessingTask;
 }
 
+// Generate a new task
+export function createProcessingTask( task: string, options: StringHash, data: object | null, priority: number ): ProcessingTask {
+    const user = store.getters['auth/getUser'];
+    return {
+        processing_id: 0,
+        task,
+        payload: {
+            options,
+            data,
+        },
+        priority,
+        state: 'new',
+        status_code: 0,
+        status_message: '',
+        user_id: user.id,
+    };
+}
+
 // Add a Task to the Processing Task Queue
-export async function API_ADD_TASK( task: ProcessingTask ) {
+export async function API_TASK_ADD( task: ProcessingTask ) {
     const user = store.getters['auth/getUser'];
 
     try {
-        const res = await axios.post( process.env.VUE_APP_ACE_URL! + '/task', {
+        const res = await axios.post( process.env.VUE_APP_ACE_URL! + '/task', task, {
             headers: { Authorization: 'Bearer ' + user.access_key },
         });
 
@@ -58,7 +78,7 @@ export async function API_ADD_TASK( task: ProcessingTask ) {
         }
 
     } catch (error) {
-        console.log(error);
+        console.error(error);
     }
 
     return undefined;

@@ -53,33 +53,33 @@ const moduleCurationActions = {
             context.commit( 'CURATION_UPDATE_CURRENT_HISTORY', data );
         }
     },
+    reset_current_dataset: (context: any) => {
+        context.commit( 'CURATION_UPDATE_CURRENT_DATASET', {} );
+        context.commit( 'CURATION_UPDATE_DRAWER_LINKS', [] );
+        context.commit( 'CURATION_UPDATE_CURRENT_HISTORY', [] );
+    },
     fetch_current_dataset: async (context: any, payload: any) => {
         const query = bodybuilder()
             .filter( 'term', 'source_id', payload.sourceID )
             .filter( 'term', 'source_type', payload.sourceType )
             .build();
 
-        const data = await ELASTIC_QUERY( query, 'dataset', true );
-
-        if (data !== undefined && data.hits.total.value >= 0) {
-            context.commit( 'CURATION_UPDATE_CURRENT_DATASET', {} );
-            context.commit( 'CURATION_UPDATE_DRAWER_LINKS', [] );
-            context.commit( 'CURATION_UPDATE_CURRENT_HISTORY', [] );
+        const data = await ELASTIC_QUERY( query, 'dataset', false );
+        if (data === undefined) {
+            context.dispatch( 'notify/displayNotification', notification( 'error', 'dataset_fetch_offline' ), {root: true });
+            return undefined;
+        } else {
+            context.dispatch( 'reset_current_dataset', {}, {} );
 
             if (data.hits.total.value === 1) {
                 const dataset = data.hits.hits[0]._source;
                 context.commit( 'CURATION_UPDATE_CURRENT_DATASET', dataset );
                 context.dispatch( 'fetch_current_history', { refID: dataset.dataset_id, refType: 'dataset' }, {} );
-                router.push( '/curation/DatasetView' );
-                return;
-            } else {
-                context.dispatch( 'notify/displayNotification', notification( 'error', 'dataset_fetch_nonexistant' ), {root: true });
+                return true;
             }
-        } else {
-            context.dispatch( 'notify/displayNotification', notification( 'error', 'dataset_fetch_offline' ), {root: true });
         }
 
-        router.push( '/elements/dashboard' );
+        return false;
 
     },
     build_curation_drawer_links: (context: any, payload: any) => {

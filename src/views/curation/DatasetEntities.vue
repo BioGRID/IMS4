@@ -70,7 +70,7 @@ const curation = namespace( 'curation' );
         ACEElasticDataTable,
     },
 })
-export default class DatasetView extends Vue {
+export default class DatasetEntities extends Vue {
     @curation.State private currentDataset!: any;
     @curation.State private attributeTypes!: any;
     private displayRows: object[] = [];
