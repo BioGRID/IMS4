@@ -164,7 +164,7 @@ const router = new Router({
                 },
             },
             {
-                path: '/curation/DatasetView',
+                path: '/curation/DatasetView/:id',
                 name: 'Read Dataset',
                 component: () => import( '@/views/curation/DatasetView.vue' ),
                 beforeEnter: (to: any, from: any, next: any) => {
@@ -193,14 +193,6 @@ const router = new Router({
                 component: () => import( '@/views/admin/chemical/ChemicalAdd.vue' ),
                 beforeEnter: (to: any, from: any, next: any) => {
                     isPermittedRoute( 'MANAGE CHEMICALS', next );
-                },
-            },
-            {
-                path: '/curation/DatasetEntities',
-                name: 'Dataset Entities',
-                component: () => import( '@/views/curation/DatasetEntities.vue' ),
-                beforeEnter: (to: any, from: any, next: any) => {
-                    isPermittedRoute( 'MANAGE CURATION', next );
                 },
             },
         ],

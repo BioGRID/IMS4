@@ -74,7 +74,7 @@ export async function API_TASK_ADD( task: ProcessingTask ) {
             console.error( res );
             console.log( 'Received ' + res.status + ' response code' );
         } else {
-            return res.data.data;
+            return res.data;
         }
 
     } catch (error) {

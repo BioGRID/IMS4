@@ -72,6 +72,7 @@ export default function notification(type: string, id: string) {
                 improper: 'Improperly formatted elastic search query',
                 offline: 'Publication fetching service is currently offline',
                 unrecognized: 'Unrecognized elastic search index',
+                timeout: 'Max attempts to fetch publication exceeded. Please try again later',
             },
         },
         history: {

@@ -1,9 +1,12 @@
+import { HistoryEntry } from '@/models/curation/History';
+import { CurationDrawerLink } from '@/models/curation/CurationDrawerLink';
+
 const moduleCurationState = {
     curationGroups: {},
-    currentDataset: {},
-    currentHistory: [],
-    datasetCollapsed: false,
-    curationDrawerLinks: [],
+    openDatasets: new Map<number, any[]>(),
+    openHistory: new Map<number, HistoryEntry[]>(),
+    curationDrawerLinkMap: new Map<number, CurationDrawerLink>(),
+    currentCurationDrawerLinks: [],
     datasetCurationOptions: {
         ABSTRACT: { text: 'Abstract Read', value: 'ABSTRACT', color: 'light-green', icon: 'mdi-note-text-outline' },
         ACCESSED: { text: 'Accessed', value: 'ACCESSED', color: 'light-blue', icon: 'mdi-eye'  },

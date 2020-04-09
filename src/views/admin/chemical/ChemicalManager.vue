@@ -26,67 +26,68 @@
                 Add New Chemical 
                 <v-icon class='ml-2'>mdi-account-plus</v-icon>
             </v-btn>
-             
-            <ACEElasticDataTable
-                class='mt-5'
-                title="Chemicals"
-                tableClass="pa-1"
-                :columns="tableHeaders"
-                :rowsPerPage="rowsPerPage"
-                :displayRows="displayRows"
-                :filteredRowCount="filteredRowCount"
-                :totalRowCount="totalRowCount"
-                :hasExpanded="hasExpanded"
-                :hasRowCheckbox="hasRowCheckbox"
-                :pagination="true"
-                :showSearch="true"
-                @query="fetchData"
-            >
+            
+            <v-card>
+                <ACEElasticDataTable
+                    class='mt-5'
+                    title="Chemicals"
+                    tableClass="pa-1"
+                    :columns="tableHeaders"
+                    :rowsPerPage="rowsPerPage"
+                    :displayRows="displayRows"
+                    :filteredRowCount="filteredRowCount"
+                    :totalRowCount="totalRowCount"
+                    :hasExpanded="hasExpanded"
+                    :hasRowCheckbox="hasRowCheckbox"
+                    :pagination="true"
+                    :showSearch="true"
+                    @query="fetchData"
+                >
 
-                <template slot="defaultRow" slot-scope="{ row, rowIndex }">
-                    <td class='text-center pa-3' nowrap>{{ row._source.chemical_id }}</td>
-                    <td class='text-center pa-3'>{{ row._source.name }}</td>
-                    <td class='text-left pa-3' wrap>
-                        {{ buildDescription(row._source.description, row.show_full_description, 30, rowIndex) }}
-                        <a v-if="!row.show_full_description" class='plainLink' @click='expandDescription( rowIndex )'>[more]</a>
-                    </td>
-                    <td class='text-center pa-3' nowrap>{{ row._source.chemical_type }}</td>
-                    <td class='text-center pa-3' nowrap>{{ row._source.source }}</td>
-                    <td class='text-center pa-3' nowrap>{{ row._source.source_id }}</td>
-                    <td class='text-center pa-3' nowrap>{{ row._source.deprecated }}</td>
-                    <td class='nowrap text-center pa-3'>
-                        <v-btn 
-                            x-small 
-                            dark 
-                            fab 
-                            elevation="0" 
-                            color="info" 
-                            :title='"Edit chemical: " + row._source.name' 
-                            :to="'/admin/chemical/chemicaledit/' + row._source.chemical_id"
-                        >
-                            <v-icon>mdi-account-edit</v-icon>
-                        </v-btn>
-                    </td>   
-                </template>
-                <template slot="expandedRow" slot-scope="{ row, rowIndex }">
-                    <td :colspan='expandedColspan'>
-                        <v-sheet
-                            color="amber lighten-4"
-                            class="pa-2 ml-2 mr-2"
-                        >
-                            <ul>
-                                <li v-for="(content,index) in buildExpandedContent(row)">
-                                    
-                                    <strong>{{ content.title }}</strong>: {{ content.value }}
-                                </li>
-                            </ul>
+                    <template slot="defaultRow" slot-scope="{ row, rowIndex }">
+                        <td class='text-center pa-3' nowrap>{{ row._source.chemical_id }}</td>
+                        <td class='text-center pa-3'>{{ row._source.name }}</td>
+                        <td class='text-left pa-3' wrap>
+                            {{ buildDescription(row._source.description, row.show_full_description, 30, rowIndex) }}
+                            <a v-if="!row.show_full_description" class='plainLink' @click='expandDescription( rowIndex )'>[more]</a>
+                        </td>
+                        <td class='text-center pa-3' nowrap>{{ row._source.chemical_type }}</td>
+                        <td class='text-center pa-3' nowrap>{{ row._source.source }}</td>
+                        <td class='text-center pa-3' nowrap>{{ row._source.source_id }}</td>
+                        <td class='text-center pa-3' nowrap>{{ row._source.deprecated }}</td>
+                        <td class='nowrap text-center pa-3'>
+                            <v-btn 
+                                x-small 
+                                dark 
+                                fab 
+                                elevation="0" 
+                                color="info" 
+                                :title='"Edit chemical: " + row._source.name' 
+                                :to="'/admin/chemical/chemicaledit/' + row._source.chemical_id"
+                            >
+                                <v-icon>mdi-account-edit</v-icon>
+                            </v-btn>
+                        </td>   
+                    </template>
+                    <template slot="expandedRow" slot-scope="{ row, rowIndex }">
+                        <td :colspan='expandedColspan'>
+                            <v-sheet
+                                color="amber lighten-4"
+                                class="pa-2 ml-2 mr-2"
+                            >
+                                <ul>
+                                    <li v-for="(content,index) in buildExpandedContent(row)">
+                                        
+                                        <strong>{{ content.title }}</strong>: {{ content.value }}
+                                    </li>
+                                </ul>
 
-                        </v-sheet>
-                    </td>
-                </template>
+                            </v-sheet>
+                        </td>
+                    </template>
 
-            </ACEElasticDataTable>
-        
+                </ACEElasticDataTable>
+            </v-card>
 
         </v-container>
     </div>

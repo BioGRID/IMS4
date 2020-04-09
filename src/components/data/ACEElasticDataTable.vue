@@ -1,119 +1,117 @@
 <template>
     <div class="ace-elastic-data-table">
-        <v-card>
-            <v-row no-gutters>
-                <v-col xl="8" lg="8" md="6" sm="12" xs="12">
-                    <v-card-title class="pb-0 mb-3 mt-2 headline">
-                        <strong>{{ title }}</strong>
-                    </v-card-title>
-                    <v-card-subtitle>
-                        Showing <strong>{{ this.startRange }}</strong> to <strong>{{ this.endRange }}</strong> of <strong>{{ this.filteredRowCount }}</strong> entries <span v-if="this.filteredRowCount !== this.totalRowCount">(filtered from <strong>{{ this.totalRowCount }}</strong> total entries)</span>
-                    </v-card-subtitle>
-                </v-col>
-                <v-col xl="4" lg="4" md="6" sm="12" xs="12">
-                    <v-text-field
-                        v-if="showSearch"
-                        v-model="searchText"
-                        append-icon="mdi-magnify"
-                        label="Search"
-                        single-line
-                        hide-details
-                        :clearable="true"
-                        @keyup.enter="filterSubmit()"
-                        @click:append="filterSubmit()"
-                        class='pr-5 pl-5 mt-4 mb-2'
-                    ></v-text-field>
-                </v-col>
-            </v-row>
-            <table :class='tableClass'>
-                <thead>
-                    <tr>
-                        <th v-if="hasRowCheckbox"></th>
-                        <th
-                            v-for="(column,index) in columns" 
-                            :class="columnClass(column)"
-                            :key="index"
-                            :width="columnWidth(column)"
-                            @click="column.sortable ? sortBy(index) : null"
-                        >
-                            <div class='tableSearchTagWrap'>
-                                <span 
-                                    v-if="column.searchTag !== undefined" 
-                                    class='tableSearchTag'
-                                    @click.stop="appendSearchTag( column.searchTag )"
-                                >
-                                    [{{ column.searchTag }}]
-                                </span>
-                            </div>
+        <v-row no-gutters>
+            <v-col xl="8" lg="8" md="6" sm="12" xs="12">
+                <v-card-title class="pb-0 mb-3 mt-2 headline">
+                    <strong>{{ title }}</strong>
+                </v-card-title>
+                <v-card-subtitle>
+                    Showing <strong>{{ this.startRange }}</strong> to <strong>{{ this.endRange }}</strong> of <strong>{{ this.filteredRowCount }}</strong> entries <span v-if="this.filteredRowCount !== this.totalRowCount">(filtered from <strong>{{ this.totalRowCount }}</strong> total entries)</span>
+                </v-card-subtitle>
+            </v-col>
+            <v-col xl="4" lg="4" md="6" sm="12" xs="12">
+                <v-text-field
+                    v-if="showSearch"
+                    v-model="searchText"
+                    append-icon="mdi-magnify"
+                    label="Search"
+                    single-line
+                    hide-details
+                    :clearable="true"
+                    @keyup.enter="filterSubmit()"
+                    @click:append="filterSubmit()"
+                    class='pr-5 pl-5 mt-4 mb-2'
+                ></v-text-field>
+            </v-col>
+        </v-row>
+        <table :class='tableClass'>
+            <thead>
+                <tr>
+                    <th v-if="hasRowCheckbox"></th>
+                    <th
+                        v-for="(column,index) in columns" 
+                        :class="columnClass(column)"
+                        :key="index"
+                        :width="columnWidth(column)"
+                        @click="column.sortable ? sortBy(index) : null"
+                    >
+                        <div class='tableSearchTagWrap'>
+                            <span 
+                                v-if="column.searchTag !== undefined" 
+                                class='tableSearchTag'
+                                @click.stop="appendSearchTag( column.searchTag )"
+                            >
+                                [{{ column.searchTag }}]
+                            </span>
+                        </div>
 
-                            <div>
-                                {{ column.title }}
-                                <v-icon v-if="tableSortDetails[index].sortDirection === 'asc'"
-                                    dark
-                                    small
-                                >
-                                    mdi-arrow-up
-                                </v-icon>
-                                <v-icon v-if="tableSortDetails[index].sortDirection === 'desc'"
-                                    dark
-                                    small
-                                >
-                                    mdi-arrow-down
-                                </v-icon>
-                                <v-icon v-if="tableSortDetails[index].sortOrder && tableSortDetails[index].sortDirection"
-                                    dark
-                                    small
-                                >
-                                    mdi-numeric-{{ tableSortDetails[index].sortOrder }}-box
-                                </v-icon>
-                            </div>
-                        </th>
-                        <th v-if="hasExpanded"></th>
+                        <div>
+                            {{ column.title }}
+                            <v-icon v-if="tableSortDetails[index].sortDirection === 'asc'"
+                                dark
+                                small
+                            >
+                                mdi-arrow-up
+                            </v-icon>
+                            <v-icon v-if="tableSortDetails[index].sortDirection === 'desc'"
+                                dark
+                                small
+                            >
+                                mdi-arrow-down
+                            </v-icon>
+                            <v-icon v-if="tableSortDetails[index].sortOrder && tableSortDetails[index].sortDirection"
+                                dark
+                                small
+                            >
+                                mdi-numeric-{{ tableSortDetails[index].sortOrder }}-box
+                            </v-icon>
+                        </div>
+                    </th>
+                    <th v-if="hasExpanded"></th>
+                </tr>
+            </thead>
+            
+            <tbody>
+                <template v-for="(row, rowIndex) in displayRows">
+                    <tr :class="rowClass(rowIndex)">
+                        <slot name="defaultRow" :row="row" :rowIndex="rowIndex"></slot>
+                        <td class='text-center expandedColumn' v-if="hasExpanded">
+                            <v-btn 
+                                medium 
+                                class='datatable-expand-row'
+                                :icon="true"
+                                title="Click to expand row for additional details"
+                                @click="toggleExpandRow(rowIndex)"
+                            >
+                                <v-icon v-if="row.is_expanded">mdi-chevron-up</v-icon>
+                                <v-icon v-if="!row.is_expanded">mdi-chevron-down</v-icon>
+                            </v-btn>
+                        </td>
                     </tr>
-                </thead>
-                
-                <tbody>
-                    <template v-for="(row, rowIndex) in displayRows">
-                        <tr :class="rowClass(rowIndex)">
-                            <slot name="defaultRow" :row="row" :rowIndex="rowIndex"></slot>
-                            <td class='text-center expandedColumn' v-if="hasExpanded">
-                                <v-btn 
-                                    medium 
-                                    class='datatable-expand-row'
-                                    :icon="true"
-                                    title="Click to expand row for additional details"
-                                    @click="toggleExpandRow(rowIndex)"
-                                >
-                                    <v-icon v-if="row.is_expanded">mdi-chevron-up</v-icon>
-                                    <v-icon v-if="!row.is_expanded">mdi-chevron-down</v-icon>
-                                </v-btn>
-                            </td>
-                        </tr>
-                        <tr v-if="hasExpanded" v-show="row.is_expanded">
-                            <slot name="expandedRow" :row="row" :rowIndex="rowIndex"></slot>
-                        </tr>
-                    </template>
-                    <template>
-                        <tr v-if="displayRows.length <= 0">
-                            <td :colspan="expandedColspan">
-                                <div class='text-center'>
-                                    Your filter matched zero entries. Please try again or remove the filter to view more data... 
-                                </div>
-                            </td>
-                        </tr>
-                    </template>
-                </tbody>
-            </table>
-            <v-pagination
-                v-if="showPagination"
-                v-model="paginationPage"
-                :length="paginationSize"
-                :page="paginationPage"
-                dark
-                total-visible="8"
-                class="mt-5"
-            ></v-pagination>
-        </v-card>
+                    <tr v-if="hasExpanded" v-show="row.is_expanded">
+                        <slot name="expandedRow" :row="row" :rowIndex="rowIndex"></slot>
+                    </tr>
+                </template>
+                <template>
+                    <tr v-if="displayRows.length <= 0">
+                        <td :colspan="expandedColspan">
+                            <div class='text-center'>
+                                Your filter matched zero entries. Please try again or remove the filter to view more data... 
+                            </div>
+                        </td>
+                    </tr>
+                </template>
+            </tbody>
+        </table>
+        <v-pagination
+            v-if="showPagination"
+            v-model="paginationPage"
+            :length="paginationSize"
+            :page="paginationPage"
+            dark
+            total-visible="8"
+            class="mt-5"
+        ></v-pagination>
     </div> 
 </template>
 
