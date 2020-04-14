@@ -1,4 +1,5 @@
 import { helpers } from 'vuelidate/lib/validators';
+import { isStringInArrayOfObjects } from '@/utils/HelperUtils';
 
 // Check if string has only printable ascii characters
 export function printableAsciiOnly( value: string ) {
@@ -52,7 +53,7 @@ export function passwordComplexity(value: string) {
 }
 
 // Check if a value of type valueType already exists in an array. Additional values and types can be checked as well.
-export function inArrayOfObjects(listOfOptions: any[], valueType: string, listOfAdditionalValues: any[]) {
+/* export function inArrayOfObjects(listOfOptions: any[], valueType: string, listOfAdditionalValues: any[]) {
     return (value: string) => {
         if (!helpers.req(value)) {
             return true;
@@ -81,3 +82,15 @@ export function inArrayOfObjects(listOfOptions: any[], valueType: string, listOf
         return true;
     };
 }
+ */
+
+ // Wrapper function for isStringInArrayOfObjects so it can be called by the form validator
+export function inArrayOfObjects(listOfOptions: any[], valueType: string, listOfAdditionalValues: any[]) {
+    return (value: string) => {
+        if (!helpers.req(value)) {
+            return true;
+        }
+        return isStringInArrayOfObjects( value, listOfOptions, valueType, listOfAdditionalValues );
+    };
+}
+

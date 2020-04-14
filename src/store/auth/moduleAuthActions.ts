@@ -17,6 +17,8 @@ const moduleAuthActions = {
                 const userPromise = context.dispatch( 'fetch_users', {}, {} );
                 // Fetch list of organisms from the API for the store
                 const orgPromise = context.dispatch( 'annotation/fetch_organisms', {}, {root: true} );
+                // Fetch list of ontologies from the API
+                const ontologyPromise = context.dispatch( 'annotation/fetch_ontologies', {}, {root: true} );
                 // Fetch list of curation_groups from the API
                 const groupPromise = context.dispatch( 'curation/fetch_curation_groups', {}, {root: true} );
                 // Fetch list of attribute types from the API
@@ -29,6 +31,7 @@ const moduleAuthActions = {
                 Promise.all([
                     userPromise,
                     orgPromise,
+                    ontologyPromise,
                     groupPromise,
                     attributePromise,
                     permissionPromise,
