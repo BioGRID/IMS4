@@ -34,3 +34,30 @@ export function tokenizeSearchString( searchText: string ): string[] {
     return [];
 
 }
+
+// Check if a value of type valueType already exists in an array. Additional values and types can be checked as well.
+export function isStringInArrayOfObjects( value: string, listOfOptions: any[], valueType: string, listOfAdditionalValues: any[]) {
+    for (const [key, item] of Object.entries(listOfOptions)) {
+        if ( item[valueType] === value ) {
+            if ( listOfAdditionalValues && listOfAdditionalValues.length > 0 ) {
+                let foundAllMatchingValues = false;
+                for (const [extraKey, extraValue] of Object.entries(listOfAdditionalValues)) {
+                    for (const [matchingKey, matchingValue] of Object.entries(extraValue)) {
+                        if ( item[matchingKey] === matchingValue ) {
+                            foundAllMatchingValues = true;
+                        } else {
+                            foundAllMatchingValues = false;
+                        }
+                    }
+                }
+                if ( foundAllMatchingValues ) {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+

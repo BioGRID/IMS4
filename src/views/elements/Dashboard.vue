@@ -114,9 +114,7 @@
                                 </template>
                             </v-expansion-panel-header>
                             <v-expansion-panel-content>
-                                <OntologyTools
-                                   
-                                >
+                                <OntologyTools>
                                 </OntologyTools>
                             </v-expansion-panel-content>
                         </v-expansion-panel>

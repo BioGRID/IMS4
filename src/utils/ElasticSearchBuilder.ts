@@ -1,6 +1,7 @@
 
 import { SearchTagLookup, TableSort, TableColumn } from '@/models/table/Table';
 import { AttributeTypeHash } from '@/models/curation/AttributeType';
+import bodybuilder from 'bodybuilder';
 
 export function buildSearchQuery( searchText: string, queryStructure: any, searchTagLookup: SearchTagLookup, attributeLookup: AttributeTypeHash  ) {
     if (searchText === null || searchText === undefined || searchText.length <= 0) {
@@ -68,4 +69,38 @@ export function buildSortQuery( tableSortDetails: TableSort[], sortOrderTracker:
         sortOptions.push(sortOption);
     }
     return sortOptions;
+}
+
+// Build elastic query to return all ontolgy terms found for the users search query against the selected ontology
+export function buildSearchQueryFromSearchString(searchTerm: string, ontologyID: number) {
+    return bodybuilder()
+        .filter( 'term', 'ontology.ontology_id', ontologyID )
+        .query( 'query_string', {
+            query: searchTerm,
+            fields: ['ontology_term_id', 'name'],
+        });
+}
+
+// Build elastic query to find all ontology terms where it is found in the parents_terms list. Used to build out the ontology treeview
+export function buildOntologyParentsQuery(itemID: string, ontologyID: number) {
+    return bodybuilder()
+        .filter( 'term', 'ontology.ontology_id', ontologyID )
+        .filter( 'term', 'parent_terms', itemID )
+        .filter( 'term', 'deprecated', false );
+}
+
+// Build elastic query to find a given ontology item within the ontology selected
+export function buildOntologyItemQuery(itemID: string, ontologyID: number) {
+    return bodybuilder()
+        .filter( 'term', 'ontology.ontology_id', ontologyID )
+        .filter( 'term', 'ontology_term_id', itemID )
+        .filter( 'term', 'deprecated', false );
+}
+
+// Build elastic query to find the root of a given ontology
+export function buildOntologyRootQuery(ontologyID: number) {
+    return bodybuilder()
+        .filter( 'term', 'ontology.ontology_id', ontologyID )
+        .filter( 'term', 'is_root', true )
+        .filter( 'term', 'deprecated', false );
 }

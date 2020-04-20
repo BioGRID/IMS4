@@ -15,8 +15,8 @@ export async function ELASTIC_QUERY( search: object, index: string, displayLoadi
             headers: { Authorization: 'Bearer ' + user.access_key },
         });
 
-        console.log( res );
-        console.log( res.data );
+        // console.log( res );
+        // console.log( res.data );
 
         if (res.status !== 200) {
             console.error( res );
