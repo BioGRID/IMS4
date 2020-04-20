@@ -2,14 +2,14 @@ import { CurationGroupEntry, CurationGroupHash, API_CURATION_GROUP_FETCH } from 
 import { AttributeTypeEntry, AttributeTypeHash, API_ATTRIBUTE_TYPE_FETCH } from '@/models/curation/AttributeType';
 import { ProcessingTask, ProcessingTaskHash, API_TASK_FETCH } from '@/models/curation/ProcessingTask';
 import { API_HISTORY_FETCH, HistoryEntry } from '@/models/curation/History';
+import { CurationDrawerLink } from '@/models/curation/CurationDrawerLink';
 import bodybuilder from 'bodybuilder';
 import { ELASTIC_QUERY } from '@/models/elastic/Query';
-import router from '@/router';
 import notification from '@/utils/Notifications';
 
 const moduleCurationActions = {
     toggleDatasetCollapsed: (context: any) => {
-        context.commit( 'TOGGLE_DATASET_COLLAPSED' );
+        context.commit( 'CURATION_TOGGLE_DATASET_COLLAPSED' );
     },
     fetch_curation_groups: async (context: any) => {
         const data: CurationGroupEntry[] = await API_CURATION_GROUP_FETCH( );
@@ -47,61 +47,71 @@ const moduleCurationActions = {
             throw new Error( 'Unable to fetch recent processing tasks from curation api' );
         }
     },
-    fetch_current_history: async (context: any, payload: any) => {
+    fetch_history: async (context: any, payload: any) => {
         const data: HistoryEntry[] = await API_HISTORY_FETCH( payload.refID, payload.refType );
         if (data !== undefined) {
-            context.commit( 'CURATION_UPDATE_CURRENT_HISTORY', data );
+            context.commit( 'CURATION_ADD_HISTORY', { refID: payload.refID, history: data } );
         }
     },
-    fetch_current_dataset: async (context: any, payload: any) => {
+    remove_dataset: (context: any, payload: any) => {
+        context.commit( 'CURATION_REMOVE_HISTORY', payload.dataset_id );
+        context.commit( 'CURATION_REMOVE_DATASET', payload.dataset_id );
+        context.commit( 'CURATION_REMOVE_DRAWER_LINK', payload.dataset_id );
+        context.dispatch( 'rebuild_current_drawer_links' );
+    },
+    truncate_datasets: (context: any) => {
+        context.commit( 'CURATION_TRUNCATE_HISTORY' );
+        context.commit( 'CURATION_TRUNCATE_DATASETS' );
+        context.commit( 'CURATION_TRUNCATE_DRAWER_LINKS' );
+        context.dispatch( 'rebuild_current_drawer_links' );
+    },
+    fetch_dataset: async (context: any, payload: any) => {
         const query = bodybuilder()
             .filter( 'term', 'source_id', payload.sourceID )
             .filter( 'term', 'source_type', payload.sourceType )
             .build();
 
-        const data = await ELASTIC_QUERY( query, 'dataset', true );
-
-        if (data !== undefined && data.hits.total.value >= 0) {
-            context.commit( 'CURATION_UPDATE_CURRENT_DATASET', {} );
-            context.commit( 'CURATION_UPDATE_DRAWER_LINKS', [] );
-            context.commit( 'CURATION_UPDATE_CURRENT_HISTORY', [] );
-
-            if (data.hits.total.value === 1) {
-                const dataset = data.hits.hits[0]._source;
-                context.commit( 'CURATION_UPDATE_CURRENT_DATASET', dataset );
-                context.dispatch( 'fetch_current_history', { refID: dataset.dataset_id, refType: 'dataset' }, {} );
-                router.push( '/curation/DatasetView' );
-                return;
-            } else {
-                context.dispatch( 'notify/displayNotification', notification( 'error', 'dataset_fetch_nonexistant' ), {root: true });
-            }
-        } else {
+        const data = await ELASTIC_QUERY( query, 'dataset', false );
+        if (data === undefined) {
             context.dispatch( 'notify/displayNotification', notification( 'error', 'dataset_fetch_offline' ), {root: true });
+            return undefined;
+        } else {
+            if (data.hits.total.value === 1) {
+                const dataset: any = data.hits.hits[0]._source;
+                context.commit( 'CURATION_ADD_DATASET', dataset );
+                context.dispatch( 'fetch_history', { refID: dataset.dataset_id, refType: 'dataset' }, {} );
+                context.dispatch( 'add_curation_drawer_link', { dataset_id: dataset.dataset_id }, {} );
+                return dataset.dataset_id;
+            }
         }
 
-        router.push( '/elements/dashboard' );
+        return 0;
 
     },
-    build_curation_drawer_links: (context: any, payload: any) => {
-        const currentDataset = context.state.currentDataset;
-        let datasetInfo = 'Pubmed: ' + currentDataset.source_id;
-        if (currentDataset.source_type !== 'pubmed') {
-            datasetInfo = currentDataset.source_type + ' ' + currentDataset.source_id;
-        }
-        const curationNavDrawerLinks = [{
-            to: '/curation/DatasetView',
-            icon: 'mdi-book-open-page-variant',
-            text: 'Read Dataset',
-            subtitle: datasetInfo,
-        },
-        {
-            to: '/curation/DatasetEntities',
-            icon: 'mdi-axis-arrow',
-            text: 'Dataset Entities',
-            subtitle: datasetInfo,
-        }];
+    add_curation_drawer_link: (context: any, payload: { dataset_id: number }) => {
+        const dataset = context.getters.getOpenDataset(payload.dataset_id);
+        if (dataset !== undefined) {
+            let datasetInfo = 'Pubmed: ' + dataset.source_id;
+            if (dataset.source_type !== 'pubmed') {
+                datasetInfo = dataset.source_type + ' ' + dataset.source_id;
+            }
+            const curationNavDrawerLink: CurationDrawerLink = {
+                to: '/curation/DatasetView/' + payload.dataset_id,
+                icon: 'mdi-book-open-page-variant',
+                text: 'View Dataset',
+                subtitle: datasetInfo,
+            };
 
-        context.commit( 'CURATION_UPDATE_DRAWER_LINKS', curationNavDrawerLinks );
+            context.commit( 'CURATION_ADD_DRAWER_LINK', { refID: payload.dataset_id, link: curationNavDrawerLink });
+            context.dispatch( 'rebuild_current_drawer_links' );
+        }
+    },
+    rebuild_current_drawer_links: async (context: any) => {
+        const curationDrawerLinkList = [];
+        for (const [key, val] of context.state.curationDrawerLinkMap.entries()) {
+            curationDrawerLinkList.push(val);
+        }
+        context.commit( 'CURATION_UPDATE_CURRENT_DRAWER_LINKS',  curationDrawerLinkList );
     },
 };
 

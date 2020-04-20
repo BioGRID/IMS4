@@ -35,6 +35,12 @@ export function tokenizeSearchString( searchText: string ): string[] {
 
 }
 
+// Asynchronous Delay function
+// time is in milliseconds
+export function asyncTimeout(ms: number) {
+    return new Promise( (resolve) => setTimeout( resolve, ms ));
+}
+
 // Check if a value of type valueType already exists in an array. Additional values and types can be checked as well.
 export function isStringInArrayOfObjects( value: string, listOfOptions: any[], valueType: string, listOfAdditionalValues: any[]) {
     for (const [key, item] of Object.entries(listOfOptions)) {
@@ -60,4 +66,3 @@ export function isStringInArrayOfObjects( value: string, listOfOptions: any[], v
     }
     return true;
 }
-

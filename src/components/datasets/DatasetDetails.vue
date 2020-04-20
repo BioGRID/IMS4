@@ -9,9 +9,9 @@
             
             <v-icon color='orange darken-2' @click='toggleDatasetCollapsed()' title='Click to show/hide dataset details' class='float-right'>mdi-arrow-split-horizontal</v-icon>
 
-            <div class="overline">BioGRID Dataset ({{ currentDataset.dataset_id }})</div>
+            <div class="overline">BioGRID Dataset ({{ dataset.dataset_id }})</div>
             <div class='headline font-weight-bold'> 
-                {{ currentDataset.title }} 
+                {{ dataset.title }} 
             </div>
             <p class='body-2 mb-0 font-weight-regular'>
                 {{ journal }} {{ pubDate }} {{ pageDetails }} <span v-html="doi"></span> <span v-html="pmid"></span>
@@ -20,7 +20,7 @@
                 {{ datasetAuthors() }}
             </p>
             <p class='body-1' v-if="!this.datasetCollapsed">
-                {{ currentDataset.abstract }}
+                {{ dataset.abstract }}
             </p>
 
             <p class='subtitle-2 font-weight-medium mb-0' v-if="this.showKeywords && !this.datasetCollapsed">
@@ -37,9 +37,9 @@
                 type="error" 
                 dense
                 class='mt-5 mr-n5 ml-n5 mb-n5'
-                v-if="this.currentDataset.state !== 'active'"
+                v-if="this.dataset.state !== 'active'"
             >
-                Dataset State: {{ currentDataset.state }}
+                Dataset State: {{ dataset.state }}
             </v-alert>
 
         </v-card>
@@ -54,7 +54,7 @@ const curation = namespace( 'curation' );
 
 @Component
 export default class DatasetDetails extends Vue {
-    @curation.State private currentDataset!: any;
+    @Prop() private dataset!: any;
     @Prop({type: String, default: ''}) private color!: string;
     @Prop({type: Boolean, default: false }) private dark!: boolean;
     @Prop({type: Boolean, default: false}) private collapsed!: boolean;
@@ -68,76 +68,76 @@ export default class DatasetDetails extends Vue {
     }
 
     private datasetAuthors() {
-        if (this.currentDataset.authors.length > 0) {
-            return this.currentDataset.authors.join( ', ' );
-        } else if (this.currentDataset.collectives.length > 0) {
-            return this.currentDataset.collectives.join( ', ' );
+        if (this.dataset.authors.length > 0) {
+            return this.dataset.authors.join( ', ' );
+        } else if (this.dataset.collectives.length > 0) {
+            return this.dataset.collectives.join( ', ' );
         }
         this.showAuthors = false;
     }
 
     private keywords() {
-        if (this.currentDataset.keywords.length > 0) {
-            return this.currentDataset.keywords.join( ', ' );
+        if (this.dataset.keywords.length > 0) {
+            return this.dataset.keywords.join( ', ' );
         }
         this.showKeywords = false;
     }
 
     private meshTerms() {
-        if (this.currentDataset.mesh_terms.length > 0) {
-            return this.currentDataset.mesh_terms.join( ', ' );
+        if (this.dataset.mesh_terms.length > 0) {
+            return this.dataset.mesh_terms.join( ', ' );
         }
         this.showMeshTerms = false;
     }
 
     get journal() {
-        if (this.currentDataset.journal_abbreviation !== '') {
-            return this.currentDataset.journal_abbreviation + ' | ';
+        if (this.dataset.journal_abbreviation !== '') {
+            return this.dataset.journal_abbreviation + ' | ';
         }
         return '';
     }
 
     get pubDate() {
-        if (this.currentDataset.pub_date !== '') {
-            return this.currentDataset.pub_date + ' | ';
+        if (this.dataset.pub_date !== '') {
+            return this.dataset.pub_date + ' | ';
         }
         return '';
     }
 
     get pageDetails() {
         let pageDetails = '';
-        if (this.currentDataset.volume !== '') {
-            if (this.currentDataset.issue !== '') {
-                if (this.currentDataset.pagination !== '' ) {
-                    pageDetails = 'vol:' + this.currentDataset.volume + ', iss:' + this.currentDataset.issue + ', pg:' + this.currentDataset.pagination;
+        if (this.dataset.volume !== '') {
+            if (this.dataset.issue !== '') {
+                if (this.dataset.pagination !== '' ) {
+                    pageDetails = 'vol:' + this.dataset.volume + ', iss:' + this.dataset.issue + ', pg:' + this.dataset.pagination;
                 } else {
-                    pageDetails = 'vol:' + this.currentDataset.volume + ', iss:' + this.currentDataset.issue;
+                    pageDetails = 'vol:' + this.dataset.volume + ', iss:' + this.dataset.issue;
                 }
             } else {
-                pageDetails = 'vol:' + this.currentDataset.volume;
+                pageDetails = 'vol:' + this.dataset.volume;
             }
-        } else if (this.currentDataset.issue !== '') {
-            if (this.currentDataset.pagination !== '' ) {
-                pageDetails = 'iss:' + this.currentDataset.issue + ', pg:' + this.currentDataset.pagination;
+        } else if (this.dataset.issue !== '') {
+            if (this.dataset.pagination !== '' ) {
+                pageDetails = 'iss:' + this.dataset.issue + ', pg:' + this.dataset.pagination;
             } else {
-                pageDetails = 'iss:' + this.currentDataset.issue;
+                pageDetails = 'iss:' + this.dataset.issue;
             }
-        } else if (this.currentDataset.pagination !== '') {
-            pageDetails = 'pg:' + this.currentDataset.pagination;
+        } else if (this.dataset.pagination !== '') {
+            pageDetails = 'pg:' + this.dataset.pagination;
         }
         return pageDetails + ' | ';
     }
 
     get doi() {
-        if (this.currentDataset.doi !== '') {
-            return 'doi: <a class="plainLink" href="https://doi.org/' + this.currentDataset.doi + '" target="_BLANK">' + this.currentDataset.doi + '</a> | ';
+        if (this.dataset.doi !== '') {
+            return 'doi: <a class="plainLink" href="https://doi.org/' + this.dataset.doi + '" target="_BLANK">' + this.dataset.doi + '</a> | ';
         }
         return '';
     }
 
     get pmid() {
-        if (this.currentDataset.source_type === 'pubmed') {
-            return 'pmid: <a class="plainLink" href="https://www.ncbi.nlm.nih.gov/pubmed/?term=' + this.currentDataset.source_id + '" target="_BLANK">' + this.currentDataset.source_id + '</a>';
+        if (this.dataset.source_type === 'pubmed') {
+            return 'pmid: <a class="plainLink" href="https://www.ncbi.nlm.nih.gov/pubmed/?term=' + this.dataset.source_id + '" target="_BLANK">' + this.dataset.source_id + '</a>';
         }
         return '';
     }

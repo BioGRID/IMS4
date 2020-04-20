@@ -1,79 +1,77 @@
 <template>
     <div class="ace-data-table">
-        <v-card>
-            <v-row no-gutters>
-                <v-col xl="8" lg="8" md="6" sm="12" xs="12">
-                    <v-card-title class="pb-0 mb-3 mt-2 headline">
-                        <strong>{{ title }}</strong>
-                    </v-card-title>
-                    <v-card-subtitle>
-                        Showing <strong>{{ this.startRange }}</strong> to <strong>{{ this.endRange }}</strong> of <strong>{{ this.filteredRowCount }}</strong> entries <span v-if="this.filteredRowCount !== this.totalRows">(filtered from <strong>{{ this.totalRows }}</strong> total entries)</span>
-                    </v-card-subtitle>
-                </v-col>
-                <v-col xl="4" lg="4" md="6" sm="12" xs="12">
-                    <v-text-field
-                        v-if="showSearch"
-                        v-model="searchText"
-                        append-icon="mdi-magnify"
-                        label="Search"
-                        single-line
-                        hide-details
-                        :clearable="true"
-                        @keyup.enter="filterSubmit()"
-                        @click:append="filterSubmit()"
-                        class='pr-5 pl-5 mt-4 mb-2'
-                    ></v-text-field>
-                </v-col>
-            </v-row>
-            <table :class='tableClass'>
-                <thead>
-                    <tr>
-                        <th
-                            v-for="(column,index) in columns" 
-                            :class="columnClass(column)"
-                            :key="index"
-                            :width="columnWidth(column)"
-                            @click="column.sortable ? sortBy(index) : null"
+        <v-row no-gutters>
+            <v-col xl="8" lg="8" md="6" sm="12" xs="12">
+                <v-card-title class="pb-0 mb-3 mt-2 headline">
+                    <strong>{{ title }}</strong>
+                </v-card-title>
+                <v-card-subtitle>
+                    Showing <strong>{{ this.startRange }}</strong> to <strong>{{ this.endRange }}</strong> of <strong>{{ this.filteredRowCount }}</strong> entries <span v-if="this.filteredRowCount !== this.totalRows">(filtered from <strong>{{ this.totalRows }}</strong> total entries)</span>
+                </v-card-subtitle>
+            </v-col>
+            <v-col xl="4" lg="4" md="6" sm="12" xs="12">
+                <v-text-field
+                    v-if="showSearch"
+                    v-model="searchText"
+                    append-icon="mdi-magnify"
+                    label="Search"
+                    single-line
+                    hide-details
+                    :clearable="true"
+                    @keyup.enter="filterSubmit()"
+                    @click:append="filterSubmit()"
+                    class='pr-5 pl-5 mt-4 mb-2'
+                ></v-text-field>
+            </v-col>
+        </v-row>
+        <table :class='tableClass'>
+            <thead>
+                <tr>
+                    <th
+                        v-for="(column,index) in columns" 
+                        :class="columnClass(column)"
+                        :key="index"
+                        :width="columnWidth(column)"
+                        @click="column.sortable ? sortBy(index) : null"
+                    >
+                        {{ column.title }}
+                        <v-icon v-if="tableSortDetails[index].sortDirection === 'asc'"
+                            dark
+                            small
                         >
-                            {{ column.title }}
-                            <v-icon v-if="tableSortDetails[index].sortDirection === 'asc'"
-                                dark
-                                small
-                            >
-                                mdi-arrow-up
-                            </v-icon>
-                            <v-icon v-if="tableSortDetails[index].sortDirection === 'desc'"
-                                dark
-                                small
-                            >
-                                mdi-arrow-down
-                            </v-icon>
-                            <v-icon v-if="tableSortDetails[index].sortOrder && tableSortDetails[index].sortDirection"
-                                dark
-                                small
-                            >
-                                mdi-numeric-{{ tableSortDetails[index].sortOrder }}-box
-                            </v-icon>
-                        </th>
-                    </tr>
-                </thead>
-                
-                <tbody>
-                    <tr :class="rowClass(rowIndex)" v-for="(row, rowIndex) in displayRows" :key="rowIndex">
-                        <slot :row="row" :rowIndex="rowIndex"></slot>
-                    </tr>
-                </tbody>
-            </table>
-            <v-pagination
-                v-if="showPagination"
-                v-model="paginationPage"
-                :length="paginationSize"
-                :page="paginationPage"
-                dark
-                total-visible="8"
-                class="mt-5"
-            ></v-pagination>
-        </v-card>
+                            mdi-arrow-up
+                        </v-icon>
+                        <v-icon v-if="tableSortDetails[index].sortDirection === 'desc'"
+                            dark
+                            small
+                        >
+                            mdi-arrow-down
+                        </v-icon>
+                        <v-icon v-if="tableSortDetails[index].sortOrder && tableSortDetails[index].sortDirection"
+                            dark
+                            small
+                        >
+                            mdi-numeric-{{ tableSortDetails[index].sortOrder }}-box
+                        </v-icon>
+                    </th>
+                </tr>
+            </thead>
+            
+            <tbody>
+                <tr :class="rowClass(rowIndex)" v-for="(row, rowIndex) in displayRows" :key="rowIndex">
+                    <slot :row="row" :rowIndex="rowIndex"></slot>
+                </tr>
+            </tbody>
+        </table>
+        <v-pagination
+            v-if="showPagination"
+            v-model="paginationPage"
+            :length="paginationSize"
+            :page="paginationPage"
+            dark
+            total-visible="8"
+            class="mt-5"
+        ></v-pagination>
     </div> 
 </template>
 

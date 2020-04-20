@@ -1,59 +1,50 @@
 <template>
     <div id="datasetentities">
-        <v-container fluid class='pt-0'>
-            <v-row dense>
-                <v-col cols="12" xl="12" lg="12" md="12" sm="12" xs="12">
-                    <DatasetDetails :dark="darkMode" :collapsed="true" />
-                </v-col>
-            </v-row>
-            <ACEElasticDataTable
-                class='mt-1'
-                title="Curated Data"
-                tableClass="pa-1"
-                :columns="tableHeaders"
-                :rowsPerPage="rowsPerPage"
-                :displayRows="displayRows"
-                :filteredRowCount="filteredRowCount"
-                :totalRowCount="totalRowCount"
-                :hasExpanded="hasExpanded"
-                :hasRowCheckbox="hasRowCheckbox"
-                :pagination="true"
-                :showSearch="true"
-                @query="fetchData"
-            >
-                <template slot="defaultRow" slot-scope="{ row, rowIndex }">
-                    <td class='text-center'>
-                        <input 
-                            type="checkbox" 
-                            :value="row._source.entity_id" 
-                            :checked="row.is_checked"
-                        >
-                        </checkbox>
-                    </td>
-                    <td :class="column.className" v-for="(column, colIndex) in tableHeaders">
-                        {{ fetchColumnContent( column, row ) }}
-                    </td>
-                </template>
-                <template slot="expandedRow" slot-scope="{ row, rowIndex }">
-                    <td :colspan='expandedColspan'>
-                        <v-sheet
-                            color="amber lighten-4"
-                            class="pa-2 ml-2 mr-2"
-                        >
-                            EXPANDED CONTENT
-                        </v-sheet>
-                    </td>
-                </template>
-
-            </ACEElasticDataTable>
-        </v-container>
+        <ACEElasticDataTable
+            class="pb-2"
+            title="Curated Data"
+            tableClass="pa-1"
+            :columns="tableHeaders"
+            :rowsPerPage="rowsPerPage"
+            :displayRows="displayRows"
+            :filteredRowCount="filteredRowCount"
+            :totalRowCount="totalRowCount"
+            :hasExpanded="hasExpanded"
+            :hasRowCheckbox="hasRowCheckbox"
+            :pagination="true"
+            :showSearch="true"
+            @query="fetchData"
+        >
+            <template slot="defaultRow" slot-scope="{ row, rowIndex }">
+                <td class='text-center'>
+                    <input 
+                        type="checkbox" 
+                        :value="row._source.entity_id" 
+                        :checked="row.is_checked"
+                    >
+                    </checkbox>
+                </td>
+                <td :class="column.className" v-for="(column, colIndex) in tableHeaders">
+                    {{ fetchColumnContent( column, row ) }}
+                </td>
+            </template>
+            <template slot="expandedRow" slot-scope="{ row, rowIndex }">
+                <td :colspan='expandedColspan'>
+                    <v-sheet
+                        color="amber lighten-4"
+                        class="pa-2 ml-2 mr-2"
+                    >
+                        EXPANDED CONTENT
+                    </v-sheet>
+                </td>
+            </template>
+        </ACEElasticDataTable>
     </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue, Mixins } from 'vue-property-decorator';
+import { Component, Vue, Mixins, Prop } from 'vue-property-decorator';
 import { State, namespace } from 'vuex-class';
-import DatasetDetails from '@/components/datasets/DatasetDetails.vue';
 import DatasetTools from '@/components/datasets/DatasetTools.vue';
 import ACEElasticDataTable from '@/components/data/ACEElasticDataTable.vue';
 import { TableColumn, TableSort, SearchTagLookup } from '@/models/table/Table';
@@ -66,13 +57,12 @@ const curation = namespace( 'curation' );
 
 @Component({
     components: {
-        DatasetDetails,
         ACEElasticDataTable,
     },
 })
-export default class DatasetView extends Vue {
-    @curation.State private currentDataset!: any;
+export default class DatasetEntities extends Vue {
     @curation.State private attributeTypes!: any;
+    @Prop() private dataset!: any;
     private displayRows: object[] = [];
     private darkMode: boolean = false;
     private totalRowCount: number = 0;
@@ -202,7 +192,7 @@ export default class DatasetView extends Vue {
 
     private getBaseQuery() {
         return bodybuilder()
-            .filter( 'term', 'dataset_id', this.currentDataset.dataset_id )
+            .filter( 'term', 'dataset_id', this.dataset.dataset_id )
             .filter( 'term', 'entity_type.family', 'Binary Interaction' )
             .filter( 'term', 'history.method', 'ACTIVATED' );
     }

@@ -73,10 +73,10 @@
 
         <v-divider />
 
-        <v-list :dark="true" dense v-if="curationDrawerLinks.length > 0" :disabled="loadingOverlayVisible">
-            <v-subheader v-if="!navDrawerMinimized">Curation Tools</v-subheader>
+        <v-list :dark="true" dense v-if="currentCurationDrawerLinks.length > 0" :disabled="loadingOverlayVisible">
+            <v-subheader v-if="!navDrawerMinimized">Open Datasets</v-subheader>
             <v-list-item
-                v-for="(link, i) in curationDrawerLinks"
+                v-for="(link, i) in currentCurationDrawerLinks"
                 :key="i"
                 :to="link.to"
                 active-class="secondary black--text"
@@ -95,11 +95,12 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 import { State, namespace } from 'vuex-class';
 import { required, numeric, maxLength } from 'vuelidate/lib/validators';
 import { printableAsciiOnly, lettersAndSpacesOnly } from '@/utils/Validators';
 import { generateValidationError } from '@/utils/ValidationErrors';
+import { CurationDrawerLink } from '@/models/curation/CurationDrawerLink';
 import Vuelidate from 'vuelidate';
 
 const curation = namespace( 'curation' );
@@ -108,12 +109,13 @@ const curation = namespace( 'curation' );
 export default class NavDrawer extends Vue {
     @State private navDrawerMinimized!: boolean;
     @State private loadingOverlayVisible!: boolean;
-    @curation.State private curationDrawerLinks!: object[];
+    @curation.State private currentCurationDrawerLinks!: object[];
     private firstTitle: string = process.env.VUE_APP_FIRST_TITLE || 'BioGRID';
     private secondTitle: string = process.env.VUE_APP_SECOND_TITLE || 'ACE';
     private publicationID: string = '20489023';
     private publicationType: string = 'pubmed';
     private maxPublicationIDLength: number = 8;
+    private currentDrawerLinks: CurationDrawerLink[] = [];
     private publicationTypes = [
         { text: 'Pubmed', value: 'pubmed' },
         { text: 'Pre-Publication', value: 'prepub' },

@@ -23,73 +23,74 @@
             Add New User 
             <v-icon class='ml-2'>mdi-account-plus</v-icon>
             </v-btn>
-            
-            <ACEDataTable
-                class='mt-5'
-                title="List of Current Users"
-                tableClass="pa-1"
-                :columns="userTableHeaders"
-                :rows="userList"
-                :rowsPerPage="100"
-                :totalRows="userCount"
-                :pagination="true"
-                :showSearch="true"
-            >
-                <template slot-scope="{ row }">
-                    <td class='text-center'>{{ row.id }}</td>
-                    <td class='text-left'><strong>{{ row.name }}</strong></td>
-                    <td class='text-left'>{{ row.email }}</td>
-                    <td class='text-left'>{{ row.first_name }}</td>
-                    <td class='text-left'>{{ row.last_name }}</td>
-                    <td class='nowrap text-center'>
-                        <v-sheet
-                            dark
-                            class='pa-1'
-                            :color="userClassColor( row.class )"
-                        >
-                            {{ row.class }}
-                        </v-sheet>
-                    </td>
-                    <td class='nowrap text-center'>
-                        <v-sheet
-                            dark
-                            class='pa-1'
-                            :color="row.status === 'active' ? 'green darken-2' : 'error darken-4'"
-                        >
-                            <span class='pr-1'>{{ row.status }}</span> 
-                            <v-icon small> 
-                                {{ row.status === 'active' ? 'mdi-account-check' : 'mdi-account-remove' }}
-                            </v-icon>
-                        </v-sheet>
-                    </td>
-                    <td class='nowrap text-center'>
-                        <v-btn 
-                            x-small 
-                            dark 
-                            fab 
-                            elevation="0" 
-                            color="info" 
-                            :title='"Edit user details for " + row.name' 
-                            :to="'/admin/user/useredit/' + row.id"
-                        >
-                            <v-icon>mdi-account-edit</v-icon>
-                        </v-btn>
-                        <v-btn 
-                            x-small 
-                            dark 
-                            fab 
-                            elevation="0" 
-                            :title='"Change password for " + row.name' 
-                            color="warning"
-                            class='ml-1' 
-                            :to="'/admin/user/userpassword/' + row.id"
-                        >
-                            <v-icon>mdi-lock-reset</v-icon>
-                        </v-btn>
-                    </td>
-                </template>
+            <v-card>
+                <ACEDataTable
+                    class='mt-5'
+                    title="List of Current Users"
+                    tableClass="pa-1"
+                    :columns="userTableHeaders"
+                    :rows="userList"
+                    :rowsPerPage="100"
+                    :totalRows="userCount"
+                    :pagination="true"
+                    :showSearch="true"
+                >
+                    <template slot-scope="{ row }">
+                        <td class='text-center'>{{ row.id }}</td>
+                        <td class='text-left'><strong>{{ row.name }}</strong></td>
+                        <td class='text-left'>{{ row.email }}</td>
+                        <td class='text-left'>{{ row.first_name }}</td>
+                        <td class='text-left'>{{ row.last_name }}</td>
+                        <td class='nowrap text-center'>
+                            <v-sheet
+                                dark
+                                class='pa-1'
+                                :color="userClassColor( row.class )"
+                            >
+                                {{ row.class }}
+                            </v-sheet>
+                        </td>
+                        <td class='nowrap text-center'>
+                            <v-sheet
+                                dark
+                                class='pa-1'
+                                :color="row.status === 'active' ? 'green darken-2' : 'error darken-4'"
+                            >
+                                <span class='pr-1'>{{ row.status }}</span> 
+                                <v-icon small> 
+                                    {{ row.status === 'active' ? 'mdi-account-check' : 'mdi-account-remove' }}
+                                </v-icon>
+                            </v-sheet>
+                        </td>
+                        <td class='nowrap text-center'>
+                            <v-btn 
+                                x-small 
+                                dark 
+                                fab 
+                                elevation="0" 
+                                color="info" 
+                                :title='"Edit user details for " + row.name' 
+                                :to="'/admin/user/useredit/' + row.id"
+                            >
+                                <v-icon>mdi-account-edit</v-icon>
+                            </v-btn>
+                            <v-btn 
+                                x-small 
+                                dark 
+                                fab 
+                                elevation="0" 
+                                :title='"Change password for " + row.name' 
+                                color="warning"
+                                class='ml-1' 
+                                :to="'/admin/user/userpassword/' + row.id"
+                            >
+                                <v-icon>mdi-lock-reset</v-icon>
+                            </v-btn>
+                        </td>
+                    </template>
 
-            </ACEDataTable>
+                </ACEDataTable>
+            </v-card>
         </v-container>
     </div>
 </template>

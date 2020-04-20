@@ -135,7 +135,6 @@
             
             <v-divider class='pt-0 mt-1 mb-3' />
             <h2>Curation Queue</h2>
-            <div>{{ processingTasks }}</div>
         </v-container>
     </div>
 </template>
@@ -158,7 +157,6 @@ const curation = namespace( 'curation' );
 })
 export default class Dashboard extends Vue {
     @auth.State private user!: any;
-    @curation.State private processingTasks!: any;
     private fullTitle: string = process.env.VUE_APP_FULL_TITLE || 'BioGRID ACE';
     private appVersion: string = process.env.VUE_APP_VERSION || '0.0.1';
     private biogridLinkouts: object[] = [{

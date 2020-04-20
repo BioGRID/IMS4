@@ -1,7 +1,7 @@
 <template>
     <div class='history-list'>
         <v-card 
-            tile
+            outlined
             :color="color"
             :dark="dark"
             class='pa-5 p'
@@ -11,7 +11,7 @@
             </div>
             <p class='body-2 mb-2 font-weight-regular'>List of most recent history entries...</p>
             <v-sheet
-                v-for="(history, i) in currentHistory"
+                v-for="(history, i) in history"
                 :key="i"
                 class='mb-2 pa-1'
                 color="grey lighten-4"
@@ -77,10 +77,10 @@ const auth = namespace( 'auth' );
 
 @Component
 export default class HistoryList extends Vue {
-    @curation.State private currentHistory!: HistoryEntry[];
     @curation.State private curationGroups!: CurationGroupHash;
     @curation.State private datasetCurationOptions!: DatasetCurationOptionHash;
     @auth.State private users!: any;
+    @Prop() private history!: HistoryEntry[];
     @Prop({type: Number, default: 0}) private refID!: number;
     @Prop({type: String, default: ''}) private refType!: string;
     @Prop({type: String, default: ''}) private color!: string;
@@ -88,7 +88,7 @@ export default class HistoryList extends Vue {
     @Prop({type: Boolean, default: false }) private showNote!: boolean;
 
     get historySize() {
-        return this.currentHistory.length;
+        return this.history.length;
     }
 
     private historyColor( method: string ) {

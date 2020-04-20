@@ -22,53 +22,54 @@
                 Add New Permission
                 <v-icon class='ml-2'>mdi-account-badge</v-icon>
             </v-btn>
+            <v-card>
+                <ACEDataTable
+                    class='mt-5'
+                    title="Current Permissions"
+                    tableClass="pa-1"
+                    :columns="permissionTableHeaders"
+                    :rows="permissionList"
+                    :rowsPerPage="100"
+                    :totalRows="permissionCount"
+                    :pagination="true"
+                    :showSearch="true"
+                >
+                    <template slot-scope="{ row }">
+                        <td class='text-center'>{{ row.id }}</td>
+                        <td class='text-left'>{{ row.name }}</td>
+                        <td class='text-left'>{{ row.description }}</td>
+                        <td class='text-center'>{{ row.category }}</td>
+                        <td class='nowrap text-center'>
+                            <v-sheet
+                                dark
+                                class='pa-1'
+                                :color="permissionLevelColor( row.level )"
+                            >
+                                {{ row.level }}
+                            </v-sheet>
+                        </td>
+                        <td class='nowrap text-center'>
+                            <v-tooltip left :nudge-top="30" color="black">
+                                <template v-slot:activator="{ on }">
+                                    <v-btn 
+                                        x-small 
+                                        dark 
+                                        fab 
+                                        elevation="0" 
+                                        v-on="on" 
+                                        color="info" 
+                                        :to="'/admin/permission/permissionedit/' + row.name"
+                                    >
+                                        <v-icon>mdi-file-document-edit</v-icon>
+                                    </v-btn>
+                                </template>
+                                <span>Edit Permission</span>
+                            </v-tooltip>
+                        </td>
+                    </template>
 
-            <ACEDataTable
-                class='mt-5'
-                title="Current Permissions"
-                tableClass="pa-1"
-                :columns="permissionTableHeaders"
-                :rows="permissionList"
-                :rowsPerPage="100"
-                :totalRows="permissionCount"
-                :pagination="true"
-                :showSearch="true"
-            >
-                <template slot-scope="{ row }">
-                    <td class='text-center'>{{ row.id }}</td>
-                    <td class='text-left'>{{ row.name }}</td>
-                    <td class='text-left'>{{ row.description }}</td>
-                    <td class='text-center'>{{ row.category }}</td>
-                    <td class='nowrap text-center'>
-                        <v-sheet
-                            dark
-                            class='pa-1'
-                            :color="permissionLevelColor( row.level )"
-                        >
-                            {{ row.level }}
-                        </v-sheet>
-                    </td>
-                    <td class='nowrap text-center'>
-                        <v-tooltip left :nudge-top="30" color="black">
-                            <template v-slot:activator="{ on }">
-                                <v-btn 
-                                    x-small 
-                                    dark 
-                                    fab 
-                                    elevation="0" 
-                                    v-on="on" 
-                                    color="info" 
-                                    :to="'/admin/permission/permissionedit/' + row.name"
-                                >
-                                    <v-icon>mdi-file-document-edit</v-icon>
-                                </v-btn>
-                            </template>
-                            <span>Edit Permission</span>
-                        </v-tooltip>
-                    </td>
-                </template>
-
-            </ACEDataTable>
+                </ACEDataTable>
+            </v-card>
         </v-container>
     </div>
 </template>
