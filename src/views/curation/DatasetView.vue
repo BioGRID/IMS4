@@ -8,7 +8,7 @@
             </v-row>
             <v-row dense>
                 <v-col cols="12" xl="12" lg="12" md="12" sm="12" xs="12">
-                    <DatasetTools :dark="darkMode" :dataset="dataset" :history="history" />
+                    <DatasetTools :dark="darkMode" :dataset="dataset" :history="history" @closeDataset="closeDataset" />
                 </v-col>
             </v-row>
             <v-row dense cols="12" xl="12" lg="12" md="12" sm="12" xs="12">
@@ -74,7 +74,12 @@ export default class DatasetView extends Vue {
         this.datasetID = Number(this.$route.params.id);
         this.dataset = this.$store.getters['curation/getOpenDataset'](this.datasetID);
         this.history = this.$store.getters['curation/getOpenHistory'](this.datasetID);
-        // this.$store.dispatch( 'curation/add_curation_drawer_link', { dataset_id: this.datasetID } );
+    }
+
+    private closeDataset() {
+        this.$store.dispatch( 'curation/remove_dataset', { dataset_id: this.datasetID } );
+        this.$destroy();
+        this.$router.push( '/elements/Dashboard' );
     }
 
 }

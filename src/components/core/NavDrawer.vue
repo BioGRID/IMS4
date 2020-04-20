@@ -74,7 +74,7 @@
         <v-divider />
 
         <v-list :dark="true" dense v-if="currentCurationDrawerLinks.length > 0" :disabled="loadingOverlayVisible">
-            <v-subheader v-if="!navDrawerMinimized">Curation Tools</v-subheader>
+            <v-subheader v-if="!navDrawerMinimized">Open Datasets</v-subheader>
             <v-list-item
                 v-for="(link, i) in currentCurationDrawerLinks"
                 :key="i"

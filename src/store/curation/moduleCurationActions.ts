@@ -54,12 +54,16 @@ const moduleCurationActions = {
         }
     },
     remove_dataset: (context: any, payload: any) => {
-        context.commit( 'CURATION_REMOVE_HISTORY', payload.datasetID );
-        context.commit( 'CURATION_REMOVE_DATASET', payload.datasetID );
+        context.commit( 'CURATION_REMOVE_HISTORY', payload.dataset_id );
+        context.commit( 'CURATION_REMOVE_DATASET', payload.dataset_id );
+        context.commit( 'CURATION_REMOVE_DRAWER_LINK', payload.dataset_id );
+        context.dispatch( 'rebuild_current_drawer_links' );
     },
     truncate_datasets: (context: any) => {
         context.commit( 'CURATION_TRUNCATE_HISTORY' );
         context.commit( 'CURATION_TRUNCATE_DATASETS' );
+        context.commit( 'CURATION_TRUNCATE_DRAWER_LINKS' );
+        context.dispatch( 'rebuild_current_drawer_links' );
     },
     fetch_dataset: async (context: any, payload: any) => {
         const query = bodybuilder()
@@ -76,6 +80,7 @@ const moduleCurationActions = {
                 const dataset: any = data.hits.hits[0]._source;
                 context.commit( 'CURATION_ADD_DATASET', dataset );
                 context.dispatch( 'fetch_history', { refID: dataset.dataset_id, refType: 'dataset' }, {} );
+                context.dispatch( 'add_curation_drawer_link', { dataset_id: dataset.dataset_id }, {} );
                 return dataset.dataset_id;
             }
         }
@@ -93,7 +98,7 @@ const moduleCurationActions = {
             const curationNavDrawerLink: CurationDrawerLink = {
                 to: '/curation/DatasetView/' + payload.dataset_id,
                 icon: 'mdi-book-open-page-variant',
-                text: 'Read Dataset',
+                text: 'View Dataset',
                 subtitle: datasetInfo,
             };
 

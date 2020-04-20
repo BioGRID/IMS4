@@ -73,6 +73,7 @@ export default function notification(type: string, id: string) {
                 offline: 'Publication fetching service is currently offline',
                 unrecognized: 'Unrecognized elastic search index',
                 timeout: 'Max attempts to fetch publication exceeded. Please try again later',
+                maximumreached: 'You have the maximum number of datasets already opened. Please close an existing open dataset before attempting to load an additional one',
             },
         },
         history: {

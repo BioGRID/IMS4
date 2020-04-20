@@ -54,6 +54,7 @@ const moduleAuthActions = {
             context.commit( 'AUTH_UPDATE_USER', undefined );
             context.commit( 'AUTH_UPDATE_USERS', {} );
             context.commit( 'AUTH_UPDATE_PERMISSIONS', {} );
+            context.dispatch( 'curation/truncate_datasets', {}, {root: true} );
             payload.vm.$disconnect( );
         }
     },
