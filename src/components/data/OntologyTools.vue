@@ -414,7 +414,7 @@ export default class OntologyTools extends Vue {
                     }
                 }
 
-                tree.push( {id: ontologyItem._source.ontology_term_id, name: ontologyItem._source.name, children: children } );
+                tree.push( {id: ontologyItem._source.ontology_term_id, name: ontologyItem._source.name, children } );
 
             }
         }
