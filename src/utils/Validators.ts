@@ -52,38 +52,6 @@ export function passwordComplexity(value: string) {
     return true;
 }
 
-// Check if a value of type valueType already exists in an array. Additional values and types can be checked as well.
-/* export function inArrayOfObjects(listOfOptions: any[], valueType: string, listOfAdditionalValues: any[]) {
-    return (value: string) => {
-        if (!helpers.req(value)) {
-            return true;
-        }
-        for (const [key, item] of Object.entries(listOfOptions)) {
-            if ( item[valueType] === value ) {
-                if ( listOfAdditionalValues && listOfAdditionalValues.length > 0 ) {
-                    let foundAllMatchingValues = false;
-                    for (const [extraKey, extraValue] of Object.entries(listOfAdditionalValues)) {
-                        for (const [matchingKey, matchingValue] of Object.entries(extraValue)) {
-                            if ( item[matchingKey] === matchingValue ) {
-                                foundAllMatchingValues = true;
-                            } else {
-                                foundAllMatchingValues = false;
-                            }
-                        }
-                    }
-                    if ( foundAllMatchingValues ) {
-                        return false;
-                    }
-                } else {
-                    return false;
-                }
-            }
-        }
-        return true;
-    };
-}
- */
-
  // Wrapper function for isStringInArrayOfObjects so it can be called by the form validator
 export function inArrayOfObjects(listOfOptions: any[], valueType: string, listOfAdditionalValues: any[]) {
     return (value: string) => {

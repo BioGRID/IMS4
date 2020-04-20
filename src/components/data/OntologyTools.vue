@@ -1,6 +1,5 @@
 <template>
-    <div class='ontology-tools'>
-            
+    <div class='ontology-tools'>           
         <v-container fluid class='pt-0'>
             <h3>Ontology Search</h3>
             <v-divider class='mb-3' />
@@ -13,25 +12,18 @@
                         outlined
                         style="border-radius: 0"
                     >
-
                         <template v-slot:append>
-    
                             <v-btn
                                 depressed 
                                 tile
                                 color="primary"
                                 class="ma-0"
                                 @click="findSearchItems">
-                            
                                 <v-icon>mdi-magnify</v-icon>
-                                Search
-                                
+                                Search            
                             </v-btn>
-            
                         </template>
-      
-                    </v-text-field>   
-                   
+                    </v-text-field>              
                 </v-col>
                 <v-col cols="12" xl="6" lg="6" md="6" sm="12" xs="12">
                     <v-select 
@@ -105,7 +97,7 @@
                                     <v-treeview
                                         v-model="ontologyBrowseTree"
                                         :load-children="fetchItems"
-                                        :items="items"
+                                        :items="ontologyItems"
                                         hoverable
                                         selection-type="independent"
                                         dense
@@ -167,20 +159,56 @@
                                             </v-tooltip>
                                         </template>
                                     </v-treeview>  
-
                                     <v-dialog
                                         v-model="ontologyTermDialog"
                                         scrollable 
-                                        max-width="700px"
+                                        max-width="900px"
                                     >
                                         <v-card
                                             v-model="selectedOntologyTermInfo"
+                                            style="max-height: 1200px;"
                                         >
                                             <v-card-title>
                                                 {{selectedOntologyTermInfo.name}}
                                             </v-card-title>
-                                            <v-card-text style="max-height: 600px;">
+                                            <v-card-text >
                                                 {{selectedOntologyTermInfo.definition}}
+                                            </v-card-text>
+                                            <v-divider class="mx-4"></v-divider>
+                                            <v-card-title v-if="selectedOntologyTermInfo.parents && (selectedOntologyTermInfo.parents).length > 0">
+                                                Condensed Tree View
+                                            </v-card-title>
+                                            <v-card-text style="max-height: 600px;" v-if="selectedOntologyTermInfo.parents && (selectedOntologyTermInfo.parents).length > 0" >
+
+                                                <v-col
+                                                    class="subtitle-1 text-center"
+                                                    cols="12"
+                                                    v-if="loadingCondensedTreeProgress"
+                                                >
+                                                    Creating Condensed Tree
+                                                </v-col>
+                                                <v-progress-linear :indeterminate="true" v-if="loadingCondensedTreeProgress"></v-progress-linear>
+                                                <v-treeview
+                                                    v-model="ontologyCondensedTree"
+                                                    :items="ontologyCondensedTreeTerms"
+                                                    expand-icon="mdi-chevron-down"
+                                                    dense
+                                                    open-all
+                                                    hoverable
+                                                    return-object
+                                                    v-if="!loadingCondensedTreeProgress"
+                                                >
+                                                </v-treeview>  
+                                            </v-card-text>
+                                            <v-card-title v-if="selectedOntologyTermInfo.parents && (selectedOntologyTermInfo.parents).length > 0">
+                                                Parents [Relationship]
+                                            </v-card-title>
+                                            <v-card-text>
+                                                <ul>
+                                                    <li v-for="(content,index) in selectedOntologyTermInfo.parents">         
+                                                        <strong>{{ content.relationships }}</strong>: {{ content.name }} ({{ content.ontology_term_id }})
+                                                    </li>
+                                                </ul>
                                             </v-card-text>
                                             <v-card-actions>
                                                 <v-btn
@@ -221,8 +249,7 @@
                                             v-for="(link, i) in selectedTermsMenuLinks"
                                             :key="i"
                                             :to="link.to"
-                                        >
-                                            
+                                        >               
                                             <v-list-item-content>
                                                 <v-list-item-title v-text="link.text" /> 
                                             </v-list-item-content>
@@ -251,7 +278,11 @@
                                         <v-btn 
                                             @click="removeQualifier(selectedTerm)"
                                             color="success"
-                                        >Remove</v-btn>
+                                            fab 
+                                            x-small 
+                                        >
+                                            <v-icon dark>mdi-close</v-icon>
+                                        </v-btn>
                                     </template>
                                 </v-treeview>  
                             </v-col>
@@ -259,9 +290,7 @@
                     </v-container>
                 </v-col>
             </v-row>
-   
-        </v-container>
-        
+        </v-container>      
     </div>
 </template>
 
@@ -269,24 +298,23 @@
 import { Component, Vue, Prop, Watch } from 'vue-property-decorator';
 import { State, namespace } from 'vuex-class';
 import { ELASTIC_QUERY, ELASTIC_COUNT } from '@/models/elastic/Query';
-import { buildSearchQuery, buildSortQuery } from '@/utils/ElasticSearchBuilder';
-import { OntologyHash } from '@/models/annotation/Ontology';
+import { buildSearchQueryFromSearchString, buildOntologyParentsQuery, buildOntologyItemQuery, buildOntologyRootQuery } from '@/utils/ElasticSearchBuilder';
+import { OntologyHash, OntologyRecord } from '@/models/annotation/Ontology';
 import bodybuilder from 'bodybuilder';
-import { syncDelay } from '@/utils/HelperUtils';
-import { isStringInArrayOfObjects } from '@/utils/HelperUtils';
+import { syncDelay, isStringInArrayOfObjects } from '@/utils/HelperUtils';
 
 const annotation = namespace( 'annotation' );
 
 @Component
 export default class OntologyTools extends Vue {
-    @Prop({type: String, default: ''}) private ontologyTreeTitle!: string;
-    @annotation.State private ontologies!: OntologyHash[];
-    private ontologyOption: OntologyHash[] = [];
-    private isLoading: boolean = false;
+    @annotation.State private ontologies!: OntologyRecord[];
+    private ontologyOption: number = 0;
     private ontologyBrowseTree: any[] = [];
-    private items: any[] = [];
-    private types: any[] = [];
-    private ontologyID: number = 9;
+    private ontologyCondensedTree: any[] = [];
+    private ontologyCondensedTreeTerms: any[] = [];
+    private loadingCondensedTreeProgress: boolean = false;
+    private ontologyItems: any[] = [];
+    private ontologyID: number = 0;
     private ontologyTermDialog: boolean = false;
     private selectedOntologyTermInfo: any = {};
     private tabs: any = null;
@@ -296,35 +324,37 @@ export default class OntologyTools extends Vue {
     private searchResultsItems: any[] = [];
     private selectedTermsTree: any[] = [];
     private selectedTerms: any[] = [];
-    private selectedTermsMenuLinks: object[] = [{
-        to: '/admin/user/changemypassword',
-        icon: 'mdi-lock-reset',
-        text: 'Change Password',
-    }, {
-        to: '/pages/login',
-        icon: 'mdi-logout',
-        text: 'Logout',
-    }];
+    private selectedTermsMenuLinks: object[] = [];
 
     get ontologyOptions() {
         const ontologyOptions: object[] = [];
         for (const ontology of Object.values(this.ontologies)) {
-            if (ontology.deprecated === 0) {
+            if ( ontology.deprecated === 0 ) {
                 ontologyOptions.push({
                     text: ontology.name,
-                    value: ontology.id,
+                    value: ontology.ontology_id,
                 });
            }
         }
         return ontologyOptions.sort( this.alphaOptionsSort );
     }
 
-    private openTermDialog(item: any) {
-        
-        this.selectedOntologyTermInfo.name = item.name + ' ( ' + item.id + ')';
-        this.selectedOntologyTermInfo.definition = item.definition;
-
+    private async openTermDialog(item: any) {
+        // If the ontology item selected is our custom name given to start each onotology tree print out a different set of information
         this.ontologyTermDialog = true;
+        this.loadingCondensedTreeProgress = true;
+        if ( item.id.startsWith( 'BIOGRID_ROOT_NAME_' ) ) {
+            this.selectedOntologyTermInfo.name = item.name;
+            this.selectedOntologyTermInfo.definition = 'asdfasdfa';
+        } else {
+            this.selectedOntologyTermInfo.name = item.name + ' ( ' + item.id + ')';
+            this.selectedOntologyTermInfo.definition = item.definition;
+        }
+        this.selectedOntologyTermInfo.parents = item.parents;
+        // clear out the Condensed Tree Arrays
+        this.ontologyCondensedTreeTerms = [];
+        this.ontologyCondensedTreeTerms = await this.getCondensedTreeItems( item.id );
+        this.loadingCondensedTreeProgress = false;
     }
 
     private addSelectedTerm(item: any) {
@@ -335,7 +365,6 @@ export default class OntologyTools extends Vue {
     }
 
     private addSelectedQualifier(item: any) {
-        console.log( this.selectedTermsTree );
         for (const selectedTerm of Object.values(this.selectedTermsTree)) {
             selectedTerm.children.push({id: item.id, name: item.name, children: []});
         }
@@ -343,53 +372,122 @@ export default class OntologyTools extends Vue {
 
     private searchOntology() {
         this.activeTab = 1;
-        console.log( this.activeTab );
     }
 
     private changeOntology() {
 
         // empty out the tree and items for the next ontology
         this.ontologyBrowseTree = [];
-        this.items = [];
+        this.ontologyItems = [];
 
-        this.ontologyID = this.ontologies[this.ontologyOption].ontology_id;
+        this.ontologyID = this.ontologyOption;
         const children: any = [];
 
-        this.items = [{
-            id: 'BIOGRID_ROOT_NAME',
+        this.ontologyItems = [{
+            id: 'BIOGRID_ROOT_NAME_' + this.ontologyID,
             name: this.ontologies[this.ontologyOption].name,
             children,
         }];
 
-        this.fetchItems(this.items[0], true );
+        this.fetchItems(this.ontologyItems[0], true );
+    }
+
+    private async getCondensedTreeItems( itemID: any ) {
+
+        const tree: any = [];
+
+        // grab the ontology record from the elastic database for a given ontology id
+        const ontologyItemRecord = await this.fetchIndividualItem( itemID );
+
+        if ( ontologyItemRecord && ontologyItemRecord.length > 0) {
+            const ontologyItem = ontologyItemRecord[0];
+            // base case when we find the root term with no parents
+            if ( ontologyItem._source.parents.length === 0 ) {
+                tree.push( {id: ontologyItem._source.ontology_term_id, name: ontologyItem._source.name, children: [] } );
+            } else {
+                // go through all the parents and find any "is_a" or "part_of" relationships
+                const children: any = [];
+                let parent: any = [];
+                for ( parent of Object.values(ontologyItem._source.parents)) {
+                    if ( (parent.relationships.indexOf( 'is_a' ) >= 0) || (parent.relationships.indexOf( 'part_of' ) >= 0)) {
+                        children.push( {id: parent.ontology_term_id, name: parent.name, children: await this.getCondensedTreeItems( parent.ontology_term_id )});
+                    }
+                }
+
+                tree.push( {id: ontologyItem._source.ontology_term_id, name: ontologyItem._source.name, children: children } );
+
+            }
+        }
+
+        return tree;
+
+    }
+
+    private async fetchIndividualItem( itemID: any ) {
+
+        let query = null;
+
+        query = buildOntologyItemQuery( itemID, this.ontologyID );
+
+        const count = await ELASTIC_COUNT( query.build(), 'ontology' );
+        if (count !== 0) {
+            query = query.size( count );
+            const data = await ELASTIC_QUERY( query.build(), 'ontology', false );
+
+            if (data !== undefined && data.hits.total.value > 0) {
+                return data.hits.hits;
+            } else {
+                return [];
+            }
+        }
     }
 
     private async fetchItems( item: any, getRootTerm: boolean ) {
 
-        console.log( 'ontology id: ' + this.ontologyID );
-
         let query = null;
 
         if ( getRootTerm ) {
-            query = this.getBaseRootQuery();
+            query = buildOntologyRootQuery(this.ontologyID);
         } else {
-            query = this.getBaseItemQuery(item.id);
+            query = buildOntologyParentsQuery(item.id, this.ontologyID);
         }
 
         const count = await ELASTIC_COUNT( query.build(), 'ontology' );
         if (count !== 0) {
-
             query = query.size( count );
             const data = await ELASTIC_QUERY( query.build(), 'ontology', false );
+
             if (data !== undefined && data.hits.total.value > 0) {
+
                 let hit: any;
                 for (hit of data.hits.hits) {
-                    if ( hit._source.child_count === 0 ) {
-                        item.children.push({id: hit._id, name: hit._source.name, definition: hit._source.definition });
+                    let foundChild: boolean = false;
+                    if ( getRootTerm ) {
+                        foundChild = true;
                     } else {
-                        item.children.push({id: hit._id, name: hit._source.name, definition: hit._source.definition, children: []});
+                        // go through parents and make sure the itemID is of relationships type "is_a" or "part_of"
+                        let value: any = [];
+                        for ( value of Object.values(hit._source.parents)) {
+                            if ( value.ontology_term_id === item.id ) {
+                                if ( value.relationships.indexOf( 'is_a' ) >= 0 || value.relationships.indexOf( 'part_of' ) >= 0 ) {
+                                    foundChild = true;
+                                }
+                            }
+                        }
+                    }
+
+                    if ( foundChild ) {
+                        if ( hit._source.child_count === 0 ) {
+                            item.children.push({id: hit._id, name: hit._source.name, definition: hit._source.definition, parents: hit._source.parents });
+                        } else {
+                            item.children.push({id: hit._id, name: hit._source.name, definition: hit._source.definition, parents: hit._source.parents, children: []});
+                        }
                     }
                 }
+
+                // sort the children alphabetically
+                item.children.sort((a: any, b: any) => (a.name > b.name) ? 1 : -1);
+
             }
         }
 
@@ -402,7 +500,7 @@ export default class OntologyTools extends Vue {
         this.searchResultsItems = [];
         this.activeTab = 1;
 
-        let query =  this.getBaseSearchQuery(this.ontologySearchString);
+        let query =  buildSearchQueryFromSearchString(this.ontologySearchString, this.ontologyID);
 
         const count = await ELASTIC_COUNT( query.build(), 'ontology' );
         if ( count > 200 ) {
@@ -415,7 +513,6 @@ export default class OntologyTools extends Vue {
                 for (hit of data.hits.hits) {
                     this.searchResultsItems.push({title: hit._id, subtitle: hit._source.name});
                 }
-                console.log( data.hits.hits );
                 this.searchResultsCount = count + ' Matching Searched Terms Displayed';
             }
 
@@ -423,27 +520,6 @@ export default class OntologyTools extends Vue {
             this.searchResultsCount = 'Your search query returned no results. Are you sure you selected the correct ontology to search via the dropdown list?';
         }
 
-    }
-
-    private getBaseSearchQuery(searchTerm: string) {
-        return bodybuilder()
-            .filter( 'term', 'ontology.ontology_id', this.ontologyID )
-            .query( 'query_string', {
-                query: searchTerm,
-                fields: ['ontology_term_id', 'name'],
-            });
-    }
-
-    private getBaseItemQuery(itemID: string) {
-        return bodybuilder()
-            .filter( 'term', 'ontology.ontology_id', this.ontologyID )
-            .filter( 'term', 'parent_terms', itemID );
-    }
-
-    private getBaseRootQuery() {
-        return bodybuilder()
-            .filter( 'term', 'ontology.ontology_id', this.ontologyID )
-            .filter( 'term', 'is_root', true );
     }
 
     private alphaOptionsSort( a: any, b: any ) {
@@ -478,7 +554,7 @@ export default class OntologyTools extends Vue {
     background-color: white;
 }
 .tab-container {
-    max-height: 500px;
+    max-height: 700px;
     overflow-y: auto;
     overflow-x: auto;
 }

@@ -3,7 +3,7 @@ import store from '@/store/store';
 import notification from '@/utils/Notifications';
 
 export interface OntologyHash {
-    [key: string]: OntologyRecord;
+    [key: number]: OntologyRecord;
 }
 
 export interface OntologyRecord {

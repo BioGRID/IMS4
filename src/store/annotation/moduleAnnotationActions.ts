@@ -15,7 +15,7 @@ const moduleAnnotationActions = {
         return API_ONTOLOGY_GETALL( (data: OntologyRecord[]) => {
             const ontologyHash: OntologyHash = {};
             for (const ontologyRecord of data) {
-                ontologyHash[ontologyRecord.name] = ontologyRecord;
+                ontologyHash[Number(ontologyRecord.ontology_id)] = ontologyRecord;
             }
             context.commit( 'ANNOTATION_UPDATE_ONTOLOGIES', ontologyHash );
         });
