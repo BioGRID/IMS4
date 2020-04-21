@@ -8,7 +8,7 @@
                 <NavBar />
                 <v-fade-transition mode="out-in">
                     <keep-alive include="DatasetView">
-                        <router-view :key="$route.path" />
+                        <router-view :key="$route.fullPath" />
                     </keep-alive>
                 </v-fade-transition>
             </div>
