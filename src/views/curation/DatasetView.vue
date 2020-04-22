@@ -1,5 +1,5 @@
 <template>
-    <div id="dashboard">
+    <div id="dataset-view">
         <v-container fluid class='pt-0'>
             <v-row dense>
                 <v-col cols="12" xl="12" lg="12" md="12" sm="12" xs="12">
@@ -69,17 +69,44 @@ export default class DatasetView extends Vue {
     private dataset: any = {};
     private history: HistoryEntry[] = [];
     private tab: string = 'history';
+    private isActive: boolean = false;
 
     private created() {
+        console.log( 'created' );
+        console.log( this.$route.fullPath );
         this.datasetID = Number(this.$route.params.id);
         this.dataset = this.$store.getters['curation/getOpenDataset'](this.datasetID);
         this.history = this.$store.getters['curation/getOpenHistory'](this.datasetID);
     }
 
+    private beforeDestroy() {
+        console.log( 'before destroyed' );
+    }
+
     private closeDataset() {
-        this.$store.dispatch( 'curation/remove_dataset', { dataset_id: this.datasetID } );
-        this.$destroy();
-        this.$router.push( '/elements/Dashboard' );
+        console.log( 'close dataset' );
+        this.$store.dispatch( 'curation/remove_dataset', { dataset_id: this.datasetID } ).then( () => {
+            this.$store.dispatch( 'incrementPathCache', {path: this.$route.path} );
+            this.$destroy();
+        });
+    }
+
+    private activated() {
+        console.log('activated');
+        this.isActive = true;
+    }
+
+    private deactivated() {
+        console.log('deactivated');
+        this.isActive = false;
+    }
+
+    private destroyed() {
+        console.log('destroyed ' + this.datasetID );
+        if (this.isActive) {
+            console.log('sending to dashboard');
+            this.$router.push( '/elements/Dashboard' );
+        }
     }
 
 }

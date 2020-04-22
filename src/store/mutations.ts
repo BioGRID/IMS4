@@ -31,6 +31,14 @@ const mutations = {
     UPDATE_ECHO_MESSAGE: (state: any, message: string) => {
         state.socket.lastEchoMessage = message;
     },
+    INCREMENT_PATH_CACHE: (state: any, payload: any ) => {
+        const current = state.pathCache.get(payload.path);
+        if (current === undefined) {
+            state.pathCache.set(payload.path, 1);
+        } else {
+            state.pathCache.set(payload.path, current + 1);
+        }
+    },
 };
 
 export default mutations;
