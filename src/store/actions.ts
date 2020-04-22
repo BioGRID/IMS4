@@ -12,6 +12,9 @@ const actions = {
     echoMessage: (context: any, payload: any) => {
         context.commit( 'UPDATE_ECHO_MESSAGE', payload.value );
     },
+    incrementPathCache: (context: any, payload: any) => {
+        context.commit( 'INCREMENT_PATH_CACHE', payload );
+    },
 };
 
 export default actions;

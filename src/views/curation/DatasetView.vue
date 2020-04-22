@@ -1,5 +1,5 @@
 <template>
-    <div id="dashboard">
+    <div id="dataset-view">
         <v-container fluid class='pt-0'>
             <v-row dense>
                 <v-col cols="12" xl="12" lg="12" md="12" sm="12" xs="12">
@@ -69,6 +69,7 @@ export default class DatasetView extends Vue {
     private dataset: any = {};
     private history: HistoryEntry[] = [];
     private tab: string = 'history';
+    private isActive: boolean = false;
 
     private created() {
         this.datasetID = Number(this.$route.params.id);
@@ -77,9 +78,24 @@ export default class DatasetView extends Vue {
     }
 
     private closeDataset() {
-        this.$store.dispatch( 'curation/remove_dataset', { dataset_id: this.datasetID } );
-        this.$destroy();
-        this.$router.push( '/elements/Dashboard' );
+        this.$store.dispatch( 'curation/remove_dataset', { dataset_id: this.datasetID } ).then( () => {
+            this.$store.dispatch( 'incrementPathCache', {path: this.$route.path} );
+            this.$destroy();
+        });
+    }
+
+    private activated() {
+        this.isActive = true;
+    }
+
+    private deactivated() {
+        this.isActive = false;
+    }
+
+    private destroyed() {
+        if (this.isActive) {
+            this.$router.push( '/elements/Dashboard' );
+        }
     }
 
 }

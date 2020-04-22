@@ -7,6 +7,7 @@ const state = {
         reconnectError: false,
         lastEchoMessage: '',
     },
+    pathCache: new Map<string, number>(),
 };
 
 export default state;

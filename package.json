@@ -15,11 +15,13 @@
   },
   "main": "background.js",
   "dependencies": {
+    "@types/uuid": "^7.0.2",
     "axios": "^0.19.0",
     "bodybuilder": "^2.2.20",
     "chai-as-promised": "^7.1.1",
     "core-js": "^3.4.8",
     "custom-electron-titlebar": "^3.1.0",
+    "uuid": "^7.0.3",
     "vue": "^2.6.10",
     "vue-class-component": "^7.1.0",
     "vue-native-websocket": "^2.0.13",

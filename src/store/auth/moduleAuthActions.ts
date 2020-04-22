@@ -54,11 +54,12 @@ const moduleAuthActions = {
         // Logout and Reset State Variables
         const status = await API_USER_LOGOUT( );
         if (status) {
-            context.commit( 'AUTH_UPDATE_USER', undefined );
-            context.commit( 'AUTH_UPDATE_USERS', {} );
-            context.commit( 'AUTH_UPDATE_PERMISSIONS', {} );
-            context.dispatch( 'curation/truncate_datasets', {}, {root: true} );
-            payload.vm.$disconnect( );
+            context.dispatch( 'curation/truncate_datasets', {}, {root: true} ).then( () => {
+                context.commit( 'AUTH_UPDATE_USER', undefined );
+                context.commit( 'AUTH_UPDATE_USERS', {} );
+                context.commit( 'AUTH_UPDATE_PERMISSIONS', {} );
+                payload.vm.$disconnect( );
+            });
         }
     },
     force_logout: (context: any, payload: any) => {
