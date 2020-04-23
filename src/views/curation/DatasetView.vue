@@ -21,10 +21,11 @@
                     :grow="true"
                 >
 
-                    <v-tab href="#history">History</v-tab>
-                    <v-tab href="#data">Curated Data</v-tab>
-                    <v-tab href="#curate">Curate New Data</v-tab>
-                    <v-tab href="#notes">Notes</v-tab>
+                    <v-tab href="#history">History <v-icon class='ml-2' color="green lighten-3">mdi-history</v-icon></v-tab>
+                    <v-tab href="#data">Curated Data <v-icon class='ml-2' color="orange lighten-1">mdi-folder</v-icon></v-tab>
+                    <v-tab href="#curate">Curate New Data <v-icon class='ml-2' color="yellow lighten-3">mdi-folder-plus</v-icon></v-tab>
+                    <v-tab href="#notes">Notes <v-icon class='ml-2' color="purple lighten-3">mdi-file-document-edit</v-icon></v-tab>
+                    <v-tab href="#files">Files <v-icon class='ml-2' color="light-blue lighten-3">mdi-file-cabinet</v-icon></v-tab>
 
                     <v-tab-item class='' value="history">
                         <HistoryList 
@@ -36,6 +37,10 @@
 
                     <v-tab-item class='pa-0 ma-0' value="data">
                         <DatasetEntities :dataset="dataset"></DatasetEntities>
+                    </v-tab-item>
+
+                    <v-tab-item class='pa-0 ma-0' value="curate">
+                        <DatasetCurate :dataset="dataset"></DatasetCurate>
                     </v-tab-item>
 
                 </v-tabs>
@@ -51,6 +56,7 @@ import DatasetDetails from '@/components/datasets/DatasetDetails.vue';
 import DatasetTools from '@/components/datasets/DatasetTools.vue';
 import HistoryList from '@/components/history/HistoryList.vue';
 import DatasetEntities from '@/components/datasets/DatasetEntities.vue';
+import DatasetCurate from '@/components/datasets/DatasetCurate.vue';
 import { HistoryEntry } from '@/models/curation/History';
 
 const curation = namespace( 'curation' );
@@ -61,6 +67,7 @@ const curation = namespace( 'curation' );
         DatasetTools,
         HistoryList,
         DatasetEntities,
+        DatasetCurate,
     },
 })
 export default class DatasetView extends Vue {
