@@ -33,7 +33,7 @@ export default class DatasetLoad extends Vue {
     private fetchPubmedPriority: number = 55;
     private maxTaskCheckAttempts: number = 20;
     private asyncTimeoutTime: number = 1000;
-    private maxOpenDatasets: number = 3;
+    private maxOpenDatasets: number = 5;
 
     public created() {
         this.datasetSourceID = Number(this.$route.params.id);
