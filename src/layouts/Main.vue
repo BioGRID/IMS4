@@ -49,7 +49,6 @@ export default class MainVue extends Vue {
 
             // New key is the route path + the incremented counter
             const pathAppend = this.pathCache.get(this.$route.path);
-            console.log(this.$route.path + '/' + pathAppend);
             return this.$route.path + '/' + pathAppend;
         }
     }
