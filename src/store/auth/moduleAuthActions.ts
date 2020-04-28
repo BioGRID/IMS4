@@ -28,6 +28,10 @@ const moduleAuthActions = {
                 const permissionPromise = context.dispatch( 'fetch_permissions', {}, {} );
                 // Get latest 60 processing tasks
                 const processingPromise = context.dispatch( 'curation/fetch_processing_tasks', {}, {root: true} );
+                // Get Entity Families
+                const entityFamilyPromise = context.dispatch( 'curation/fetch_entity_families', {}, {root: true} );
+                // Get Entity Workflows
+                const entityWorkflowPromise = context.dispatch( 'curation/fetch_entity_workflows', {}, {root: true} );
 
                 Promise.all([
                     userPromise,
@@ -37,6 +41,8 @@ const moduleAuthActions = {
                     attributePromise,
                     permissionPromise,
                     processingPromise,
+                    entityFamilyPromise,
+                    entityWorkflowPromise,
                 ]).then( () => {
                     // Redirect to Dashboard
                     router.push( '/' );

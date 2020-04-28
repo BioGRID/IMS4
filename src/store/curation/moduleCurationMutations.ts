@@ -44,6 +44,12 @@ const moduleCurationMutations = {
     CURATION_UPDATE_CURRENT_DRAWER_LINKS: (state: any, links: CurationDrawerLink[] ) => {
         state.currentCurationDrawerLinks = links;
     },
+    CURATION_UPDATE_ENTITY_FAMILIES: (state: any, entityFamilies: object) => {
+        state.entityFamilies = entityFamilies;
+    },
+    CURATION_UPDATE_ENTITY_WORKFLOWS: (state: any, entityWorkflows: object) => {
+        state.entityWorkflows = entityWorkflows;
+    },
 };
 
 export default moduleCurationMutations;
