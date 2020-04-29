@@ -38,7 +38,6 @@ export default class MainVue extends Vue {
         // Check to see if route starts with /curation/DatasetView
         // if not, return just the path
         if (!this.$route.path.startsWith( '/curation/DatasetView' )) {
-            console.log(this.$route.path);
             return this.$route.path;
         } else {
             // If it is a dataset path, check to see if path is in the
@@ -49,7 +48,6 @@ export default class MainVue extends Vue {
 
             // New key is the route path + the incremented counter
             const pathAppend = this.pathCache.get(this.$route.path);
-            console.log(this.$route.path + '/' + pathAppend);
             return this.$route.path + '/' + pathAppend;
         }
     }

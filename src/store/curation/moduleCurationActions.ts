@@ -2,6 +2,8 @@ import { CurationGroupEntry, CurationGroupHash, API_CURATION_GROUP_FETCH } from 
 import { AttributeTypeEntry, AttributeTypeHash, API_ATTRIBUTE_TYPE_FETCH } from '@/models/curation/AttributeType';
 import { ProcessingTask, ProcessingTaskHash, API_TASK_FETCH } from '@/models/curation/ProcessingTask';
 import { API_HISTORY_FETCH, HistoryEntry } from '@/models/curation/History';
+import { API_ENTITY_FAMILY_FETCH, EntityFamilyEntry, EntityFamilyHash } from '@/models/curation/EntityFamilies';
+import { API_ENTITY_WORKFLOW_FETCH, EntityWorkflowEntry, EntityWorkflowHash } from '@/models/curation/EntityWorkflows';
 import { CurationDrawerLink } from '@/models/curation/CurationDrawerLink';
 import bodybuilder from 'bodybuilder';
 import { ELASTIC_QUERY } from '@/models/elastic/Query';
@@ -112,6 +114,30 @@ const moduleCurationActions = {
             curationDrawerLinkList.push(val);
         }
         context.commit( 'CURATION_UPDATE_CURRENT_DRAWER_LINKS',  curationDrawerLinkList );
+    },
+    fetch_entity_families: async (context: any) => {
+        const data: EntityFamilyEntry[] = await API_ENTITY_FAMILY_FETCH( );
+        if (data !== undefined) {
+            const entityFamilyHash: EntityFamilyHash = {};
+            for (const entityFamily of data) {
+                entityFamilyHash[entityFamily.entity_family_id] = entityFamily;
+            }
+            context.commit( 'CURATION_UPDATE_ENTITY_FAMILIES', entityFamilyHash );
+        } else {
+            throw new Error( 'Unable to fetch list of entity families from curation api' );
+        }
+    },
+    fetch_entity_workflows: async (context: any) => {
+        const data: EntityWorkflowEntry[] = await API_ENTITY_WORKFLOW_FETCH( );
+        if (data !== undefined) {
+            const entityWorkflowHash: EntityWorkflowHash = {};
+            for (const entityWorkflow of data) {
+                entityWorkflowHash[entityWorkflow.entity_workflow_id] = entityWorkflow;
+            }
+            context.commit( 'CURATION_UPDATE_ENTITY_WORKFLOWS', entityWorkflowHash );
+        } else {
+            throw new Error( 'Unable to fetch list of entity workflows from curation api' );
+        }
     },
 };
 

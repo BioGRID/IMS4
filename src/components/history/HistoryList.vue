@@ -7,9 +7,9 @@
             class='pa-5 p'
         >
             <div class='headline font-weight-bold'> 
-                Dataset History ({{ historySize }})
+                History ({{ historySize }})
             </div>
-            <p class='body-2 mb-2 font-weight-regular'>List of most recent history entries...</p>
+            <p class='body-2 mb-2 font-weight-regular'>Most recent state changes for this dataset...</p>
             <v-sheet
                 v-for="(history, i) in history"
                 :key="i"

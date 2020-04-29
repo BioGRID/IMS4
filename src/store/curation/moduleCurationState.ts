@@ -20,6 +20,8 @@ const moduleCurationState = {
     attributeTypes: {},
     processingTasks: {},
     maxProcessingTasks: 60,
+    entityFamilies: {},
+    entityWorkflows: {},
 };
 
 export default moduleCurationState;

@@ -62,6 +62,7 @@ const curation = namespace( 'curation' );
 })
 export default class DatasetEntities extends Vue {
     @curation.State private attributeTypes!: any;
+    @curation.State private entityFamilies!: any;
     @Prop() private dataset!: any;
     private displayRows: object[] = [];
     private darkMode: boolean = false;
@@ -78,99 +79,6 @@ export default class DatasetEntities extends Vue {
         '#U': 'history.user_name',
         '#D': 'history.addeddate',
     };
-    private tableHeaders: TableColumn[] = [
-        {
-            title: 'Bait',
-            field: 'participants.name_keyword',
-            sortable: true,
-            searchable: true,
-            searchName: 'Bait',
-            searchTag: '#B',
-            sortDirection: '',
-            sortOrder: 0,
-            sortNested: { path: 'participants',  filter: { term: { 'participants.keyword_attributes.ER.text': 'bait' }}},
-            className: 'text-center',
-            formatFunc: 'PN_ER',
-            formatFuncParams: { role: 'bait' },
-        },
-        {
-            title: 'Prey',
-            field: 'participants.name_keyword',
-            sortable: true,
-            searchable: true,
-            searchName: 'Prey',
-            searchTag: '#P',
-            sortDirection: '',
-            sortOrder: 0,
-            sortNested: { path: 'participants',  filter: { term: { 'participants.keyword_attributes.ER.text': 'prey' }}},
-            className: 'text-center',
-            formatFunc: 'PN_ER',
-            formatFuncParams: { role: 'prey' },
-        },
-        {
-            title: 'Bait Org',
-            field: 'participants.organism.abbreviation',
-            sortable: true,
-            searchable: true,
-            searchName: 'Bait Organism',
-            searchTag: '#BO',
-            sortDirection: '',
-            sortOrder: 0,
-            sortNested: { path: 'participants',  filter: { term: { 'participants.keyword_attributes.ER': 'bait' }}},
-            className: 'text-center',
-            formatFunc: 'OABB_ER',
-            formatFuncParams: { role: 'bait' },
-        },
-        {
-            title: 'Prey Org',
-            field: 'participants.organism.abbreviation',
-            sortable: true,
-            searchable: true,
-            searchName: 'Prey Organism',
-            searchTag: '#PO',
-            sortDirection: '',
-            sortOrder: 0,
-            sortNested: { path: 'participants',  filter: { term: { 'participants.keyword_attributes.ER': 'prey' }}},
-            className: 'text-center',
-            formatFunc: 'OABB_ER',
-            formatFuncParams: { role: 'prey' },
-        },
-        {
-            title: 'System',
-            field: 'keyword_attributes.ES.text',
-            sortable: true,
-            searchable: true,
-            searchName: 'Email',
-            searchTag: '@ES',
-            sortDirection: '',
-            sortOrder: 0,
-            className: 'text-center',
-            formatFunc: 'EKA_SC',
-            formatFuncParams: { shortcode: 'ES' },
-        },
-        {
-            title: 'User',
-            field: 'history.user_name',
-            sortable: true,
-            searchable: true,
-            searchName: 'User',
-            searchTag: '#U',
-            sortDirection: '',
-            sortOrder: 0,
-            className: 'text-center',
-        },
-        {
-            title: 'Date',
-            field: 'history.addeddate',
-            sortable: true,
-            searchable: true,
-            searchName: 'Date',
-            searchTag: '#D',
-            sortDirection: 'desc',
-            sortOrder: 1,
-            className: 'text-center',
-        },
-    ];
 
     private created() {
         this.getTotalCount();
@@ -182,6 +90,14 @@ export default class DatasetEntities extends Vue {
         if (this.hasRowCheckbox) { addonCols++; }
 
         return this.tableHeaders.length + addonCols;
+    }
+
+    get tableHeaders() {
+        if (this.entityFamilies[1] !== undefined) {
+            return this.entityFamilies[1].columns;
+        }
+
+        return [];
     }
 
     private async getTotalCount() {
