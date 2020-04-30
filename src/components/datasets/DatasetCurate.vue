@@ -27,13 +27,43 @@
                         dense
                         attach
                     >
-                        
                         <template v-slot:item="data">
                             <option :value="data.item.id">{{ data.item.name }}</option>
                         </template>
                     </v-autocomplete>
                 </v-col>
             </v-row>
+            <v-row no-gutters v-if="showWorkflow">
+                <v-col xl="12" lg="12" md="12" sm="12" xs="12">
+                    <v-stepper
+                        :vertical="false"
+                        alt-labels
+                        non-linear
+                        color="red"
+                    >
+                        <template v-for="(workflowEntry, entryIndex) in currentWorkflow">
+                            <v-stepper-step
+                                :key="`${entryIndex + 1}-step`"
+                                :complete="false"
+                                :step="entryIndex + 1"
+                                :editable="true"
+                            >
+                                {{ workflowEntry.title }}
+                                <small>{{ workflowEntry.description }}</small>
+                            </v-stepper-step>
+
+                            <v-stepper-content
+                                :key="`${entryIndex + 1}-content`"
+                                :step="entryIndex + 1"
+                            >
+                                {{ workflowEntry.description }}
+                            </v-stepper-content>
+
+                        </template>
+                    </v-stepper>
+                </v-col>
+            </v-row>
+
         </v-card>
     </div>
 </template>
@@ -46,6 +76,11 @@ import { EntityWorkflowEntry, EntityWorkflowHash } from '@/models/curation/Entit
 
 const curation = namespace( 'curation' );
 
+interface WorkflowRecord {
+    name: string;
+    id: string;
+}
+
 @Component
 export default class DatasetCurate extends Vue {
     @curation.State private entityFamilies!: EntityFamilyHash;
@@ -53,17 +88,19 @@ export default class DatasetCurate extends Vue {
     @Prop() private dataset!: any;
     @Prop({type: String, default: ''}) private color!: string;
     @Prop({type: Boolean, default: false }) private dark!: boolean;
-    @Prop({type: Boolean, default: false}) private collapsed!: boolean;
     private selectedWorkflow: string = '';
+    private currentWorkflow: object = [];
 
     @Watch( 'selectedWorkflow' )
     private onSelectedWorkflowChange() {
         console.log(this.selectedWorkflow);
+        this.currentWorkflow = this.entityWorkflows[this.selectedWorkflow].workflow;
+        console.log(this.currentWorkflow);
     }
 
     get workflowOptions() {
         const options: object[] = [];
-        const families: any = {};
+        const families: Record<string, Record<string, WorkflowRecord>> = {};
 
         for (const [familyID, family] of Object.entries(this.entityFamilies)) {
             families[family.name] = {};
@@ -85,6 +122,13 @@ export default class DatasetCurate extends Vue {
         }
 
         return options;
+    }
+
+    get showWorkflow() {
+        if (this.selectedWorkflow !== '' && this.selectedWorkflow !== undefined) {
+            return true;
+        }
+        return false;
     }
 
     private filterWorkflows( item: any, queryText: string, itemText: string ) {
