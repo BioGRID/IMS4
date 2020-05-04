@@ -11,7 +11,7 @@
                     <v-card-title class="pb-0 mb-3 mt-2 headline">
                         <strong>Curate New Data</strong>
                     </v-card-title>
-                    <v-card-subtitle>
+                    <v-card-subtitle class="pb-0">
                         Choose a curation workflow from the right to get started....
                     </v-card-subtitle>
                 </v-col>
@@ -33,37 +33,88 @@
                     </v-autocomplete>
                 </v-col>
             </v-row>
+            <v-row no-gutters>
+                <v-col xl="12" lg="12" md="12" sm="12" xs="12">
+                    <v-dialog persistent max-width="500" v-model="addDialog">
+                        <template v-slot:activator="{ on }">
+                            <v-btn
+                                v-on="on"
+                                class='mr-2 ml-4 mb-3'
+                                small
+                                dark
+                                title="Add blocks to this curation workflow"
+                                color="primary"
+                            >
+                                Add Blocks <v-icon class='ml-1'>mdi-plus</v-icon>
+                            </v-btn>
+                        </template>
+                        <v-card>
+                            <v-card-title class="headline">Add blocks to this curation workflow?</v-card-title>
+                            <v-card-text>You are about to close this dataset. This will remove the dataset from your list of open datasets, but will not change the state of the dataset. If you have any unfinished work for this dataset, it will be lost when closed. Are you sure you want to close the dataset?</v-card-text>
+                            <v-card-actions>
+                                <v-spacer></v-spacer>
+                                <v-btn color="red darken-3" dark @click="addDialog = false">Disagree <v-icon class='ml-1'>mdi-close-box</v-icon></v-btn>
+                                <v-btn color="green darken-3" dark @click="addDialog = false">Agree <v-icon class='ml-1'>mdi-check</v-icon></v-btn>
+                            </v-card-actions>
+                        </v-card>
+                    </v-dialog>
+                </v-col>
+            </v-row>
             <v-row no-gutters v-if="showWorkflow">
                 <v-col xl="12" lg="12" md="12" sm="12" xs="12">
                     <v-stepper
-                        :vertical="false"
-                        alt-labels
+                        :vertical="true"
+                        :alt-labels="false"
                         non-linear
-                        color="red"
+                        class="elevation-0 pb-3"
+                        align="left"
                     >
                         <template v-for="(workflowEntry, entryIndex) in currentWorkflow">
-                            <v-stepper-step
-                                :key="`${entryIndex + 1}-step`"
-                                :complete="false"
-                                :step="entryIndex + 1"
-                                :editable="true"
-                            >
-                                {{ workflowEntry.title }}
-                                <small>{{ workflowEntry.description }}</small>
-                            </v-stepper-step>
+                            <template v-if="workflowEntry.visible">
+                                <v-stepper-step
+                                    :key="`${entryIndex + 1}-step`"
+                                    :complete="isBlockComplete(entryIndex)"
+                                    :step="entryIndex + 1"
+                                    :editable="true"
+                                    :rules="[() => isBlockValid(entryIndex)]"
+                                    color="green darken-3"
+                                >
+                                    {{ workflowEntry.title }}
+                                    <small>{{ workflowEntry.description }}</small>
+                                </v-stepper-step>
 
-                            <v-stepper-content
-                                :key="`${entryIndex + 1}-content`"
-                                :step="entryIndex + 1"
-                            >
-                                {{ workflowEntry.description }}
-                            </v-stepper-content>
+                                <v-stepper-content
+                                    :key="`${entryIndex + 1}-content`"
+                                    :step="entryIndex + 1"
+                                >
+                                    <template v-if="workflowEntry.type === 'participant'">
+                                        <ParticipantBlock 
+                                            :name="workflowEntry.type" 
+                                            :required="workflowEntry.required"
+                                            :settings="workflowEntry.settings"
+                                        ></ParticipantBlock>
+                                    </template>
 
+                                    <template v-else>
+                                        <v-card color="pink lighten-1" height="200px">
+                                            Unknown Block
+                                        </v-card>
+                                    </template>
+                                </v-stepper-content>
+                            </template>
                         </template>
                     </v-stepper>
+                    <v-btn
+                        class='mr-2 ml-4 mb-3'
+                        large
+                        :disabled="!isWorkflowValid"
+                        title="Add blocks to this curation workflow"
+                        color="success"
+                    >
+                        Submit Curated Data <v-icon class='ml-1'>mdi-check</v-icon>
+                    </v-btn>
                 </v-col>
             </v-row>
-
         </v-card>
     </div>
 </template>
@@ -73,6 +124,8 @@ import { Component, Vue, Prop, Watch } from 'vue-property-decorator';
 import { State, namespace } from 'vuex-class';
 import { EntityFamilyEntry, EntityFamilyHash } from '@/models/curation/EntityFamilies';
 import { EntityWorkflowEntry, EntityWorkflowHash } from '@/models/curation/EntityWorkflows';
+import ParticipantBlock from '@/components/workflow/ParticipantBlock.vue';
+import NoteBlock from '@/components/workflow/NoteBlock.vue';
 
 const curation = namespace( 'curation' );
 
@@ -81,7 +134,11 @@ interface WorkflowRecord {
     id: string;
 }
 
-@Component
+@Component({
+    components: {
+        ParticipantBlock,
+    },
+})
 export default class DatasetCurate extends Vue {
     @curation.State private entityFamilies!: EntityFamilyHash;
     @curation.State private entityWorkflows!: EntityWorkflowHash;
@@ -89,13 +146,28 @@ export default class DatasetCurate extends Vue {
     @Prop({type: String, default: ''}) private color!: string;
     @Prop({type: Boolean, default: false }) private dark!: boolean;
     private selectedWorkflow: string = '';
-    private currentWorkflow: object = [];
+    private currentWorkflow: object[] = [];
+    private addDialog: boolean = false;
 
     @Watch( 'selectedWorkflow' )
     private onSelectedWorkflowChange() {
-        console.log(this.selectedWorkflow);
-        this.currentWorkflow = this.entityWorkflows[this.selectedWorkflow].workflow;
-        console.log(this.currentWorkflow);
+        if (this.showWorkflow) {
+            this.$store.dispatch( 'toggleLoadingOverlay', {} );
+            this.currentWorkflow = this.entityWorkflows[Number(this.selectedWorkflow)].workflow;
+            this.$store.dispatch( 'toggleLoadingOverlay', {} );
+        } else {
+            this.currentWorkflow = [];
+        }
+    }
+
+    get isWorkflowValid() {
+        let currentBlock: Record<string, any> = {};
+        for (currentBlock of this.currentWorkflow) {
+            if (!currentBlock.valid || currentBlock.valid === undefined || !(currentBlock.state === 'complete')) {
+                return false;
+            }
+        }
+        return true;
     }
 
     get workflowOptions() {
@@ -140,6 +212,24 @@ export default class DatasetCurate extends Vue {
         const searchText = queryText.toLowerCase();
 
         return text.indexOf(searchText) > -1;
+    }
+
+    private isBlockValid( blockID: number ) {
+        const currentBlock: Record<string, any> = this.currentWorkflow[blockID];
+        if (currentBlock.valid || currentBlock.valid === undefined) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private isBlockComplete( blockID: number ) {
+        const currentBlock: Record<string, any> = this.currentWorkflow[blockID];
+        if (currentBlock.state === 'complete') {
+            return true;
+        }
+
+        return false;
     }
 
 }
