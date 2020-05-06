@@ -5,9 +5,22 @@ export interface EntityWorkflowEntry {
     entity_workflow_id: number;
     name: string;
     entity_family_id: number;
-    workflow: any;
+    workflow: EntityWorkflowBlock[];
     user_id: number;
     deprecated: number;
+}
+
+export interface EntityWorkflowBlock {
+    name: string;
+    title: string;
+    description: string;
+    type: string;
+    required: boolean;
+    visible: boolean;
+    settings?: Record<string, string|number>;
+    valid?: boolean | undefined;
+    state?: string | undefined;
+    data?: any;
 }
 
 export interface EntityWorkflowHash {

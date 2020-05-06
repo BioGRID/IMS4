@@ -17,7 +17,7 @@
                 </v-col>
                 <v-col xl="4" lg="4" md="6" sm="12" xs="12">
                     <v-autocomplete
-                        v-model="selectedWorkflow"
+                        v-model="selectedWorkflowID"
                         class='pr-5 pl-5 mt-9 mb-0'
                         :items="workflowOptions"
                         :filter="filterWorkflows"
@@ -35,7 +35,17 @@
             </v-row>
             <v-row no-gutters>
                 <v-col xl="12" lg="12" md="12" sm="12" xs="12">
-                    <v-dialog persistent max-width="500" v-model="addDialog">
+                    <v-btn
+                        class='mr-2 ml-4 mb-3'
+                        small
+                        dark
+                        title="Add blocks to this curation workflow"
+                        color="primary"
+                        @click="addBlock()"
+                    >
+                        Add Blocks <v-icon class='ml-1'>mdi-plus</v-icon>
+                    </v-btn>
+                    <!--<v-dialog persistent max-width="500" v-model="addDialog">
                         <template v-slot:activator="{ on }">
                             <v-btn
                                 v-on="on"
@@ -57,7 +67,7 @@
                                 <v-btn color="green darken-3" dark @click="addDialog = false">Agree <v-icon class='ml-1'>mdi-check</v-icon></v-btn>
                             </v-card-actions>
                         </v-card>
-                    </v-dialog>
+                    </v-dialog>-->
                 </v-col>
             </v-row>
             <v-row no-gutters v-if="showWorkflow">
@@ -68,37 +78,52 @@
                         non-linear
                         class="elevation-0 pb-3"
                         align="left"
+                        v-model="currentStep"
+                        :key="selectedWorkflowID"
                     >
-                        <template v-for="(workflowEntry, entryIndex) in currentWorkflow">
-                            <template v-if="workflowEntry.visible">
+                        <template v-for="(block, entryIndex) in workflow">
+                            <template v-if="block.visible">
                                 <v-stepper-step
-                                    :key="`${entryIndex + 1}-step`"
+                                    :key="`${selectedWorkflowID}-${entryIndex + 1}-step`"
                                     :complete="isBlockComplete(entryIndex)"
                                     :step="entryIndex + 1"
                                     :editable="true"
                                     :rules="[() => isBlockValid(entryIndex)]"
                                     color="green darken-3"
                                 >
-                                    {{ workflowEntry.title }}
-                                    <small>{{ workflowEntry.description }}</small>
+                                    {{ block.title }} {{ selectedWorkflowID + "-" + (entryIndex + 1) + "-step" }}
+                                    <div class='caption pa-0 ma-0'>
+                                        <span v-if="block.required"> <span class="red--text">Required</span></span>
+                                        <span v-if="block.settings !== undefined && block.settings !== {}">
+                                            <span v-if="block.required"> |</span> Rules: {{ buildRulesText(block.settings, block.type) }}
+                                        </span>
+                                    </div>
                                 </v-stepper-step>
 
                                 <v-stepper-content
                                     :key="`${entryIndex + 1}-content`"
                                     :step="entryIndex + 1"
                                 >
-                                    <template v-if="workflowEntry.type === 'participant'">
-                                        <ParticipantBlock 
-                                            :name="workflowEntry.type" 
-                                            :required="workflowEntry.required"
-                                            :settings="workflowEntry.settings"
+                                    <template v-if="block.type === 'participant'">
+                                        <ParticipantBlock
+                                            :id="entryIndex"
+                                            :name="block.name" 
+                                            :required="block.required"
+                                            :settings="block.settings"
+                                            @complete="completeBlock"
+                                            @remove="removeBlock"
                                         ></ParticipantBlock>
                                     </template>
 
                                     <template v-else>
-                                        <v-card color="pink lighten-1" height="200px">
-                                            Unknown Block
-                                        </v-card>
+                                        <UnknownBlock
+                                            :id="entryIndex"
+                                            :name="block.name" 
+                                            :required="block.required"
+                                            :settings="block.settings"
+                                            @complete="completeBlock"
+                                            @remove="removeBlock"
+                                        ></UnknownBlock>
                                     </template>
                                 </v-stepper-content>
                             </template>
@@ -123,9 +148,11 @@
 import { Component, Vue, Prop, Watch } from 'vue-property-decorator';
 import { State, namespace } from 'vuex-class';
 import { EntityFamilyEntry, EntityFamilyHash } from '@/models/curation/EntityFamilies';
-import { EntityWorkflowEntry, EntityWorkflowHash } from '@/models/curation/EntityWorkflows';
+import { EntityWorkflowEntry, EntityWorkflowHash, EntityWorkflowBlock } from '@/models/curation/EntityWorkflows';
 import ParticipantBlock from '@/components/workflow/ParticipantBlock.vue';
+import UnknownBlock from '@/components/workflow/UnknownBlock.vue';
 import NoteBlock from '@/components/workflow/NoteBlock.vue';
+import _ from 'lodash';
 
 const curation = namespace( 'curation' );
 
@@ -137,6 +164,7 @@ interface WorkflowRecord {
 @Component({
     components: {
         ParticipantBlock,
+        UnknownBlock,
     },
 })
 export default class DatasetCurate extends Vue {
@@ -145,25 +173,34 @@ export default class DatasetCurate extends Vue {
     @Prop() private dataset!: any;
     @Prop({type: String, default: ''}) private color!: string;
     @Prop({type: Boolean, default: false }) private dark!: boolean;
-    private selectedWorkflow: string = '';
-    private currentWorkflow: object[] = [];
+    private selectedWorkflowID: string = '';
+    private workflow: EntityWorkflowBlock[] = [];
     private addDialog: boolean = false;
+    private currentStep: number = 1;
 
-    @Watch( 'selectedWorkflow' )
-    private onSelectedWorkflowChange() {
+    @Watch( 'selectedWorkflowID' )
+    private onselectedWorkflowIDChange() {
         if (this.showWorkflow) {
             this.$store.dispatch( 'toggleLoadingOverlay', {} );
-            this.currentWorkflow = this.entityWorkflows[Number(this.selectedWorkflow)].workflow;
+            this.workflow = [];
+            for (const [blockID, block] of Object.entries(this.entityWorkflows[Number(this.selectedWorkflowID)].workflow)) {
+                if (block.visible) {
+                    const newBlock = _.cloneDeep(block);
+                    newBlock.valid = undefined;
+                    newBlock.state = 'new';
+                    newBlock.data = undefined;
+                    this.workflow.push(newBlock);
+                }
+            }
+            this.currentStep = 1;
             this.$store.dispatch( 'toggleLoadingOverlay', {} );
-        } else {
-            this.currentWorkflow = [];
         }
+
     }
 
     get isWorkflowValid() {
-        let currentBlock: Record<string, any> = {};
-        for (currentBlock of this.currentWorkflow) {
-            if (!currentBlock.valid || currentBlock.valid === undefined || !(currentBlock.state === 'complete')) {
+        for (const [blockID, block] of Object.entries(this.workflow)) {
+            if (!block.valid || block.valid === undefined || !(block.state === 'complete')) {
                 return false;
             }
         }
@@ -197,7 +234,7 @@ export default class DatasetCurate extends Vue {
     }
 
     get showWorkflow() {
-        if (this.selectedWorkflow !== '' && this.selectedWorkflow !== undefined) {
+        if (this.selectedWorkflowID !== '' && this.selectedWorkflowID !== undefined) {
             return true;
         }
         return false;
@@ -215,8 +252,8 @@ export default class DatasetCurate extends Vue {
     }
 
     private isBlockValid( blockID: number ) {
-        const currentBlock: Record<string, any> = this.currentWorkflow[blockID];
-        if (currentBlock.valid || currentBlock.valid === undefined) {
+        const block: EntityWorkflowBlock = this.workflow[blockID];
+        if (block.valid || block.valid === undefined) {
             return true;
         }
 
@@ -224,12 +261,65 @@ export default class DatasetCurate extends Vue {
     }
 
     private isBlockComplete( blockID: number ) {
-        const currentBlock: Record<string, any> = this.currentWorkflow[blockID];
-        if (currentBlock.state === 'complete') {
+        const block: EntityWorkflowBlock = this.workflow[blockID];
+        if (block.state === 'complete') {
             return true;
         }
 
         return false;
+    }
+
+    private completeBlock(blockID: number, blockData: object) {
+        const block: EntityWorkflowBlock = this.workflow[blockID];
+        block.state = 'complete';
+        block.valid = true;
+    }
+
+    private removeBlock(blockID: string) {
+        this.workflow.splice(Number(blockID), 1);
+    }
+
+    private buildRulesText( settings: Record<string, string|number>, type: string ) {
+        const rules: string[] = [];
+        for (const [settingName, settingValue] of Object.entries(settings)) {
+            if (type === 'participant') {
+                if (settingName === 'min') {
+                    rules.push('min ' + String(settingValue));
+                } else if (settingName === 'max') {
+                    rules.push('max ' + String(settingValue));
+                }
+            } else if (type === 'ontology') {
+                if (settingName === 'min') {
+                    rules.push('min ' + String(settingValue));
+                } else if (settingName === 'max') {
+                    rules.push('max ' + String(settingValue));
+                } else if (settingName === 'qualifier_max' && settingValue === 0) {
+                    rules.push('no qualifiers');
+                } else if (settingName === 'qualifier_max' && settingValue > 0) {
+                    rules.push('max qualifications = ' + String(settingValue));
+                }
+            }
+        }
+        return rules.join(', ');
+    }
+
+    private addBlock() {
+        console.log('Add Block');
+        this.workflow.push({
+            name: 'public_note',
+            title: 'Public Notes',
+            description: 'You can enter one or more notes',
+            type: 'note',
+            required: false,
+            visible: true,
+            settings: {
+                min: 2,
+                max: 2,
+            },
+            valid: undefined,
+            state: 'new',
+            data: undefined,
+        });
     }
 
 }

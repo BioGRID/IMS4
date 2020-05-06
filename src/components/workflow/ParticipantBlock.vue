@@ -2,9 +2,8 @@
     <div class='participants-block'>
         <v-card
             tile
-            color="grey lighten-2 pa-3 pl-5"
+            color="grey lighten-2 pa-1 pl-4"
         >
-
             <v-row>
                 <v-col xl="4" lg="4" md="4" sm="12" xs="12">
                     <v-textarea
@@ -82,9 +81,9 @@
                     <v-btn
                         color="success"
                         :disabled="isInvalid"
-                        @click="validateParticipants"
+                        @click="mapParticipants"
                     >
-                        Validate <v-icon>mdi-check</v-icon>
+                        Verify Participants <v-icon>mdi-check</v-icon>
                     </v-btn>
                 </v-col>
                 <v-col xl="4" lg="4" md="4" sm="12" xs="12">
@@ -114,8 +113,9 @@
                             </v-list-item-content>
                         </v-list-item>
                     </v-list>
-
                 </v-col>
+            </v-row>
+            <v-row>
                 <v-col xl="12" lg="12" md="12" sm="12" xs="12">
                     <v-btn
                         color="primary"
@@ -127,27 +127,26 @@
                     </v-btn>
                     <v-btn
                         color="error"
-                        v-if="required"
+                        v-if="!required"
                         @click="removeBlock"
                     >
                         Remove Block <v-icon>mdi-close</v-icon>
                     </v-btn>
                 </v-col>
-                <v-overlay
-                    :absolute="true"
-                    :opacity="0.7"
-                    :value="loading"
-                    z-index="1000"
-                >
-                    <v-progress-circular 
-                        indeterminate 
-                        color="yellow accent-4"
-                        size="120"
-                        width="10"
-                    >Processing</v-progress-circular>
-                </v-overlay>
             </v-row>
-            
+            <v-overlay
+                :absolute="true"
+                :opacity="0.7"
+                :value="loading"
+                z-index="1000"
+            >
+                <v-progress-circular 
+                    indeterminate 
+                    color="yellow accent-4"
+                    size="120"
+                    width="10"
+                >Processing</v-progress-circular>
+            </v-overlay>
         </v-card>
     </div>
 </template>
@@ -158,7 +157,7 @@ import { State, namespace } from 'vuex-class';
 import { required } from 'vuelidate/lib/validators';
 import { generateValidationError } from '@/utils/ValidationErrors';
 import { OrganismEntry, OrganismHash } from '@/models/annotation/Organism';
-import { syncDelay } from '@/utils/HelperUtils';
+import { EntityWorkflowBlock } from '@/models/curation/EntityWorkflows';
 
 const annotation = namespace( 'annotation' );
 
@@ -183,6 +182,7 @@ export default class ParticipantBlock extends Vue {
     @annotation.State private experimentalRoles!: SelectRecord[];
     @annotation.State private participantTypes!: SelectRecord[];
     @annotation.State private identifierTypes!: SelectRecord[];
+    @Prop({type: Number, default: 0}) private id!: number;
     @Prop({type: String, default: ''}) private name!: string;
     @Prop({type: Boolean, default: false}) private required!: boolean;
     @Prop() private settings!: Record<string, string>;
@@ -193,6 +193,8 @@ export default class ParticipantBlock extends Vue {
     private identifierTypeID: string = '';
     private participantSets: ParticipantSet[] = [];
     private loading: boolean = false;
+    private showAlert: boolean = false;
+    private alertMessage: string = '';
 
     get organismOptions() {
         const organismOptions = [];
@@ -261,7 +263,7 @@ export default class ParticipantBlock extends Vue {
     }
 
     get isComplete() {
-        return false;
+        return this.validateBlock();
     }
 
     private removeParticipantSet(participantSetID: number) {
@@ -278,7 +280,7 @@ export default class ParticipantBlock extends Vue {
         return 'Experimental Role: ' + experimentalRoleName;
     }
 
-    private validateParticipants() {
+    private mapParticipants() {
         this.loading = true;
         this.$v.$touch();
         if (!this.$v.$invalid) {
@@ -315,6 +317,27 @@ export default class ParticipantBlock extends Vue {
         }
 
         return 0;
+    }
+
+    private completeBlock() {
+        this.loading = true;
+        if (this.validateBlock()) {
+            this.$emit( 'complete', this.id, this.participantSets );
+        }
+        this.loading = false;
+    }
+
+    private removeBlock() {
+        this.$emit( 'remove', this.id );
+    }
+
+    private validateBlock() {
+        let isValid = true;
+        const participantSetCount = this.participantSets.length;
+        if (participantSetCount < Number(this.settings.min) || participantSetCount > Number(this.settings.max)) {
+            isValid = false;
+        }
+        return isValid;
     }
 
     private validations() {
