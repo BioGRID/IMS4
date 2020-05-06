@@ -85,8 +85,8 @@ export default function notification(type: string, id: string) {
         curate: {
             workflow: {
                 blockexists: 'One or more of the blocks selected already exists in the workflow, they cannot be added twice',
-            }
-        }
+            },
+        },
     };
 
     const getMessage = ( source: string, operation: string, msgtype: string ) => {
