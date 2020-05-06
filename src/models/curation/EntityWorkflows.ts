@@ -16,7 +16,6 @@ export interface EntityWorkflowBlock {
     description: string;
     type: string;
     required: boolean;
-    visible: boolean;
     settings?: Record<string, string|number>;
     valid?: boolean | undefined;
     state?: string | undefined;

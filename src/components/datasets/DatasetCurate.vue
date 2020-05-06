@@ -41,7 +41,7 @@
                         dark
                         title="Add blocks to this curation workflow"
                         color="primary"
-                        @click="addBlock()"
+                        @click="addBlock( 'public_note' )"
                     >
                         Add Blocks <v-icon class='ml-1'>mdi-plus</v-icon>
                     </v-btn>
@@ -82,51 +82,49 @@
                         :key="selectedWorkflowID"
                     >
                         <template v-for="(block, entryIndex) in workflow">
-                            <template v-if="block.visible">
-                                <v-stepper-step
-                                    :key="`${selectedWorkflowID}-${entryIndex + 1}-step`"
-                                    :complete="isBlockComplete(entryIndex)"
-                                    :step="entryIndex + 1"
-                                    :editable="true"
-                                    :rules="[() => isBlockValid(entryIndex)]"
-                                    color="green darken-3"
-                                >
-                                    {{ block.title }} {{ selectedWorkflowID + "-" + (entryIndex + 1) + "-step" }}
-                                    <div class='caption pa-0 ma-0'>
-                                        <span v-if="block.required"> <span class="red--text">Required</span></span>
-                                        <span v-if="block.settings !== undefined && block.settings !== {}">
-                                            <span v-if="block.required"> |</span> Rules: {{ buildRulesText(block.settings, block.type) }}
-                                        </span>
-                                    </div>
-                                </v-stepper-step>
+                            <v-stepper-step
+                                :key="`${selectedWorkflowID}-${entryIndex + 1}-step`"
+                                :complete="isBlockComplete(entryIndex)"
+                                :step="entryIndex + 1"
+                                :editable="true"
+                                :rules="[() => isBlockValid(entryIndex)]"
+                                color="green darken-3"
+                            >
+                                {{ block.title }} {{ selectedWorkflowID + "-" + (entryIndex + 1) + "-step" }}
+                                <div class='caption pa-0 ma-0'>
+                                    <span v-if="block.required"> <span class="red--text">Required</span></span>
+                                    <span v-if="block.settings !== undefined && block.settings !== {}">
+                                        <span v-if="block.required"> |</span> Rules: {{ buildRulesText(block.settings, block.type) }}
+                                    </span>
+                                </div>
+                            </v-stepper-step>
 
-                                <v-stepper-content
-                                    :key="`${entryIndex + 1}-content`"
-                                    :step="entryIndex + 1"
-                                >
-                                    <template v-if="block.type === 'participant'">
-                                        <ParticipantBlock
-                                            :id="entryIndex"
-                                            :name="block.name" 
-                                            :required="block.required"
-                                            :settings="block.settings"
-                                            @complete="completeBlock"
-                                            @remove="removeBlock"
-                                        ></ParticipantBlock>
-                                    </template>
+                            <v-stepper-content
+                                :key="`${entryIndex + 1}-content`"
+                                :step="entryIndex + 1"
+                            >
+                                <template v-if="block.type === 'participant'">
+                                    <ParticipantBlock
+                                        :id="entryIndex"
+                                        :name="block.name" 
+                                        :required="block.required"
+                                        :settings="block.settings"
+                                        @complete="completeBlock"
+                                        @remove="removeBlock"
+                                    ></ParticipantBlock>
+                                </template>
 
-                                    <template v-else>
-                                        <UnknownBlock
-                                            :id="entryIndex"
-                                            :name="block.name" 
-                                            :required="block.required"
-                                            :settings="block.settings"
-                                            @complete="completeBlock"
-                                            @remove="removeBlock"
-                                        ></UnknownBlock>
-                                    </template>
-                                </v-stepper-content>
-                            </template>
+                                <template v-else>
+                                    <UnknownBlock
+                                        :id="entryIndex"
+                                        :name="block.name" 
+                                        :required="block.required"
+                                        :settings="block.settings"
+                                        @complete="completeBlock"
+                                        @remove="removeBlock"
+                                    ></UnknownBlock>
+                                </template>
+                            </v-stepper-content>
                         </template>
                     </v-stepper>
                     <v-btn
@@ -152,6 +150,7 @@ import { EntityWorkflowEntry, EntityWorkflowHash, EntityWorkflowBlock } from '@/
 import ParticipantBlock from '@/components/workflow/ParticipantBlock.vue';
 import UnknownBlock from '@/components/workflow/UnknownBlock.vue';
 import NoteBlock from '@/components/workflow/NoteBlock.vue';
+import notification from '@/utils/Notifications';
 import _ from 'lodash';
 
 const curation = namespace( 'curation' );
@@ -175,6 +174,7 @@ export default class DatasetCurate extends Vue {
     @Prop({type: Boolean, default: false }) private dark!: boolean;
     private selectedWorkflowID: string = '';
     private workflow: EntityWorkflowBlock[] = [];
+    private activeBlockNames: Record<string, boolean> = {};
     private addDialog: boolean = false;
     private currentStep: number = 1;
 
@@ -183,14 +183,14 @@ export default class DatasetCurate extends Vue {
         if (this.showWorkflow) {
             this.$store.dispatch( 'toggleLoadingOverlay', {} );
             this.workflow = [];
+            this.activeBlockNames = {};
             for (const [blockID, block] of Object.entries(this.entityWorkflows[Number(this.selectedWorkflowID)].workflow)) {
-                if (block.visible) {
-                    const newBlock = _.cloneDeep(block);
-                    newBlock.valid = undefined;
-                    newBlock.state = 'new';
-                    newBlock.data = undefined;
-                    this.workflow.push(newBlock);
-                }
+                const newBlock = _.cloneDeep(block);
+                newBlock.valid = undefined;
+                newBlock.state = 'new';
+                newBlock.data = undefined;
+                this.workflow.push(newBlock);
+                this.activeBlockNames[newBlock.name.toUpperCase()] = true;
             }
             this.currentStep = 1;
             this.$store.dispatch( 'toggleLoadingOverlay', {} );
@@ -275,8 +275,12 @@ export default class DatasetCurate extends Vue {
         block.valid = true;
     }
 
-    private removeBlock(blockID: string) {
+    private removeBlock(blockID: number) {
+        const blockName: string = '';
+        const block: EntityWorkflowBlock = this.workflow[blockID];
         this.workflow.splice(Number(blockID), 1);
+        delete this.activeBlockNames[block.name.toUpperCase()];
+        this.currentStep = this.currentStep - 1;
     }
 
     private buildRulesText( settings: Record<string, string|number>, type: string ) {
@@ -303,23 +307,27 @@ export default class DatasetCurate extends Vue {
         return rules.join(', ');
     }
 
-    private addBlock() {
-        console.log('Add Block');
-        this.workflow.push({
-            name: 'public_note',
-            title: 'Public Notes',
-            description: 'You can enter one or more notes',
-            type: 'note',
-            required: false,
-            visible: true,
-            settings: {
-                min: 2,
-                max: 2,
-            },
-            valid: undefined,
-            state: 'new',
-            data: undefined,
-        });
+    private addBlock( blockName: string ) {
+        blockName = blockName.toUpperCase();
+        if (this.activeBlockNames[blockName] === undefined) {
+            this.workflow.push({
+                name: 'public_note',
+                title: 'Public Notes',
+                description: 'You can enter one or more notes',
+                type: 'note',
+                required: false,
+                settings: {
+                    min: 2,
+                    max: 2,
+                },
+                valid: undefined,
+                state: 'new',
+                data: undefined,
+            });
+            this.activeBlockNames[blockName] = true;
+        } else {
+            this.$store.dispatch( 'notify/displayNotification', notification( 'error', 'curate_workflow_blockexists' ), {root: true });
+        }
     }
 
 }
