@@ -1,0 +1,48 @@
+import { EntityWorkflowBlock } from '@/models/curation/EntityWorkflows';
+
+export const WorkflowBlocks: Record<string, EntityWorkflowBlock> = {
+    entity_score : {
+        name: 'entity_score',
+        title: 'Scores',
+        description: 'Enter one or more groups of scores, including the type of score',
+        type: 'score',
+        required: false,
+        settings: {},
+        valid: undefined,
+        state: 'new',
+        data: undefined,
+    },
+    public_note : {
+        name: 'public_note',
+        title: 'Public Notes',
+        description: 'Enter one or more notes separated by newlines, these will be released publicly',
+        type: 'text',
+        required: false,
+        settings: {},
+        valid: undefined,
+        state: 'new',
+        data: undefined,
+    },
+    private_note : {
+        name: 'private_note',
+        title: 'Private Notes',
+        description: 'Enter one or more notes separated by newlines, these will not be released publicly',
+        type: 'text',
+        required: false,
+        settings: {},
+        valid: undefined,
+        state: 'new',
+        data: undefined,
+    },
+    phenotype : {
+        name: 'phenotype',
+        title: 'Phenotypes',
+        description: 'Enter one or more phenotypes',
+        type: 'ontology',
+        required: false,
+        settings: {},
+        valid: undefined,
+        state: 'new',
+        data: undefined,
+    },
+};

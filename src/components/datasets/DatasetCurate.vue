@@ -35,17 +35,7 @@
             </v-row>
             <v-row no-gutters>
                 <v-col xl="12" lg="12" md="12" sm="12" xs="12">
-                    <v-btn
-                        class='mr-2 ml-4 mb-3'
-                        small
-                        dark
-                        title="Add blocks to this curation workflow"
-                        color="primary"
-                        @click="addBlock( 'public_note' )"
-                    >
-                        Add Blocks <v-icon class='ml-1'>mdi-plus</v-icon>
-                    </v-btn>
-                    <!--<v-dialog persistent max-width="500" v-model="addDialog">
+                    <v-dialog persistent max-width="500" v-model="addDialog">
                         <template v-slot:activator="{ on }">
                             <v-btn
                                 v-on="on"
@@ -54,20 +44,46 @@
                                 dark
                                 title="Add blocks to this curation workflow"
                                 color="primary"
+                                :disabled="!showWorkflow"
                             >
                                 Add Blocks <v-icon class='ml-1'>mdi-plus</v-icon>
                             </v-btn>
                         </template>
                         <v-card>
                             <v-card-title class="headline">Add blocks to this curation workflow?</v-card-title>
-                            <v-card-text>You are about to close this dataset. This will remove the dataset from your list of open datasets, but will not change the state of the dataset. If you have any unfinished work for this dataset, it will be lost when closed. Are you sure you want to close the dataset?</v-card-text>
+                            <v-card-text>
+                                Select the blocks you want to add below, if the blocks already exist, they will not be added twice.
+                                <v-autocomplete
+                                    v-model="selectedAddonBlocks"
+                                    :items="workflowBlockOptions"
+                                    :filter="filterWorkflows"
+                                    class='pt-3'
+                                    label="Select optional blocks to add"
+                                    item-text="name"
+                                    item-value="id"
+                                    dense
+                                    chips
+                                    multiple
+                                    hint="Choose optional blocks to add to this workflow"
+                                    persistent-hint
+                                >
+                                </v-autocomplete>
+                            </v-card-text>
+                            
                             <v-card-actions>
                                 <v-spacer></v-spacer>
-                                <v-btn color="red darken-3" dark @click="addDialog = false">Disagree <v-icon class='ml-1'>mdi-close-box</v-icon></v-btn>
-                                <v-btn color="green darken-3" dark @click="addDialog = false">Agree <v-icon class='ml-1'>mdi-check</v-icon></v-btn>
+                                <v-btn color="red darken-3" dark @click="addDialog = false">Cancel <v-icon class='ml-1'>mdi-close-box</v-icon></v-btn>
+                                <v-btn
+                                    dark
+                                    title="Add blocks to this curation workflow"
+                                    color="primary"
+                                    @click="addDialog = false; addSelectedAddonBlocks();"
+                                >
+                                    Add Selected Blocks <v-icon class='ml-1'>mdi-plus</v-icon>
+                                </v-btn>
                             </v-card-actions>
                         </v-card>
-                    </v-dialog>-->
+                    </v-dialog>
                 </v-col>
             </v-row>
             <v-row no-gutters v-if="showWorkflow">
@@ -90,11 +106,12 @@
                                 :rules="[() => isBlockValid(entryIndex)]"
                                 color="green darken-3"
                             >
-                                {{ block.title }} {{ selectedWorkflowID + "-" + (entryIndex + 1) + "-step" }}
+                                {{ block.title }}
+                                <div class='caption pa-0 ma-0'>{{ block.description }}</div>
                                 <div class='caption pa-0 ma-0'>
                                     <span v-if="block.required"> <span class="red--text">Required</span></span>
                                     <span v-if="block.settings !== undefined && block.settings !== {}">
-                                        <span v-if="block.required"> |</span> Rules: {{ buildRulesText(block.settings, block.type) }}
+                                        <span v-if="block.required"> |</span> {{ buildRulesText(block.settings, block.type) }}
                                     </span>
                                 </div>
                             </v-stepper-step>
@@ -150,6 +167,7 @@ import { EntityWorkflowEntry, EntityWorkflowHash, EntityWorkflowBlock } from '@/
 import ParticipantBlock from '@/components/workflow/ParticipantBlock.vue';
 import UnknownBlock from '@/components/workflow/UnknownBlock.vue';
 import NoteBlock from '@/components/workflow/NoteBlock.vue';
+import { WorkflowBlocks } from '@/models/curation/WorkflowBlocks';
 import notification from '@/utils/Notifications';
 import _ from 'lodash';
 
@@ -177,6 +195,7 @@ export default class DatasetCurate extends Vue {
     private activeBlockNames: Record<string, boolean> = {};
     private addDialog: boolean = false;
     private currentStep: number = 1;
+    private selectedAddonBlocks = [];
 
     @Watch( 'selectedWorkflowID' )
     private onselectedWorkflowIDChange() {
@@ -231,6 +250,33 @@ export default class DatasetCurate extends Vue {
         }
 
         return options;
+    }
+
+    get workflowBlockOptions() {
+        const options: object[] = [];
+
+        for (const [blockName, block] of Object.entries(WorkflowBlocks)) {
+            const blockType: string = block.type.toUpperCase();
+
+            if (options[blockType] === undefined) {
+                options[blockType] = {};
+            }
+
+            options[blockType][blockName] = { name: block.title, id: blockName };
+        }
+
+        const displayOptions: object[] = [];
+        for (const blockType of Object.keys(options).sort()) {
+            const childBlocks = options[blockType];
+            if (Object.keys(childBlocks).length > 0) {
+                displayOptions.push({ header: blockType });
+                for (const optionName of Object.keys(childBlocks).sort()) {
+                    displayOptions.push(childBlocks[optionName]);
+                }
+            }
+        }
+
+        return displayOptions;
     }
 
     get showWorkflow() {
@@ -304,28 +350,27 @@ export default class DatasetCurate extends Vue {
                 }
             }
         }
-        return rules.join(', ');
+        if (rules.length > 0) {
+            return 'Rules: ' + rules.join(', ');
+        } else {
+            return '';
+        }
     }
 
-    private addBlock( blockName: string ) {
-        blockName = blockName.toUpperCase();
-        if (this.activeBlockNames[blockName] === undefined) {
-            this.workflow.push({
-                name: 'public_note',
-                title: 'Public Notes',
-                description: 'You can enter one or more notes',
-                type: 'note',
-                required: false,
-                settings: {
-                    min: 2,
-                    max: 2,
-                },
-                valid: undefined,
-                state: 'new',
-                data: undefined,
-            });
-            this.activeBlockNames[blockName] = true;
-        } else {
+    private addSelectedAddonBlocks( ) {
+        let existCount = 0;
+        for (const blockName of this.selectedAddonBlocks ) {
+            if (this.activeBlockNames[blockName.toUpperCase()] === undefined) {
+                this.workflow.push(WorkflowBlocks[blockName]);
+                this.activeBlockNames[blockName.toUpperCase()] = true;
+            } else {
+                existCount++;
+            }
+        }
+
+        this.selectedAddonBlocks = [];
+
+        if (existCount > 0) {
             this.$store.dispatch( 'notify/displayNotification', notification( 'error', 'curate_workflow_blockexists' ), {root: true });
         }
     }
