@@ -52,7 +52,7 @@ export function passwordComplexity(value: string) {
     return true;
 }
 
- // Wrapper function for isStringInArrayOfObjects so it can be called by the form validator
+// Wrapper function for isStringInArrayOfObjects so it can be called by the form validator
 export function inArrayOfObjects(listOfOptions: any[], valueType: string, listOfAdditionalValues: any[]) {
     return (value: string) => {
         if (!helpers.req(value)) {
@@ -61,4 +61,3 @@ export function inArrayOfObjects(listOfOptions: any[], valueType: string, listOf
         return isStringInArrayOfObjects( value, listOfOptions, valueType, listOfAdditionalValues );
     };
 }
-

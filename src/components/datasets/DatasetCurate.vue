@@ -104,7 +104,7 @@
                                 :step="entryIndex + 1"
                                 :editable="true"
                                 :rules="[() => isBlockValid(entryIndex)]"
-                                color="green darken-3"
+                                color="success"
                             >
                                 {{ block.title }}
                                 <div class='caption pa-0 ma-0'>{{ block.description }}</div>
@@ -124,6 +124,7 @@
                                     <ParticipantBlock
                                         :id="entryIndex"
                                         :name="block.name" 
+                                        :title="block.title"
                                         :required="block.required"
                                         :settings="block.settings"
                                         @complete="completeBlock"
@@ -131,10 +132,35 @@
                                     ></ParticipantBlock>
                                 </template>
 
+                                <template v-else-if="block.type === 'text'">
+                                    <TextBlock
+                                        :id="entryIndex"
+                                        :name="block.name" 
+                                        :title="block.title"
+                                        :required="block.required"
+                                        :settings="block.settings"
+                                        @complete="completeBlock"
+                                        @remove="removeBlock"
+                                    ></TextBlock>
+                                </template>
+
+                                <template v-else-if="block.type === 'score'">
+                                    <ScoreBlock
+                                        :id="entryIndex"
+                                        :name="block.name" 
+                                        :title="block.title"
+                                        :required="block.required"
+                                        :settings="block.settings"
+                                        @complete="completeBlock"
+                                        @remove="removeBlock"
+                                    ></ScoreBlock>
+                                </template>
+
                                 <template v-else>
                                     <UnknownBlock
                                         :id="entryIndex"
-                                        :name="block.name" 
+                                        :name="block.name"
+                                        :title="block.title" 
                                         :required="block.required"
                                         :settings="block.settings"
                                         @complete="completeBlock"
@@ -166,7 +192,8 @@ import { EntityFamilyEntry, EntityFamilyHash } from '@/models/curation/EntityFam
 import { EntityWorkflowEntry, EntityWorkflowHash, EntityWorkflowBlock } from '@/models/curation/EntityWorkflows';
 import ParticipantBlock from '@/components/workflow/ParticipantBlock.vue';
 import UnknownBlock from '@/components/workflow/UnknownBlock.vue';
-import NoteBlock from '@/components/workflow/NoteBlock.vue';
+import TextBlock from '@/components/workflow/TextBlock.vue';
+import ScoreBlock from '@/components/workflow/ScoreBlock.vue';
 import { WorkflowBlocks } from '@/models/curation/WorkflowBlocks';
 import notification from '@/utils/Notifications';
 import _ from 'lodash';
@@ -182,6 +209,8 @@ interface WorkflowRecord {
     components: {
         ParticipantBlock,
         UnknownBlock,
+        TextBlock,
+        ScoreBlock,
     },
 })
 export default class DatasetCurate extends Vue {
@@ -253,7 +282,7 @@ export default class DatasetCurate extends Vue {
     }
 
     get workflowBlockOptions() {
-        const options: object[] = [];
+        const options: Record<string, Record<string, WorkflowRecord>> = {};
 
         for (const [blockName, block] of Object.entries(WorkflowBlocks)) {
             const blockType: string = block.type.toUpperCase();
@@ -359,9 +388,10 @@ export default class DatasetCurate extends Vue {
 
     private addSelectedAddonBlocks( ) {
         let existCount = 0;
-        for (const blockName of this.selectedAddonBlocks ) {
+        let blockName: string = '';
+        for (blockName of this.selectedAddonBlocks ) {
             if (this.activeBlockNames[blockName.toUpperCase()] === undefined) {
-                this.workflow.push(WorkflowBlocks[blockName]);
+                this.workflow.push(_.cloneDeep(WorkflowBlocks[blockName]));
                 this.activeBlockNames[blockName.toUpperCase()] = true;
             } else {
                 existCount++;

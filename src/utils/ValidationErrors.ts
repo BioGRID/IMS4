@@ -31,5 +31,8 @@ export function generateValidationError(validationType: string, field: string, p
 
         case 'valueinarray' :
             return field + ' already exists';
+
+        case 'decimal' :
+            return field + ' must contain only decimal (float) values';
     }
 }

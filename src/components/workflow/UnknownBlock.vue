@@ -6,19 +6,26 @@
         <v-row>
             <v-col xl="12" lg="12" md="12" sm="12" xs="12">
                 <v-btn
-                    color="primary"
+                    color="success"
                     :disabled="!isComplete"
-                    class='mr-3'
                     @click="completeBlock"
+                    fab
+                    small
+                    title="Remove block from curation workflow"
+                    class='elevation-2 mr-2' 
                 >
-                    Finish Block <v-icon>mdi-check</v-icon>
+                    <v-icon>mdi-check</v-icon>
                 </v-btn>
                 <v-btn
                     color="error"
                     v-if="!required"
                     @click="removeBlock"
+                    fab
+                    small
+                    title="Finish Block, Mark as Completed"
+                    class='elevation-2' 
                 >
-                    Remove Block <v-icon>mdi-close</v-icon>
+                    <v-icon>mdi-close</v-icon>
                 </v-btn>
             </v-col>
         </v-row>
@@ -33,6 +40,7 @@ import { State, namespace } from 'vuex-class';
 export default class UnknownBlock extends Vue {
     @Prop({type: Number, default: 0}) private id!: number;
     @Prop({type: String, default: ''}) private name!: string;
+    @Prop({type: String, default: ''}) private title!: string;
     @Prop({type: Boolean, default: false}) private required!: boolean;
     @Prop() private settings!: Record<string, string>;
 
