@@ -3,7 +3,7 @@
         <v-card
             tile
             color="grey lighten-2"
-            class="pa-1 pl-4"
+            class="pa-1 pl-4 pr-4"
         >
             <v-row>
                 <v-col xl="4" lg="4" md="4" sm="12" xs="12">
@@ -194,16 +194,31 @@ export default class ParticipantBlock extends Vue {
     @Prop({type: String, default: ''}) private name!: string;
     @Prop({type: String, default: ''}) private title!: string;
     @Prop({type: Boolean, default: false}) private required!: boolean;
-    @Prop() private settings!: Record<string, string>;
+    @Prop() private settings!: Record<string, string|string[]>;
     private participants: string = '';
     private organismID: string = '';
     private experimentalRoleID: string = '';
     private participantTypeID: string = '';
     private identifierTypeID: string = '';
     private participantSets: ParticipantSet[] = [];
+    private participantSetSizes: number[] = [];
     private loading: boolean = false;
     private showAlert: boolean = false;
     private alertMessage: string = '';
+    private mustBeEqual: boolean = false;
+    private allowOneToMany: boolean = false;
+
+    private created() {
+        if (this.settings.size !== undefined && this.settings.size.length > 0) {
+            if (this.settings.size.indexOf('equal') !== -1) {
+                this.mustBeEqual = true;
+            }
+
+            if (this.settings.size.indexOf('onetomany') !== -1) {
+                this.allowOneToMany = true;
+            }
+        }
+    }
 
     get organismOptions() {
         const organismOptions = [];
@@ -277,6 +292,7 @@ export default class ParticipantBlock extends Vue {
 
     private removeParticipantSet(participantSetID: number) {
         this.participantSets.splice(participantSetID, 1);
+        this.participantSetSizes.splice(participantSetID, 1);
     }
 
     private participantSetTitle(participantSetID: number) {
@@ -293,8 +309,17 @@ export default class ParticipantBlock extends Vue {
         this.loading = true;
         this.$v.$touch();
         if (!this.$v.$invalid) {
+            const splitParticipants: string[] = this.participants.split(/[\r\n]+/);
+            const participantSet: string[] = [];
+            for (let participant of splitParticipants) {
+                participant = participant.trim();
+                if (participant.length > 0) {
+                    participantSet.push(participant);
+                }
+            }
+
             this.participantSets.push({
-                participants: this.participants.split(/[\r\n]+/),
+                participants: participantSet,
                 participantMap: new Map<string, string>(),
                 experimentalRoleName: this.getExperimentalRoleName(this.experimentalRoleID),
                 experimentalRoleID: this.experimentalRoleID,
@@ -302,6 +327,7 @@ export default class ParticipantBlock extends Vue {
                 participantTypeID: this.participantTypeID,
                 identifierTypeID: this.identifierTypeID,
             });
+            this.participantSetSizes.push(splitParticipants.length);
         }
         this.loading = false;
     }
@@ -346,6 +372,31 @@ export default class ParticipantBlock extends Vue {
         if (participantSetCount < Number(this.settings.min) || participantSetCount > Number(this.settings.max)) {
             isValid = false;
         }
+
+        if (isValid) {
+            let currentCount: number = 0;
+            for (const participantCount of this.participantSetSizes) {
+
+                // If one to many is set, we allow blocks with only a single entry
+                // to be provided
+                if (this.allowOneToMany && participantCount === 1) {
+                    continue;
+                }
+
+                if (currentCount === 0) {
+                    currentCount = participantCount;
+                }
+
+                // If must be equal, we only continue if all the counts match
+                if (this.mustBeEqual && participantCount === currentCount) {
+                    continue;
+                }
+
+                isValid = false;
+                break;
+            }
+        }
+
         return isValid;
     }
 

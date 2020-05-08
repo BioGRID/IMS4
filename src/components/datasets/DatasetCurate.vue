@@ -358,7 +358,7 @@ export default class DatasetCurate extends Vue {
         this.currentStep = this.currentStep - 1;
     }
 
-    private buildRulesText( settings: Record<string, string|number>, type: string ) {
+    private buildRulesText( settings: Record<string, any>, type: string ) {
         const rules: string[] = [];
         for (const [settingName, settingValue] of Object.entries(settings)) {
             if (type === 'participant') {
@@ -366,6 +366,8 @@ export default class DatasetCurate extends Vue {
                     rules.push('min ' + String(settingValue));
                 } else if (settingName === 'max') {
                     rules.push('max ' + String(settingValue));
+                } else if (settingName === 'size') {
+                    rules.push('size options: ' + settingValue.join(' | '));
                 }
             } else if (type === 'ontology') {
                 if (settingName === 'min') {
