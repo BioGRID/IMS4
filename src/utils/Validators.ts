@@ -1,5 +1,5 @@
 import { helpers } from 'vuelidate/lib/validators';
-import { isStringInArrayOfObjects } from '@/utils/HelperUtils';
+import { isStringInArrayOfObjects, isNumeric } from '@/utils/HelperUtils';
 
 // Check if string has only printable ascii characters
 export function printableAsciiOnly( value: string ) {
@@ -60,4 +60,30 @@ export function inArrayOfObjects(listOfOptions: any[], valueType: string, listOf
         }
         return isStringInArrayOfObjects( value, listOfOptions, valueType, listOfAdditionalValues );
     };
+}
+
+export function complexNumeric( value: string ) {
+    if (!helpers.req(value)) {
+        return true;
+    }
+
+    return isNumeric(value);
+}
+
+export function complexNumericNewlines( value: string ) {
+    if (!helpers.req(value)) {
+        return true;
+    }
+
+    const numericValues = value.split(/[\r\n]+/);
+    let isValid = true;
+    for (const val of numericValues) {
+        if (!isNumeric(val.trim())) {
+            isValid = false;
+            break;
+        }
+    }
+
+    return isValid;
+
 }

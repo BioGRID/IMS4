@@ -66,3 +66,8 @@ export function isStringInArrayOfObjects( value: string, listOfOptions: any[], v
     }
     return true;
 }
+
+// Test if a number is a numeric value
+export function isNumeric(n: any) {
+    return !isNaN(parseFloat(n)) && isFinite(n);
+}
