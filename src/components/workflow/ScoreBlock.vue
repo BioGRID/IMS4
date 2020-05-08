@@ -18,6 +18,22 @@
                     >
                     </v-textarea>
                 </v-col>
+                <v-col xl="4" lg="4" md="4" sm="12" xs="12">
+                    <v-autocomplete 
+                        v-model="scoreTypeID"
+                        background-color="white"
+                        outlined
+                        :items="scoreTypes"
+                        item-text="name"
+                        item-value="id"
+                        label="Select score type"
+                        clearable
+                        dense
+                        :error-messages="scoreTypeIDErrors"
+                        @change="$v.scooreTypeID.$touch()"
+                    >
+                    </v-autocomplete>
+                </v-col>
             </v-row>
             <v-row>
                 <v-col xl="12" lg="12" md="12" sm="12" xs="12">
@@ -53,16 +69,27 @@
 import { Component, Vue, Prop, Watch } from 'vue-property-decorator';
 import { State, namespace } from 'vuex-class';
 import { required, decimal } from 'vuelidate/lib/validators';
+import { complexNumericNewlines } from '@/utils/Validators';
 import { generateValidationError } from '@/utils/ValidationErrors';
+import { AttributeTypeEntry } from '@/models/curation/AttributeType';
+
+const curation = namespace( 'curation' );
+
+interface SelectRecord {
+    id: string;
+    name: string;
+}
 
 @Component
 export default class ScoreBlock extends Vue {
+    @curation.State private attributeTypes!: AttributeTypeEntry[];
     @Prop({type: Number, default: 0}) private id!: number;
     @Prop({type: String, default: ''}) private name!: string;
     @Prop({type: String, default: ''}) private title!: string;
     @Prop({type: Boolean, default: false}) private required!: boolean;
     @Prop() private settings!: Record<string, string>;
     private scores: string = '';
+    private scoreTypeID: string = '';
 
     get isComplete() {
         return this.validateBlock();
@@ -73,11 +100,44 @@ export default class ScoreBlock extends Vue {
         if (this.$v.scores.$dirty) {
             if (!this.$v.scores.required) {
                 errors.push( generateValidationError( 'required', this.title, null ));
-            } else if (!this.$v.scores.decimal ) {
-                errors.push( generateValidationError( 'decimal', this.title, null ));
+            } else if (!this.$v.scores.complexNumericNewlines ) {
+                errors.push( generateValidationError( 'complexNumericNewlines', this.title, null ));
             }
         }
         return errors;
+    }
+
+    get scoreTypeIDErrors() {
+        const errors = [];
+        if (this.$v.scooreTypeID.$dirty) {
+            if (!this.$v.scooreTypeID.required) {
+                errors.push( generateValidationError( 'required', this.title, null ));
+            }
+        }
+        return errors;
+    }
+
+    get scoreTypes() {
+        const scoreTypes: SelectRecord[] = [];
+        for (const [shortcode, attributeType] of Object.entries(this.attributeTypes)) {
+            if (attributeType.attribute_type_category_id === 2) { // 2 is Score Category
+                scoreTypes.push({ id: String(attributeType.attribute_type_id), name: attributeType.name });
+            }
+        }
+        return scoreTypes.sort(this.selectNameSort);
+    }
+
+    private selectNameSort(a: SelectRecord, b: SelectRecord) {
+        const nameA = a.name.toUpperCase();
+        const nameB = b.name.toUpperCase();
+
+        if (nameA > nameB) {
+            return 1;
+        } else if (nameA < nameB) {
+            return -1;
+        }
+
+        return 0;
     }
 
     private validateBlock() {
@@ -96,7 +156,8 @@ export default class ScoreBlock extends Vue {
 
     private validations() {
         return {
-            scores: { required, decimal },
+            scores: { required, complexNumericNewlines },
+            scooreTypeID: { required },
         };
     }
 

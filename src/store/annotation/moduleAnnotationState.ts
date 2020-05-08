@@ -31,6 +31,12 @@ const moduleAnnotationState = {
         { name: 'systematic names', id: '4' },
         { name: 'aliases', id: '5' },
         { name: 'uniprot accessions', id: '6' },
+        { name: 'entrez gene ids', id: '7' },
+        { name: 'refseq accessions', id: '8' },
+        { name: 'sgd ids', id: '9' },
+        { name: 'flybase ids', id: '10' },
+        { name: 'wormbase ids', id: '11' },
+        { name: 'mgi ids', id: '12' },
     ],
 };
 

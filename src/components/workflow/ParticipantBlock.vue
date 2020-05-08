@@ -2,7 +2,8 @@
     <div class='participants-block'>
         <v-card
             tile
-            color="grey lighten-2 pa-1 pl-4"
+            color="grey lighten-2"
+            class="pa-1 pl-4"
         >
             <v-row>
                 <v-col xl="4" lg="4" md="4" sm="12" xs="12">
@@ -39,13 +40,13 @@
                     <v-autocomplete 
                         v-model="participantTypeID"
                         background-color="white"
-                        outlined
                         :items="participantTypes"
                         item-text="name"
                         item-value="id"
                         label="Select participant type"
                         clearable
-                        dense
+                        outlined
+                        dense        
                         :error-messages="participantTypeIDErrors"
                         @change="$v.participantTypeID.$touch()"
                     >
@@ -59,7 +60,7 @@
                         item-value="id"
                         label="Select experimental role"
                         clearable
-                        dense
+                        dense          
                         :error-messages="experimentalRoleIDErrors"
                         @change="$v.experimentalRoleID.$touch()"
                     >

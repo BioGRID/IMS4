@@ -1,5 +1,6 @@
 <template>
     <v-app>
+        <TitleBar />
         <NavDrawer />
         <NavBar />
         <v-content class="grey lighten-3" app>
@@ -23,6 +24,7 @@ import NavBar from '@/components/core/NavBar.vue';
 import NavDrawer from '@/components/core/NavDrawer.vue';
 import LoadingOverlay from '@/components/core/LoadingOverlay.vue';
 import NotifyBar from '@/components/core/NotifyBar.vue';
+import TitleBar from '@/components/core/TitleBar.vue';
 
 @Component({
     components: {
@@ -30,6 +32,7 @@ import NotifyBar from '@/components/core/NotifyBar.vue';
         NavDrawer,
         LoadingOverlay,
         NotifyBar,
+        TitleBar,
     },
 })
 export default class MainVue extends Vue {
