@@ -27,7 +27,7 @@
             left
             bottom
             dark
-            nudge-bottom="20"
+            nudge-bottom="40"
         >
             <template v-slot:activator="{ on }">
                 <v-btn icon v-on="on">

@@ -6,7 +6,6 @@
         app 
         floating
         color="primary"
-        class="mt-6"
         permanent
         :mini-variant="navDrawerMinimized"
     >
