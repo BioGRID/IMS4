@@ -1,18 +1,18 @@
 <template>
     <v-app>
-        <NotifyBar />
-        <LoadingOverlay />
-        <v-content class="grey lighten-3">
-            <div id="main-view">
-                <NavDrawer />
-                <NavBar />
+        <NavDrawer />
+        <NavBar />
+        <v-content class="grey lighten-3" app>
+            <v-container fluid class='pl-0 pr-0 pt-0'>
                 <v-fade-transition mode="out-in">
                     <keep-alive include="DatasetView">
                         <router-view :key="getKey()" />
                     </keep-alive>
                 </v-fade-transition>
-            </div>
+            </v-container>
         </v-content>
+        <NotifyBar />
+        <LoadingOverlay />
     </v-app>
 </template>
 
@@ -21,15 +21,15 @@ import { Component, Vue } from 'vue-property-decorator';
 import { State, namespace } from 'vuex-class';
 import NavBar from '@/components/core/NavBar.vue';
 import NavDrawer from '@/components/core/NavDrawer.vue';
-import NotifyBar from '@/components/core/NotifyBar.vue';
 import LoadingOverlay from '@/components/core/LoadingOverlay.vue';
+import NotifyBar from '@/components/core/NotifyBar.vue';
 
 @Component({
     components: {
         NavBar,
         NavDrawer,
-        NotifyBar,
         LoadingOverlay,
+        NotifyBar,
     },
 })
 export default class MainVue extends Vue {

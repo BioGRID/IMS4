@@ -44,14 +44,6 @@ const router = new Router({
                 },
             },
             {
-                path: '/elements/test',
-                name: 'Test Page',
-                component: () => import( '@/views/elements/Test.vue' ),
-                beforeEnter: (to: any, from: any, next: any) => {
-                    isPermittedRoute( 'MANAGE USERS', next );
-                },
-            },
-            {
                 path: '/elements/admin',
                 name: 'Admin Tools',
                 component: () => import( '@/views/elements/Admin.vue' ),
@@ -216,6 +208,14 @@ const router = new Router({
                 path: '/pages/error-401',
                 name: '401 Error Page',
                 component: () => import( '@/views/pages/Error401.vue' ),
+            },
+            {
+                path: '/elements/test',
+                name: 'Test Page',
+                component: () => import( '@/views/elements/Test.vue' ),
+                beforeEnter: (to: any, from: any, next: any) => {
+                    isPermittedRoute( 'MANAGE USERS', next );
+                },
             },
         ],
     },
