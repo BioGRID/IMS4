@@ -176,6 +176,7 @@
                         large
                         :disabled="!isWorkflowValid"
                         title="Add blocks to this curation workflow"
+                        @click="submitCuratedData()"
                         color="success"
                     >
                         Submit Curated Data <v-icon class='ml-1'>mdi-check</v-icon>
@@ -347,8 +348,10 @@ export default class DatasetCurate extends Vue {
 
     private completeBlock(blockID: number, blockData: object) {
         const block: EntityWorkflowBlock = this.workflow[blockID];
+        block.data = blockData;
         block.state = 'complete';
         block.valid = true;
+        this.currentStep++;
     }
 
     private removeBlock(blockID: number) {
@@ -380,6 +383,14 @@ export default class DatasetCurate extends Vue {
                 } else if (settingName === 'qualifier_max' && settingValue > 0) {
                     rules.push('max qualifications = ' + String(settingValue));
                 }
+            } else if (type === 'score') {
+                if (settingName === 'size') {
+                    rules.push('size options: ' + settingValue.join(' | '));
+                } else if (settingName === 'match_participants') {
+                    if (settingValue) {
+                        rules.push('score count must equal participant count');
+                    }
+                }
             }
         }
         if (rules.length > 0) {
@@ -406,6 +417,10 @@ export default class DatasetCurate extends Vue {
         if (existCount > 0) {
             this.$store.dispatch( 'notify/displayNotification', notification( 'error', 'curate_workflow_blockexists' ), {root: true });
         }
+    }
+
+    private submitCuratedData() {
+        console.log(this.workflow);
     }
 
 }

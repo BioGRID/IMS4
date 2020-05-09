@@ -1,13 +1,16 @@
 import { EntityWorkflowBlock } from '@/models/curation/EntityWorkflows';
 
 export const WorkflowBlocks: Record<string, EntityWorkflowBlock> = {
-    entity_score : {
-        name: 'entity_score',
-        title: 'Scores',
-        description: 'Enter one or more groups of scores, including the type of score',
+    experimental_score : {
+        name: 'experimental_score',
+        title: 'Experimental Scores',
+        description: 'Enter one or more groups of experimental scores, including the type of score',
         type: 'score',
         required: false,
-        settings: {},
+        settings: {
+            match_participants: true,
+            size: ['equal'],
+        },
         valid: undefined,
         state: 'new',
         data: undefined,
