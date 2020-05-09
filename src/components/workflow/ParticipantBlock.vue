@@ -327,7 +327,7 @@ export default class ParticipantBlock extends Vue {
                 participantTypeID: this.participantTypeID,
                 identifierTypeID: this.identifierTypeID,
             });
-            this.participantSetSizes.push(splitParticipants.length);
+            this.participantSetSizes.push(participantSet.length);
         }
         this.loading = false;
     }
