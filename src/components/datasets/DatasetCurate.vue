@@ -35,7 +35,7 @@
             </v-row>
             <v-row no-gutters>
                 <v-col xl="12" lg="12" md="12" sm="12" xs="12">
-                    <v-dialog persistent max-width="500" v-model="addDialog">
+                    <v-dialog persistent max-width="600" v-model="addDialog">
                         <template v-slot:activator="{ on }">
                             <v-btn
                                 v-on="on"
@@ -63,6 +63,7 @@
                                     item-value="id"
                                     dense
                                     chips
+                                    deletable-chips
                                     multiple
                                     hint="Choose optional blocks to add to this workflow"
                                     persistent-hint
