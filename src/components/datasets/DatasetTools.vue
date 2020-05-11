@@ -18,7 +18,8 @@
                 <v-menu
                     left
                     bottom
-                    nudge-bottom="3"
+                    dark
+                    nudge-bottom="33"
                 >
                     <template v-slot:activator="{ on }">
                         <v-btn 
@@ -52,7 +53,8 @@
                 <v-menu
                     left
                     bottom
-                    nudge-bottom="3"
+                    dark
+                    nudge-bottom="33"
                 >
                     <template v-slot:activator="{ on }">
                         <v-btn 

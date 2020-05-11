@@ -1,6 +1,6 @@
 'use strict';
 
-import { app, protocol, BrowserWindow } from 'electron';
+import { app, protocol, BrowserWindow, Menu } from 'electron';
 import {
   createProtocol,
   installVueDevtools,
@@ -11,12 +11,15 @@ const isDevelopment = process.env.NODE_ENV !== 'production';
 // be closed automatically when the JavaScript object is garbage collected.
 let win: BrowserWindow | null;
 
+// Remove the application menu
+// Menu.setApplicationMenu( null );
+
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([{scheme: 'app', privileges: { secure: true, standard: true } }]);
 
 function createWindow() {
   // Create the browser window.
-  win = new BrowserWindow({ width: 800, height: 600, titleBarStyle: 'hidden', frame: false, webPreferences: {
+  win = new BrowserWindow({ width: 800, height: 600, titleBarStyle: 'hidden', backgroundColor: '#FFF', frame: false, webPreferences: {
     nodeIntegration: true,
   } });
 
@@ -40,11 +43,8 @@ function createWindow() {
     e.preventDefault();
     require('electron').shell.openExternal(url);
    });
-}
 
-/* titlebar = new Titlebar({
-    backgroundColor: Color.fromHex( '#FF0000' )
-}); */
+}
 
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {
@@ -98,5 +98,3 @@ if (isDevelopment) {
     });
   }
 }
-
-
