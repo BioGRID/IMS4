@@ -1,5 +1,9 @@
-# BioGRID ACE
-The annotation and curation engine for the BioGRID. This project manages interaction with the various BioGRID related apis and applications.
+# BioGRID IMS 4
+The Interaction Management System 4 project.
+
+## STATUS
+* IN PROGRESS
+* ALPHA 0.5.3
 
 ## Requirements
 * GIT 2.23+ (https://git-scm.com/download)
